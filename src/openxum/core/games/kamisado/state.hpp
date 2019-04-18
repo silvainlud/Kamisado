@@ -2,7 +2,7 @@
 #define KAMISADO_STATE_H
 
 
-#include "Coordinates.h"
+#include "coordinates.hpp"
 #include "enum_utils.h"
 
 class State {

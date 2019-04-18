@@ -2,7 +2,7 @@
 #define KAMISADO_MOVE_H
 
 
-#include "Coordinates.h"
+#include "coordinates.hpp"
 
 class Move {
 public:

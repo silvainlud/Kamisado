@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include "Engine.h"
-#include "RandomPlayer.h"
-#include "MCTSPlayer.h"
+#include "engine.hpp"
+#include "openxum/ai/specific/kamisado/RandomPlayer.h"
+#include "openxum/ai/specific/kamisado/MCTSPlayer.h"
 
 
 

@@ -2,7 +2,7 @@
 #define KAMISADO_PLAYER_H
 
 
-#include "Engine.h"
+#include "openxum/core/games/kamisado/engine.hpp"
 #include "Node.h"
 
  class Player {

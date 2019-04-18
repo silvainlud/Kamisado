@@ -1,0 +1,12 @@
+prefix=@OPENXUM_WS_CPP_PKGCONFIG_PREFIXPATH@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/@OPENXUM_WS_CPP_PKGCONFIG_LIBDIR@
+includedir=${prefix}/include
+
+Name: vle
+Description: Web service for OpenXum Project
+Requires:
+Version: @OPENXUM_WS_CPP_VERSION@
+Libs:	-L${libdir} \
+    -lopenxum-ws-cpp-@OPENXUM_WS_CPP_VERSION_SHORT@
+Cflags: -I${includedir}/artis-m2-@OPENXUM_WS_CPP_VERSION_SHORT@ -I@OPENXUM_WS_CPP_PKGCONFIG_BOOSTINCLUDE_DIRS@

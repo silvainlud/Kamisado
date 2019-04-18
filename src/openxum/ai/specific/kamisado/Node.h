@@ -2,7 +2,7 @@
 #define MCTS_NODE_H
 
 #include <vector>
-#include "Engine.h"
+#include "openxum/core/games/kamisado/engine.hpp"
 
 
 class Node {

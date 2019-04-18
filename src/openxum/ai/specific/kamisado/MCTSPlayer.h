@@ -1,7 +1,7 @@
 #ifndef KAMISADO_MCTSPLAYER_H
 #define KAMISADO_MCTSPLAYER_H
 
-#include "Engine.h"
+#include "openxum/core/games/kamisado/engine.hpp"
 #include "Node.h"
 #include <utility>
 #include <random>
