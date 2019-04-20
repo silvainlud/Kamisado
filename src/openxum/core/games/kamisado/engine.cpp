@@ -1,270 +1,290 @@
-#include <iostream>
-#include <ctime>
-#include <random>
+/**
+ * @file openxum/core/games/kamisado/engine.cpp
+ * See the AUTHORS or Authors.txt file
+ */
+
+/*
+ * Copyright (C) 2011-2019 Openxum Team
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <openxum/core/games/kamisado/engine.hpp>
 
-int Engine::current_color() {
-    return _color;
-}
+#include <iostream>
 
-std::vector<State> Engine::get_black_towers() {
-    return _black_towers;
-}
+namespace openxum {
+    namespace core {
+        namespace games {
+            namespace kamisado {
 
-std::vector<State> Engine::get_white_towers() {
-    return _white_towers;
-}
+                static int initial_colors[8][8] = {
+                        {ORANGE, BLUE,   PURPLE, PINK,   YELLOW, RED,    GREEN,  BROWN},
+                        {RED,    ORANGE, PINK,   GREEN,  BLUE,   YELLOW, BROWN,  PURPLE},
+                        {GREEN,  PINK,   ORANGE, RED,    PURPLE, BROWN,  YELLOW, BLUE},
+                        {PINK,   PURPLE, BLUE,   ORANGE, BROWN,  GREEN,  RED,    YELLOW},
+                        {YELLOW, RED,    GREEN,  BROWN,  ORANGE, BLUE,   PURPLE, PINK},
+                        {BLUE,   YELLOW, BROWN,  PURPLE, RED,    ORANGE, PINK,   GREEN},
+                        {PURPLE, BROWN,  YELLOW, BLUE,   GREEN,  PINK,   ORANGE, RED},
+                        {BROWN,  GREEN,  RED,    YELLOW, PINK,   PURPLE, BLUE,   ORANGE}
+                };
 
-int Engine::get_play_color() {
-    return _play_color;
-}
+                std::string Engine::GAME_NAME = "kamisado";
 
-std::vector<State> Engine::get_towers(int color) {
-    std::vector<State> result;
-    if (_color == WHITE)
-        result = get_white_towers();
-    else result = get_black_towers();
-    return result;
-}
+                // constructors
+                Engine::Engine(int type, int color)
+                        :_color(color), _type(type)
+                {
+                    for (int i = 0; i < 8; i++) {
+                        _black_towers.emplace_back(State(i, 0, initial_colors[i][0]));
+                    }
+                    for (int i = 0; i < 8; i++) {
+                        _white_towers.emplace_back(State(i, 7, initial_colors[i][7]));
+                    }
+                    _phase = MOVE_TOWER;
+                    _play_color = NONE;
+                }
 
-int Engine::next_color(int color) {
-    if (_color == WHITE)
-        return BLACK;
-    else return WHITE;
-}
+                // public methods
+                void Engine::apply_moves(const openxum::core::common::Moves& moves)
+                {
+                    for (auto m: moves) {
+                        move(m);
+                    }
+                }
 
-void Engine::change_color() {
-    _color = next_color(_color);
-}
+                Engine* Engine::clone() const
+                {
+                    auto e = new Engine(_type, _color);
 
-bool Engine::is_finished() {
-    return (_phase == FINISH);
-}
+                    for (const State& s: _black_towers) {
+                        e->_black_towers.push_back(s);
+                    }
+                    for (const State& s: _white_towers) {
+                        e->_white_towers.push_back(s);
+                    }
+                    e->_phase = _phase;
+                    e->_play_color = _play_color;
+                    return e;
+                }
 
-int Engine::winner_is() {
-    if (is_finished())
-        return _color;
-    else return NONE;
-}
+                int Engine::current_color() const
+                {
+                    return _color;
+                }
 
-int Engine::get_phase() {
-    return _phase;
-}
+                openxum::core::common::Moves Engine::get_possible_move_list() const
+                {
+                    openxum::core::common::Moves moves;
+                    const Coordinates& playable_tower = find_playable_tower(_color);
 
-std::vector<State> Engine::get_current_towers() {
-    std::vector<State> result;
-    if (_color == BLACK)
-        result = get_black_towers();
-    else result = get_white_towers();
-    return result;
-}
+                    if (playable_tower.is_valid()) {
+                        const std::vector<Coordinates>& list = get_possible_moving_list(
+                                State(playable_tower.x(), playable_tower.y(), _color));
 
-void Engine::move(Move movement) {
-    move_tower(movement._from, movement._to);
-}
+                        for (const Coordinates& c: list) {
+                            moves.push_back(new Move(playable_tower, c));
+                        }
+                    } else {
+                        const std::vector<State>& towers = get_towers(_color);
 
+                        for (const State& s: towers) {
+                            const std::vector<Coordinates>& list = get_possible_moving_list(
+                                    State(s.x(), s.y(), _color));
 
-Engine::Engine(int type, int color) : _type(type), _color(color) {
+                            for (const Coordinates& c: list) {
+                                moves.push_back(new Move(s.coordinates(), c));
+                            }
+                        }
+                    }
+                    return moves;
+                }
 
-    for (int i = 0; i < 8; i++) {
-        State blacks(i, 0, _colors[i][0]);
-        _black_towers.push_back(blacks);
-    }
-    for (int i = 0; i < 8; i++) {
+                bool Engine::is_finished() const
+                {
+                    return _phase == FINISH;
+                }
 
-        State whites(i, 7, _colors[i][7]);
-        _white_towers.push_back(whites);
-    }
+                void Engine::move(const openxum::core::common::Move* move)
+                {
+                    auto* m = dynamic_cast<const openxum::core::games::kamisado::Move*>(move);
 
-    _phase = MOVE_TOWER;
-    _play_color = NONE;
-}
+                    move_tower(m->from(), m->to());
+                }
 
-void Engine::move_tower(Coordinates selected_tower, Coordinates selected_cell) {
-    State tower = find_towers2(selected_tower, _color);
-    if (tower._x != -1) {
-        tower._x = selected_cell._x;
-        tower._y = selected_cell._x;
-    }
-    if (_color == BLACK && tower._y == 7 || _color == WHITE && tower._y == 0)
-        _phase = FINISH;
-    else {
-        _play_color = _colors[tower._x][tower._y];
-        if (!pass(next_color(_color))) {
-            change_color();
-        } else {
-            Coordinates playable_tower = find_playable_tower(next_color(_color));
-            _play_color = _colors[playable_tower._x][playable_tower._y];
+                int Engine::winner_is() const
+                {
+                    if (is_finished()) {
+                        return _color;
+                    } else {
+                        return NONE;
+                    }
+                }
 
-            if (pass(_color)) {
-                _phase = FINISH;
-                _color = next_color(_color);
+                // private methods
+                void Engine::change_color()
+                {
+                    _color = next_color(_color);
+                }
+
+                Coordinates Engine::find_playable_tower(int color) const
+                {
+                    Coordinates result;
+
+                    if (_play_color != NONE) {
+                        std::vector<State> towers = get_towers(color);
+
+                        for (const State& s : towers) {
+                            if (s.color() == _play_color) {
+                                result = s.coordinates();
+                            }
+                        }
+                    }
+                    return result;
+                }
+
+                State Engine::find_towers2(const Coordinates& coord, int color) const
+                {
+                    State result;
+                    std::vector<State> towers = get_towers(color);
+                    bool found = false;
+                    int i = 0;
+
+                    while (i < 8 && !found) {
+                        if (towers[i].x() == coord.x() && towers[i].y() == coord.y()) {
+                            result = towers[i];
+                            found = true;
+                        } else i++;
+                    }
+                    return result;
+                }
+
+                std::vector<Coordinates> Engine::get_possible_moving_list(const State& tower) const
+                {
+                    std::vector<Coordinates> moves;
+                    int step = tower.color() == BLACK ? 1 : -1;
+                    int limit = tower.color() == BLACK ? 8 : -1;
+
+                    //column
+                    {
+                        int line = tower.y() + step;
+                        Coordinates coordinates(tower.x(), line);
+
+                        while (line != limit and is_empty(coordinates)) {
+                            moves.push_back(coordinates);
+                            line += step;
+                            coordinates = Coordinates(tower.x(), line);
+                        }
+                    }
+
+                    // right diagonal
+                    {
+                        int column = tower.x() + 1;
+                        int line = tower.y() + step;
+                        Coordinates coordinates(column, line);
+
+                        while (line != limit && column != 8 and is_empty(coordinates)) {
+                            moves.push_back(coordinates);
+                            line += step;
+                            ++column;
+                            coordinates = Coordinates(column, line);
+                        }
+                    }
+
+                    // left diagonal
+                    {
+                        int column = tower.x() - 1;
+                        int line = tower.y() + step;
+                        Coordinates coordinates(column, line);
+
+                        while (line != limit && column != -1 and is_empty(coordinates)) {
+                            moves.push_back(coordinates);
+                            line += step;
+                            --column;
+                            coordinates = Coordinates(column, line);
+                        }
+                    }
+                    return moves;
+                }
+
+                const std::vector<State>& Engine::get_towers(int color) const
+                {
+                    return color == BLACK ? _black_towers : _white_towers;
+                }
+
+                bool Engine::is_empty(const Coordinates& coordinates) const
+                {
+                    bool found = false;
+                    int i = 0;
+
+                    while (i < 8 and not found) {
+                        if (_black_towers[i].x() == coordinates.x() and _black_towers[i].y() == coordinates.y()) {
+                            found = true;
+                        } else {
+                            i++;
+                        }
+                    }
+                    i = 0;
+                    while (i < 8 and not found) {
+                        if (_white_towers[i].x() == coordinates.x() and _white_towers[i].y() == coordinates.y()) {
+                            found = true;
+                        } else {
+                            i++;
+                        }
+                    }
+                    return not found;
+                }
+
+                void Engine::move_tower(const Coordinates& selected_tower, const Coordinates& selected_cell)
+                {
+                    State tower = find_towers2(selected_tower, _color);
+
+                    if (tower.x() != -1) {
+                        tower = selected_cell;
+                    }
+                    if ((_color == BLACK and tower.y() == 7) or (_color == WHITE and tower.y() == 0)) {
+                        _phase = FINISH;
+                    } else {
+                        _play_color = initial_colors[tower.x()][tower.y()];
+                        if (not pass(next_color(_color))) {
+                            change_color();
+                        } else {
+                            const Coordinates& playable_tower = find_playable_tower(next_color(_color));
+
+                            _play_color = initial_colors[playable_tower.x()][playable_tower.y()];
+                            if (pass(_color)) {
+                                _phase = FINISH;
+                                change_color();
+                            }
+                        }
+                    }
+                }
+
+                int Engine::next_color(int color)
+                {
+                    return color == WHITE ? BLACK : WHITE;
+                }
+
+                bool Engine::pass(int color) const
+                {
+                    const Coordinates& playable_tower = find_playable_tower(color);
+                    const std::vector<Coordinates>& list = get_possible_moving_list(
+                            State(playable_tower.x(), playable_tower.y(), _color));
+
+                    return list.empty();
+                }
             }
         }
-    }
-}
-
-State Engine::find_tower(Coordinates coord, int color) {
-    State result = find_towers2(coord, color);
-    return result;
-}
-
-bool Engine::pass(int color) {
-    Coordinates coord = find_playable_tower(color);
-    State state(coord._x, coord._y, color);
-    std::vector<Coordinates> moveList = get_possible_moving_list(state);
-
-    return !moveList.empty();
-}
-
-
-std::vector<Coordinates> Engine::get_possible_moving_list(State tower) {
-    std::vector<Coordinates> moveList;
-    int step;
-    int limit;
-
-    bool player_color = is_black(tower);
-
-    if (player_color) {
-        step = 1;
-        limit = 8;
-    } else {
-        step = -1;
-        limit = -1;
-    }
-    //colonne
-    int line = tower._y + step;
-
-    Coordinates coord(tower._x, line);
-
-    while (line != limit && !is_empty(coord)) {
-        moveList.push_back(coord);
-        line += step;
-        coord._y += step;
-
-    }
-
-
-    int col = tower._x + 1;
-    line = tower._y + step;
-
-    Coordinates coord2(col, line);
-    while (line != limit && col != 8 && !is_empty(coord)) {
-        moveList.push_back(coord2);
-        line += step;
-
-        coord2._y += step;
-
-        coord2._x++;
-
-    }
-
-
-    col = tower._x - 1;
-    line = tower._y + step;
-
-    Coordinates coord3(col, line);
-    while (line != limit && col != -1 && !is_empty(coord)) {
-        moveList.push_back(coord3);
-        line += step;
-        coord3._y += step;
-        coord3._x--;
-    }
-
-
-    return moveList;
-}
-
-bool Engine::is_empty(Coordinates coord) {
-    bool found = false;
-    int i = 0;
-
-    while (i < 8 && !found) {
-        if (_black_towers[i]._x == coord._x && _black_towers[i]._y == coord._y) {
-            found = true;
-        } else i++;
-    }
-    i = 0;
-    while (i < 8 && !found) {
-        if (_white_towers[i]._x == coord._x && _white_towers[i]._y == coord._y) {
-            found = true;
-        } else i++;
-    }
-    return found;
-}
-
-State Engine::find_towers2(Coordinates coord, int color) {
-    State result;
-    std::vector<State> towers = get_towers(color);
-    bool found = false;
-    int i = 0;
-
-    while (i < 8 && !found) {
-        if (towers[i]._x == coord._x && towers[i]._y == coord._y) {
-            result = towers[i];
-            found = true;
-        } else i++;
-    }
-    if (!found)
-        result._x = -1; // indicates nonexistence
-    return result;
-}
-
-Coordinates Engine::find_playable_tower(int color) {
-
-    Coordinates result;
-    std::vector<State> towers = get_towers(color);
-
-    if (_play_color == NONE) {
-        result._x = result._y = -1;
-    } else {
-        for (State i : towers) {
-            if (i._color == color) {
-                result._x = i._x;
-                result._y = i._y;
-            }
-
-        }
-    }
-    return result;
-}
-
-Engine::Engine() {}
-
-std::vector<Move> Engine::get_possible_move_list() {
-    Coordinates tower = find_playable_tower(_play_color);
-    std::vector<Coordinates> coordList;
-    std::vector<Move> moveList;
-    if (tower._x == -1) {
-        std::vector<State> towers = get_current_towers();
-        State chosenTower;
-
-        std::mt19937 rng;
-        rng.seed(static_cast<unsigned int>(time(nullptr)));
-        std::uniform_int_distribution<std::mt19937::result_type> distribution(0, towers.size() - 1);
-        chosenTower = towers[distribution(rng)];
-
-        coordList = get_possible_moving_list(State(chosenTower._x, chosenTower._y, _play_color));
-
-
-    } else {
-        coordList = get_possible_moving_list(State(tower._x, tower._y, _play_color));
-
-        for (Coordinates i : coordList) {
-            moveList.emplace_back(tower, i);
-        }
-    }
-
-    return moveList;
-}
-
-bool Engine::is_black(State tower) {
-    bool found = false;
-    int i = 0;
-
-    while (i < 8 && !found) {
-        if (_black_towers[i]._x == tower._x && _black_towers[i]._y == tower._y) {
-            found = true;
-        } else i++;
     }
 }

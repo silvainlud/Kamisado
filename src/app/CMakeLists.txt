@@ -9,4 +9,4 @@ CONFIGURE_FILE(version.hpp.in
 
 ADD_EXECUTABLE(openxum-ws-cpp-main main.cpp)
 
-TARGET_LINK_LIBRARIES(openxum-ws-cpp-main games-kamisado restbed)
+TARGET_LINK_LIBRARIES(openxum-ws-cpp-main openxum-core-games-kamisado openxum-ai-specific-kamisado restbed)

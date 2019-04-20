@@ -1,5 +1,5 @@
 /**
- * @file openxum/core/games/kamisado/state.cpp
+ * @file openxum/core/games/kamisado/color.hpp
  * See the AUTHORS or Authors.txt file
  */
 
@@ -20,24 +20,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <openxum/core/games/kamisado/state.hpp>
+#ifndef OPENXUM_CORE_GAMES_KAMISADO_COLOR_HPP
+#define OPENXUM_CORE_GAMES_KAMISADO_COLOR_HPP
 
 namespace openxum {
     namespace core {
         namespace games {
             namespace kamisado {
 
-                State::State(int x, int y, int color)
-                        :_x(x), _y(y), _color(color) { }
-
-                State& State::operator=(const Coordinates& coordinates)
-                {
-                    _x = coordinates.x();
-                    _y = coordinates.y();
-                    return *this;
-                }
+                enum Color {
+                    BLACK = 0, WHITE = 1, NONE = 2
+                };
 
             }
         }
     }
 }
+
+#endif

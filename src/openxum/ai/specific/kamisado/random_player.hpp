@@ -1,5 +1,5 @@
 /**
- * @file openxum/core/games/kamisado/state.hpp
+ * @file openxum/core/common/random_player.hpp
  * See the AUTHORS or Authors.txt file
  */
 
@@ -20,35 +20,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef OPENXUM_CORE_GAMES_KAMISADO_STATE_HPP
-#define OPENXUM_CORE_GAMES_KAMISADO_STATE_HPP
+#ifndef OPENXUM_AI_SPECIFIC_KAMISADO_RANDOM_PLAYER_HPP
+#define OPENXUM_AI_SPECIFIC_KAMISADO_RANDOM_PLAYER_HPP
 
-#include <openxum/core/games/kamisado/color.hpp>
-#include <openxum/core/games/kamisado/coordinates.hpp>
+#include <random>
+#include <openxum/core/common/player.hpp>
+#include <openxum/core/games/kamisado/engine.hpp>
 
 namespace openxum {
-    namespace core {
-        namespace games {
+    namespace ai {
+        namespace specific {
             namespace kamisado {
 
-                class State {
+                class RandomPlayer : public openxum::core::common::Player {
                 public:
-                    explicit State(int x = -1, int y = -1, int color = -1);
+                    RandomPlayer(int c, int o, openxum::core::common::Engine* e)
+                            :openxum::core::common::Player(c, o, e) { }
 
-                    int color() const { return _color; }
+                    openxum::core::common::Move* build_move() const override
+                    {
+                        return new openxum::core::games::kamisado::Move;
+                    }
 
-                    Coordinates coordinates() const { return Coordinates(_x, _y); }
-
-                    int x() const { return _x; }
-
-                    int y() const { return _y; }
-
-                    virtual State& operator=(const Coordinates& coordinates);
-
-                private:
-                    int _x;
-                    int _y;
-                    int _color;
+                    openxum::core::common::Move* get_move() const override;
                 };
 
             }

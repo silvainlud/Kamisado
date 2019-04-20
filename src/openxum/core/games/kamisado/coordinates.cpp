@@ -1,8 +1,14 @@
-#include "coordinates.hpp"
+#include <openxum/core/games/kamisado/coordinates.hpp>
 
-Coordinates::Coordinates(int x, int y) : _x(x), _y(y)
-{}
+namespace openxum {
+    namespace core {
+        namespace games {
+            namespace kamisado {
 
-Coordinates::Coordinates() {
+                Coordinates::Coordinates(int x, int y)
+                        :_x(x), _y(y) { }
 
+            }
+        }
+    }
 }

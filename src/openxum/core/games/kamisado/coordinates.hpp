@@ -1,18 +1,71 @@
-#ifndef KAMISADO_COORDINATES_H
-#define KAMISADO_COORDINATES_H
+/**
+ * @file openxum/core/games/kamisado/coordinates.hpp
+ * See the AUTHORS or Authors.txt file
+ */
 
+/*
+ * Copyright (C) 2011-2019 Openxum Team
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-class Coordinates {
+#ifndef OPENXUM_CORE_GAMES_KAMISADO_COORDINATES_HPP
+#define OPENXUM_CORE_GAMES_KAMISADO_COORDINATES_HPP
 
-public:
-    Coordinates();
+#include <nlohmann/json.hpp>
+#include <string>
 
-    int _x;
-    int _y;
-    Coordinates(int , int );
+namespace openxum {
+    namespace core {
+        namespace games {
+            namespace kamisado {
 
+                class Coordinates {
+                public:
+                    explicit Coordinates(int = -1, int = -1);
 
-};
+                    void from_object(const nlohmann::json& json)
+                    {
+                        _x = std::stoi(json["x"].get<std::string>());
+                        _y = std::stoi(json["x"].get<std::string>());
+                    }
 
+                    bool is_valid() const { return _x != -1 and _y != -1; }
 
-#endif //KAMISADO_COORDINATES_H
+                    nlohmann::json to_object() const
+                    {
+                        nlohmann::json json;
+
+                        json["x"] = std::to_string(_x);
+                        json["y"] = std::to_string(_y);
+                        return json;
+                    }
+
+                    std::string to_string() const { return char('a' + _x) + std::to_string(_y + 1); }
+
+                    int x() const { return _x; }
+
+                    int y() const { return _y; }
+
+                private:
+                    int _x;
+                    int _y;
+                };
+
+            }
+        }
+    }
+}
+
+#endif

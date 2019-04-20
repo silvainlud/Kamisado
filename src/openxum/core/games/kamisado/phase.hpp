@@ -1,5 +1,5 @@
 /**
- * @file openxum/core/games/kamisado/state.cpp
+ * @file openxum/core/games/kamisado/phase.hpp
  * See the AUTHORS or Authors.txt file
  */
 
@@ -20,24 +20,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <openxum/core/games/kamisado/state.hpp>
+#ifndef OPENXUM_CORE_GAMES_KAMISADO_PHASE_HPP
+#define OPENXUM_CORE_GAMES_KAMISADO_PHASE_HPP
 
 namespace openxum {
     namespace core {
         namespace games {
             namespace kamisado {
 
-                State::State(int x, int y, int color)
-                        :_x(x), _y(y), _color(color) { }
-
-                State& State::operator=(const Coordinates& coordinates)
-                {
-                    _x = coordinates.x();
-                    _y = coordinates.y();
-                    return *this;
-                }
+                enum Phase {
+                    MOVE_TOWER = 0, FINISH = 1
+                };
 
             }
         }
     }
 }
+
+#endif

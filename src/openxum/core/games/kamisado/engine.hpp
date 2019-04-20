@@ -1,61 +1,103 @@
+/**
+ * @file openxum/core/games/kamisado/engine.hpp
+ * See the AUTHORS or Authors.txt file
+ */
+
+/*
+ * Copyright (C) 2011-2019 Openxum Team
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef OPENXUM_CORE_GAMES_KAMISADO_ENGINE_HPP
 #define OPENXUM_CORE_GAMES_KAMISADO_ENGINE_HPP
 
+#include <openxum/core/common/engine.hpp>
+
 #include <openxum/core/games/kamisado/coordinates.hpp>
-#include <openxum/core/games/kamisado/state.hpp>
 #include <openxum/core/games/kamisado/move.hpp>
+#include <openxum/core/games/kamisado/phase.hpp>
+#include <openxum/core/games/kamisado/state.hpp>
+#include <openxum/core/games/kamisado/tower_color.hpp>
 
 #include <vector>
 
-class Engine {
-public:
-    int _color; // BLACK ou WHITE, couleur du joueur
-    int _type; // ENUM Type
-    std::vector<State> _black_towers;
-    std::vector<State> _white_towers;
-    int _play_color; // ENUM COLORS
-    int _phase;  //ENUM PHASE
-    bool is_black(State);
+namespace openxum {
+    namespace core {
+        namespace games {
+            namespace kamisado {
 
-    Engine();
-    Engine(int type, int color);
+                class Engine : public openxum::core::common::Engine {
+                public:
+                    Engine() = default;
 
-    int  current_color();
-    std::vector<State> get_towers(int color);
-    std::vector<State> get_black_towers();
-    std::vector<State> get_white_towers();
-    std::vector<State> get_current_towers();
-    bool is_finished();
-    int get_play_color();
-    int winner_is();
-    int get_phase();
-    void move(Move);
-    State find_tower(Coordinates, int);
-    bool pass(int);
-    std::vector<Coordinates>  get_possible_moving_list(State);
-    std::vector<Move> get_possible_move_list();
-    Coordinates find_playable_tower(int);
+                    Engine(int type, int color);
 
+                    void apply_moves(const openxum::core::common::Moves&) override;
 
-    int _colors[8][8] ={
-            {ORANGE, BLUE, PURPLE, PINK, YELLOW, RED, GREEN, BROWN},
-            {RED, ORANGE, PINK, GREEN, BLUE, YELLOW, BROWN, PURPLE},
-            {GREEN, PINK, ORANGE, RED, PURPLE, BROWN, YELLOW, BLUE},
-            {PINK, PURPLE, BLUE, ORANGE, BROWN, GREEN, RED, YELLOW},
-            {YELLOW, RED,GREEN, BROWN, ORANGE, BLUE, PURPLE, PINK},
-            {BLUE, YELLOW, BROWN, PURPLE, RED, ORANGE, PINK, GREEN},
-            {PURPLE, BROWN, YELLOW, BLUE, GREEN, PINK, ORANGE, RED},
-            {BROWN, GREEN, RED, YELLOW, PINK, PURPLE, BLUE, ORANGE}
-    };
+                    Engine* clone() const override;
 
-    bool is_empty(Coordinates);
+                    int current_color() const override;
 
-private:
-    int next_color(int color);
-    void change_color();
-    void move_tower(Coordinates selected_tower, Coordinates selected_cell);
-    State find_towers2(Coordinates, int) ;
-};
+                    Coordinates find_playable_tower(int) const;
 
+                    const std::string& get_name() const override { return GAME_NAME; }
+
+                    openxum::core::common::Moves get_possible_move_list() const override;
+
+                    bool is_finished() const override;
+
+                    void move(const openxum::core::common::Move* move) override;
+
+                    void parse(const std::string&) override { }
+
+                    int type() const { return _type; }
+
+                    std::string to_string() const override { return ""; };
+
+                    int winner_is() const override;
+
+                private:
+                    void change_color();
+
+                    State find_towers2(const Coordinates&, int) const;
+
+                    const std::vector<State>& get_towers(int color) const;
+
+                    std::vector<Coordinates> get_possible_moving_list(const State& tower) const;
+
+                    bool is_empty(const Coordinates&) const;
+
+                    void move_tower(const Coordinates& selected_tower, const Coordinates& selected_cell);
+
+                    int next_color(int color);
+
+                    bool pass(int) const;
+
+                    int _color;
+                    int _type;
+                    std::vector<State> _black_towers;
+                    std::vector<State> _white_towers;
+                    int _play_color;
+                    int _phase;
+
+                    static std::string GAME_NAME;
+                };
+
+            }
+        }
+    }
+}
 
 #endif //KAMISADO_ENGINE_H
