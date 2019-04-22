@@ -52,19 +52,28 @@ void delete_method_handler(const std::shared_ptr<Session>& /* session */)
 void get_method_handler(const std::shared_ptr<Session>& session)
 {
     const auto request = session->get_request();
-    std::string id = request->get_query_parameter("id");
-    std::string json;
-    openxum::core::common::Player* player = current_players[std::stoi(id)];
+    size_t content_length = 0;
 
-    if (player != nullptr) {
-        openxum::core::common::Move* move = player->get_move();
+    request->get_header("Content-Length", content_length);
+    session->fetch(content_length,
+            [request, content_length](const std::shared_ptr<Session>& session, const Bytes& body) {
+                std::string str = reinterpret_cast<const char*>(body.data());
+                json data = json::parse(str.substr(0, content_length));
+                int id = data["id"].get<int>();
+                std::string json;
+                openxum::core::common::Player* player = current_players[id];
 
-        if (move != nullptr) {
-            json = move->to_object().dump();
-        }
-    }
-    return session->close(OK, json, {{"Content-Length", std::to_string(json.size())},
-                                     {"Content-Type",   "application/json"}});
+                if (player != nullptr) {
+                    openxum::core::common::Move* move = player->get_move();
+
+                    if (move != nullptr) {
+                        player->move(move);
+                        json = move->to_object().dump();
+                    }
+                }
+                return session->close(OK, json, {{"Content-Length", std::to_string(json.size())},
+                                                 {"Content-Type",   "application/json"}});
+            });
 }
 
 void option(const std::shared_ptr<Session>& /* session */)
@@ -77,62 +86,68 @@ void post_method_handler(const std::shared_ptr<Session>& session)
     size_t content_length = 0;
 
     request->get_header("Content-Length", content_length);
-    session->fetch(content_length, [request](const std::shared_ptr<Session>& session, const Bytes& body) {
-        json data = json::parse(body.data());
-        std::string game = data["game"].get<std::string>();
-        int game_type = std::stoi(data["game_type"].get<std::string>());
-        int color = std::stoi(data["color"].get<std::string>());
-        int opponent_color = std::stoi(data["opponent_color"].get<std::string>());
-        openxum::core::common::Player* player = nullptr;
+    session->fetch(content_length,
+            [request, content_length](const std::shared_ptr<Session>& session, const Bytes& body) {
+                std::string str = reinterpret_cast<const char*>(body.data());
+                json data = json::parse(str.substr(0, content_length));
+                std::string game = data["game"].get<std::string>();
+                int game_type = data["type"].get<int>();
+                int color = data["color"].get<int>();
+                int player_color = data["player_color"].get<int>();
+                int opponent_color = data["opponent_color"].get<int>();
+                openxum::core::common::Player* player = nullptr;
 
-        if (game == "kamisado") {
-            player = new openxum::ai::specific::kamisado::RandomPlayer(color, opponent_color,
-                    new openxum::core::games::kamisado::Engine(game_type, color));
-        }
+                if (game == "Kamisado") {
+                    player = new openxum::ai::specific::kamisado::RandomPlayer(player_color, opponent_color,
+                            new openxum::core::games::kamisado::Engine(game_type, color));
+                }
 
-        if (player != nullptr) {
-            json response;
-            std::string json;
+                if (player != nullptr) {
+                    json response;
+                    std::string json;
 
-            ++ID;
-            current_players[ID] = player;
+                    ++ID;
+                    current_players[ID] = player;
 
-            response["id"] = ID;
-            json = response.dump();
-            session->close(OK, json, {{"Content-Length", std::to_string(json.size())},
-                                      {"Content-Type",   "application/json"}});
-        } else {
-            session->close(OK);
-        }
-    });
+                    response["id"] = ID;
+                    json = response.dump();
+                    session->close(OK, json, {{"Content-Length", std::to_string(json.size())},
+                                              {"Content-Type",   "application/json"}});
+                } else {
+                    session->close(OK);
+                }
+            });
 }
 
 void put_method_handler(const std::shared_ptr<Session>& session)
 {
     const auto request = session->get_request();
-    std::string id = request->get_query_parameter("id");
-    openxum::core::common::Player* player = current_players[std::stoi(id)];
+    size_t content_length = 0;
 
-    if (player != nullptr) {
-        size_t content_length = 0;
+    request->get_header("Content-Length", content_length);
+    session->fetch(content_length,
+            [request, content_length](const std::shared_ptr<Session>& session, const Bytes& body) {
+                std::string str = reinterpret_cast<const char*>(body.data());
+                json data = json::parse(str.substr(0, content_length));
+                int id = data["id"].get<int>();
+                json json_move = json::parse(data["move"].get<std::string>());
+                openxum::core::common::Player* player = current_players[id];
 
-        request->get_header("Content-Length", content_length);
-        session->fetch(content_length, [request, player](const std::shared_ptr<Session>& session, const Bytes& body) {
-            json data = json::parse(body.data());
-            openxum::core::common::Move* move = player->build_move();
+                if (player != nullptr) {
+                    openxum::core::common::Move* move = player->build_move();
 
-            move->from_object(data);
-            player->move(move);
-            session->close(OK);
-        });
-    } else {
-        session->close(OK);
-    }
+                    move->from_object(json_move);
+                    player->move(move);
+                    session->close(OK);
+                } else {
+                    session->close(OK);
+                }
+            });
 }
 
 void service_ready_handler(Service&)
 {
-    fprintf(stderr, "Hey! The service is up and running.");
+    std::cerr << "The service is up and running." << std::endl;
 }
 
 int main(int, const char**)
@@ -150,7 +165,7 @@ int main(int, const char**)
     PUT->set_method_handler("PUT", {{"Content-Type", "application/json"}}, put_method_handler);
 
     auto DELETE = std::make_shared<Resource>();
-    DELETE->set_path("/openxum/game/delete");
+    DELETE->set_path("/openxum/game/delete/");
     DELETE->set_method_handler("DELETE", {{"Content-Type", "application/json"}}, delete_method_handler);
 
     auto settings = std::make_shared<Settings>();

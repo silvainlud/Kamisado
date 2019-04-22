@@ -64,16 +64,14 @@ namespace openxum {
 
                     int type() const { return _type; }
 
-                    std::string to_string() const override { return ""; };
+                    std::string to_string() const override;
 
                     int winner_is() const override;
 
                 private:
                     void change_color();
 
-                    State find_towers2(const Coordinates&, int) const;
-
-                    const std::vector<State>& get_towers(int color) const;
+                    State& find_towers2(const Coordinates&, int);
 
                     std::vector<Coordinates> get_possible_moving_list(const State& tower) const;
 

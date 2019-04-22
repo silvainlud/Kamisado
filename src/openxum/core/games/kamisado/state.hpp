@@ -39,11 +39,16 @@ namespace openxum {
 
                     Coordinates coordinates() const { return Coordinates(_x, _y); }
 
+                    virtual State& operator=(const Coordinates& coordinates);
+
                     int x() const { return _x; }
 
                     int y() const { return _y; }
 
-                    virtual State& operator=(const Coordinates& coordinates);
+                    std::string to_string() const
+                    {
+                        return "[" + coordinates().to_string() + " (" + std::to_string(_color) + ")]";
+                    }
 
                 private:
                     int _x;

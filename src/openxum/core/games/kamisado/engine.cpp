@@ -22,8 +22,6 @@
 
 #include <openxum/core/games/kamisado/engine.hpp>
 
-#include <iostream>
-
 namespace openxum {
     namespace core {
         namespace games {
@@ -97,7 +95,7 @@ namespace openxum {
                             moves.push_back(new Move(playable_tower, c));
                         }
                     } else {
-                        const std::vector<State>& towers = get_towers(_color);
+                        const std::vector<State>& towers = _color == BLACK ? _black_towers : _white_towers;
 
                         for (const State& s: towers) {
                             const std::vector<Coordinates>& list = get_possible_moving_list(
@@ -123,6 +121,21 @@ namespace openxum {
                     move_tower(m->from(), m->to());
                 }
 
+                std::string Engine::to_string() const
+                {
+                    std::string str;
+
+                    str += "BLACK: ";
+                    for (const State& s: _black_towers) {
+                        str += s.to_string() + " ";
+                    }
+                    str += " / WHITE: ";
+                    for (const State& s: _white_towers) {
+                        str += s.to_string() + " ";
+                    }
+                    return str;
+                }
+
                 int Engine::winner_is() const
                 {
                     if (is_finished()) {
@@ -143,7 +156,7 @@ namespace openxum {
                     Coordinates result;
 
                     if (_play_color != NONE) {
-                        std::vector<State> towers = get_towers(color);
+                        const std::vector<State>& towers = color == BLACK ? _black_towers : _white_towers;
 
                         for (const State& s : towers) {
                             if (s.color() == _play_color) {
@@ -154,20 +167,20 @@ namespace openxum {
                     return result;
                 }
 
-                State Engine::find_towers2(const Coordinates& coord, int color) const
+                State& Engine::find_towers2(const Coordinates& coordinates, int color)
                 {
-                    State result;
-                    std::vector<State> towers = get_towers(color);
+                    std::vector<State>& towers = color == BLACK ? _black_towers : _white_towers;
                     bool found = false;
                     int i = 0;
 
-                    while (i < 8 && !found) {
-                        if (towers[i].x() == coord.x() && towers[i].y() == coord.y()) {
-                            result = towers[i];
+                    while (i < 8 and not found) {
+                        if (towers[i].x() == coordinates.x() and towers[i].y() == coordinates.y()) {
                             found = true;
-                        } else i++;
+                        } else {
+                            i++;
+                        }
                     }
-                    return result;
+                    return towers[i];
                 }
 
                 std::vector<Coordinates> Engine::get_possible_moving_list(const State& tower) const
@@ -218,11 +231,6 @@ namespace openxum {
                     return moves;
                 }
 
-                const std::vector<State>& Engine::get_towers(int color) const
-                {
-                    return color == BLACK ? _black_towers : _white_towers;
-                }
-
                 bool Engine::is_empty(const Coordinates& coordinates) const
                 {
                     bool found = false;
@@ -248,7 +256,7 @@ namespace openxum {
 
                 void Engine::move_tower(const Coordinates& selected_tower, const Coordinates& selected_cell)
                 {
-                    State tower = find_towers2(selected_tower, _color);
+                    State& tower = find_towers2(selected_tower, _color);
 
                     if (tower.x() != -1) {
                         tower = selected_cell;
@@ -279,10 +287,15 @@ namespace openxum {
                 bool Engine::pass(int color) const
                 {
                     const Coordinates& playable_tower = find_playable_tower(color);
-                    const std::vector<Coordinates>& list = get_possible_moving_list(
-                            State(playable_tower.x(), playable_tower.y(), _color));
 
-                    return list.empty();
+                    if (playable_tower.is_valid()) {
+                        const std::vector<Coordinates>& list = get_possible_moving_list(
+                                State(playable_tower.x(), playable_tower.y(), color));
+
+                        return list.empty();
+                    } else {
+                        return false;
+                    }
                 }
             }
         }

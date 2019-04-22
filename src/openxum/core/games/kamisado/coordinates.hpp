@@ -37,8 +37,8 @@ namespace openxum {
 
                     void from_object(const nlohmann::json& json)
                     {
-                        _x = std::stoi(json["x"].get<std::string>());
-                        _y = std::stoi(json["x"].get<std::string>());
+                        _x = json["x"].get<int>();
+                        _y = json["y"].get<int>();
                     }
 
                     bool is_valid() const { return _x != -1 and _y != -1; }
@@ -47,8 +47,8 @@ namespace openxum {
                     {
                         nlohmann::json json;
 
-                        json["x"] = std::to_string(_x);
-                        json["y"] = std::to_string(_y);
+                        json["x"] = _x;
+                        json["y"] = _y;
                         return json;
                     }
 
