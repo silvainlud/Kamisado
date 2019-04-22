@@ -1,0 +1,13 @@
+INCLUDE_DIRECTORIES(
+  ${CMAKE_SOURCE_DIR}/src)
+
+LINK_DIRECTORIES()
+
+SET(OPENXUM_WS_CPP_AI_COMMON_HPP random_player.hpp mcts_player.hpp node.hpp)
+
+SET(OPENXUM_WS_CPP_AI_COMMON_CPP random_player.cpp mcts_player.cpp node.cpp)
+
+ADD_LIBRARY(openxum-ai-common SHARED ${OPENXUM_WS_CPP_AI_COMMON_HPP};${OPENXUM_WS_CPP_AI_COMMON_CPP})
+
+INSTALL(FILES ${OPENXUM_WS_CPP_AI_COMMON_HPP} DESTINATION
+        ${OPENXUM_WS_CPP_INCLUDE_DIRS}/openxum/ai/common/)

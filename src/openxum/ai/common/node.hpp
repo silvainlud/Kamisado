@@ -1,5 +1,5 @@
 /**
- * @file openxum/core/common/node.hpp
+ * @file openxum/ai/common/node.hpp
  * See the AUTHORS or Authors.txt file
  */
 
@@ -20,17 +20,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef OPENXUM_AI_SPECIFIC_KAMISADO_NODE_HPP
-#define OPENXUM_AI_SPECIFIC_KAMISADO_NODE_HPP
+#ifndef OPENXUM_AI_COMMON_NODE_HPP
+#define OPENXUM_AI_COMMON_NODE_HPP
 
 #include <vector>
-#include <openxum/core/games/kamisado/engine.hpp>
-#include <openxum/core/games/kamisado/move.hpp>
+#include <openxum/core/common/engine.hpp>
+#include <openxum/core/common/move.hpp>
 
 namespace openxum {
     namespace ai {
-        namespace specific {
-            namespace kamisado {
+        namespace common {
 
                 class Node {
                 public:
@@ -91,7 +90,6 @@ namespace openxum {
 
             }
         }
-    }
 }
 
 #endif

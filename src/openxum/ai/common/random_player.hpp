@@ -1,5 +1,5 @@
 /**
- * @file openxum/core/common/random_player.hpp
+ * @file openxum/ai/common/random_player.hpp
  * See the AUTHORS or Authors.txt file
  */
 
@@ -20,28 +20,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef OPENXUM_AI_SPECIFIC_KAMISADO_RANDOM_PLAYER_HPP
-#define OPENXUM_AI_SPECIFIC_KAMISADO_RANDOM_PLAYER_HPP
+#ifndef OPENXUM_AI_COMMON_RANDOM_PLAYER_HPP
+#define OPENXUM_AI_COMMON_RANDOM_PLAYER_HPP
 
-#include <openxum/ai/common/random_player.hpp>
+#include <random>
+#include <openxum/core/common/player.hpp>
+#include <openxum/core/common/engine.hpp>
 
 namespace openxum {
     namespace ai {
-        namespace specific {
-            namespace kamisado {
+        namespace common {
 
-                class RandomPlayer : public openxum::ai::common::RandomPlayer {
-                public:
-                    RandomPlayer(int c, int o, openxum::core::common::Engine* e)
-                            :openxum::ai::common::RandomPlayer(c, o, e) { }
+            class RandomPlayer : public openxum::core::common::Player {
+            public:
+                RandomPlayer(int c, int o, openxum::core::common::Engine* e)
+                        :openxum::core::common::Player(c, o, e) { }
 
-                    openxum::core::common::Move* build_move() const override
-                    {
-                        return new openxum::core::games::kamisado::Move;
-                    }
-                };
+                openxum::core::common::Move* get_move() override;
+            };
 
-            }
         }
     }
 }
