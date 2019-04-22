@@ -38,6 +38,7 @@
 #include <openxum/core/games/kamisado/game_type.hpp>
 
 #include <openxum/ai/specific/kamisado/random_player.hpp>
+#include <openxum/ai/specific/kamisado/mcts_player.hpp>
 
 using json = nlohmann::json;
 using namespace restbed;
@@ -98,8 +99,10 @@ void post_method_handler(const std::shared_ptr<Session>& session)
                 openxum::core::common::Player* player = nullptr;
 
                 if (game == "Kamisado") {
-                    player = new openxum::ai::specific::kamisado::RandomPlayer(player_color, opponent_color,
-                            new openxum::core::games::kamisado::Engine(game_type, color));
+//                    player = new openxum::ai::specific::kamisado::RandomPlayer(player_color, opponent_color,
+//                            new openxum::core::games::kamisado::Engine(game_type, color));
+                    player = new openxum::ai::specific::kamisado::MCTSPlayer(player_color, opponent_color,
+                            new openxum::core::games::kamisado::Engine(game_type, color), 10000);
                 }
 
                 if (player != nullptr) {

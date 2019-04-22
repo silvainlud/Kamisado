@@ -54,6 +54,8 @@ namespace openxum {
                     _play_color = NONE;
                 }
 
+                Engine::~Engine() { }
+
                 // public methods
                 void Engine::apply_moves(const openxum::core::common::Moves& moves)
                 {
@@ -66,6 +68,8 @@ namespace openxum {
                 {
                     auto e = new Engine(_type, _color);
 
+                    e->_black_towers.clear();
+                    e->_white_towers.clear();
                     for (const State& s: _black_towers) {
                         e->_black_towers.push_back(s);
                     }
@@ -92,18 +96,22 @@ namespace openxum {
                                 State(playable_tower.x(), playable_tower.y(), _color));
 
                         for (const Coordinates& c: list) {
-                            moves.push_back(new Move(playable_tower, c));
+                            moves.push_back(new Move(MOVE, playable_tower, c));
                         }
                     } else {
-                        const std::vector<State>& towers = _color == BLACK ? _black_towers : _white_towers;
+                        if (_play_color == NONE) {
+                            const std::vector<State>& towers = _color == BLACK ? _black_towers : _white_towers;
 
-                        for (const State& s: towers) {
-                            const std::vector<Coordinates>& list = get_possible_moving_list(
-                                    State(s.x(), s.y(), _color));
+                            for (const State& s: towers) {
+                                const std::vector<Coordinates>& list = get_possible_moving_list(
+                                        State(s.x(), s.y(), _color));
 
-                            for (const Coordinates& c: list) {
-                                moves.push_back(new Move(s.coordinates(), c));
+                                for (const Coordinates& c: list) {
+                                    moves.push_back(new Move(MOVE, s.coordinates(), c));
+                                }
                             }
+                        } else {
+                            moves.push_back(new Move(PASS, Coordinates(), Coordinates()));
                         }
                     }
                     return moves;
@@ -118,7 +126,11 @@ namespace openxum {
                 {
                     auto* m = dynamic_cast<const openxum::core::games::kamisado::Move*>(move);
 
-                    move_tower(m->from(), m->to());
+                    if (m->type() == MOVE) {
+                        move_tower(m->from(), m->to());
+                    } else {
+                        change_color();
+                    }
                 }
 
                 std::string Engine::to_string() const

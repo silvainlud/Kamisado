@@ -25,6 +25,7 @@
 
 #include <openxum/core/common/move.hpp>
 #include <openxum/core/games/kamisado/coordinates.hpp>
+#include <openxum/core/games/kamisado/move_type.hpp>
 
 namespace openxum {
     namespace core {
@@ -35,7 +36,9 @@ namespace openxum {
                 public:
                     Move() = default;
 
-                    Move(const Coordinates& to, const Coordinates& from);
+                    Move(const MoveType& type, const Coordinates& to, const Coordinates& from);
+
+                    openxum::core::common::Move* clone() const override;
 
                     void decode(const std::string&) override;
 
@@ -51,10 +54,17 @@ namespace openxum {
 
                     std::string to_string() const override
                     {
-                        return "move tower from " + _from.to_string() + " to " + _to.to_string();
+                        if (_type == MOVE) {
+                            return "move tower from " + _from.to_string() + " to " + _to.to_string();
+                        } else {
+                            return "pass";
+                        }
                     }
 
+                    MoveType type() const { return _type; }
+
                 private:
+                    MoveType _type;
                     Coordinates _from;
                     Coordinates _to;
                 };

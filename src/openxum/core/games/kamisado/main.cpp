@@ -2,7 +2,7 @@
 
 #include "engine.hpp"
 #include "openxum/ai/specific/kamisado/random_player.hpp"
-#include "openxum/ai/specific/kamisado/MCTSPlayer.h"
+#include "openxum/ai/specific/kamisado/mcts_player.hpp"
 
 int main()
 {

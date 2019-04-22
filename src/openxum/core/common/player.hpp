@@ -35,6 +35,8 @@ namespace openxum {
                 Player(int c, int o, Engine* e)
                         :_color(c), _opponent_color(o), _engine(e) { _level = 0; }
 
+                virtual ~Player() { delete _engine; }
+
                 virtual Move* build_move() const = 0;
 
                 int color() const { return _color; }
@@ -43,7 +45,7 @@ namespace openxum {
 
                 Engine& engine() { return *_engine; }
 
-                virtual Move* get_move() const = 0;
+                virtual Move* get_move() = 0;
 
                 void move(const Move* move) { _engine->move(move); }
 

@@ -1,5 +1,5 @@
 /**
- * @file openxum/core/common/random_player.hpp
+ * @file openxum/core/common/mcts_player.hpp
  * See the AUTHORS or Authors.txt file
  */
 
@@ -20,22 +20,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef OPENXUM_AI_SPECIFIC_KAMISADO_RANDOM_PLAYER_HPP
-#define OPENXUM_AI_SPECIFIC_KAMISADO_RANDOM_PLAYER_HPP
+#ifndef OPENXUM_AI_SPECIFIC_KAMISADO_MCTS_PLAYER_HPP
+#define OPENXUM_AI_SPECIFIC_KAMISADO_MCTS_PLAYER_HPP
 
-#include <random>
 #include <openxum/core/common/player.hpp>
 #include <openxum/core/games/kamisado/engine.hpp>
+#include <openxum/ai/specific/kamisado/node.hpp>
 
 namespace openxum {
     namespace ai {
         namespace specific {
             namespace kamisado {
 
-                class RandomPlayer : public openxum::core::common::Player {
+                class MCTSPlayer : public openxum::core::common::Player {
                 public:
-                    RandomPlayer(int c, int o, openxum::core::common::Engine* e)
-                            :openxum::core::common::Player(c, o, e) { }
+                    MCTSPlayer(int c, int o, openxum::core::common::Engine* e, int simulation_number)
+                            :openxum::core::common::Player(c, o, e), _simulation_number(simulation_number),
+                             _root(nullptr) { }
 
                     openxum::core::common::Move* build_move() const override
                     {
@@ -43,6 +44,22 @@ namespace openxum {
                     }
 
                     openxum::core::common::Move* get_move() override;
+
+                private:
+                    int evaluate(const openxum::core::common::Engine*);
+
+                    openxum::core::common::Move* get_final_choice();
+
+                    void init_search();
+
+                    void play_a_random_turn(openxum::core::common::Engine*);
+
+                    void simulate_one_game_from_root();
+
+                    void updateScore(Node*, int);
+
+                    int _simulation_number;
+                    Node* _root;
                 };
 
             }

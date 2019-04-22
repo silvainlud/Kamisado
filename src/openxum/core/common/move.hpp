@@ -34,6 +34,10 @@ namespace openxum {
             public:
                 Move() = default;
 
+                virtual ~Move() = default;
+
+                virtual Move* clone() const = 0;
+
                 virtual void decode(const std::string&) = 0;
 
                 virtual std::string encode() const = 0;

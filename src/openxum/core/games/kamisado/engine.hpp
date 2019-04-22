@@ -44,6 +44,8 @@ namespace openxum {
 
                     Engine(int type, int color);
 
+                    ~Engine() override;
+
                     void apply_moves(const openxum::core::common::Moves&) override;
 
                     Engine* clone() const override;

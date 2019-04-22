@@ -31,9 +31,9 @@ namespace openxum {
 
             class Engine {
             public:
-                Engine()
-                {
-                }
+                Engine() { }
+
+                virtual ~Engine() { }
 
                 virtual void apply_moves(const Moves& moves) = 0;
 
