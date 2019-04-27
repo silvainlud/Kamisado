@@ -1,5 +1,5 @@
 /**
- * @file openxum/core/games/kamisado/coordinates.cpp
+ * @file openxum/core/games/kikotsoka/coordinates.cpp
  * See the AUTHORS or Authors.txt file
  */
 
@@ -20,15 +20,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <openxum/core/games/kamisado/coordinates.hpp>
+#include <openxum/core/games/kikotsoka/coordinates.hpp>
 
 namespace openxum {
     namespace core {
         namespace games {
-            namespace kamisado {
+            namespace kikotsoka {
 
-                Coordinates::Coordinates(int x, int y)
-                        :_x(x), _y(y) { }
+                Coordinates::Coordinates(int c, int l)
+                        :_column(c), _line(l) { }
 
             }
         }

@@ -1,5 +1,5 @@
 /**
- * @file openxum/core/games/kamisado/coordinates.cpp
+ * @file openxum/core/games/kikotsoka/color.hpp
  * See the AUTHORS or Authors.txt file
  */
 
@@ -20,17 +20,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <openxum/core/games/kamisado/coordinates.hpp>
+#ifndef OPENXUM_CORE_GAMES_KIKOTSOKA_COLOR_HPP
+#define OPENXUM_CORE_GAMES_KIKOTSOKA_COLOR_HPP
 
 namespace openxum {
     namespace core {
         namespace games {
-            namespace kamisado {
+            namespace kikotsoka {
 
-                Coordinates::Coordinates(int x, int y)
-                        :_x(x), _y(y) { }
+                enum Color {
+                    NONE = -1, BLACK = 0, WHITE = 1
+                };
 
             }
         }
     }
 }
+
+#endif

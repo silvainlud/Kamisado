@@ -1,5 +1,5 @@
 /**
- * @file openxum/core/games/kamisado/coordinates.cpp
+ * @file openxum/core/games/kikotsoka/move_type.hpp
  * See the AUTHORS or Authors.txt file
  */
 
@@ -20,17 +20,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef OPENXUM_CORE_GAMES_KIKOTSOKA_MOVE_TYPE_HPP
+#define OPENXUM_CORE_GAMES_KIKOTSOKA_MOVE_TYPE_HPP
+
+#include <openxum/core/common/move.hpp>
 #include <openxum/core/games/kamisado/coordinates.hpp>
 
 namespace openxum {
     namespace core {
         namespace games {
-            namespace kamisado {
+            namespace kikotsoka {
 
-                Coordinates::Coordinates(int x, int y)
-                        :_x(x), _y(y) { }
+                class MoveType {
+                public:
+                    enum Values {
+                        PUT_SHIDO = 0, PUT_PIECE = 1, CHOICE = 2, PASS = 3
+                    };
+                };
 
             }
         }
     }
 }
+
+#endif

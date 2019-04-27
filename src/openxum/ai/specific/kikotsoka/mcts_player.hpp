@@ -1,5 +1,5 @@
 /**
- * @file openxum/core/games/kamisado/coordinates.cpp
+ * @file openxum/core/common/mcts_player.hpp
  * See the AUTHORS or Authors.txt file
  */
 
@@ -20,17 +20,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <openxum/core/games/kamisado/coordinates.hpp>
+#ifndef OPENXUM_AI_SPECIFIC_KIKOTSOKA_MCTS_PLAYER_HPP
+#define OPENXUM_AI_SPECIFIC_KIKOTSOKA_MCTS_PLAYER_HPP
+
+#include <openxum/ai/common/mcts_player.hpp>
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kamisado {
+    namespace ai {
+        namespace specific {
+            namespace kikotsoka {
 
-                Coordinates::Coordinates(int x, int y)
-                        :_x(x), _y(y) { }
+                class MCTSPlayer : public openxum::ai::common::MCTSPlayer {
+                public:
+                    MCTSPlayer(int c, int o, openxum::core::common::Engine* e)
+                            :openxum::ai::common::MCTSPlayer(c, o, e, 10000) { }
+
+                    openxum::core::common::Move* build_move() const override
+                    {
+                        return new openxum::core::games::kikotsoka::Move;
+                    }
+                };
 
             }
         }
     }
 }
+
+#endif
