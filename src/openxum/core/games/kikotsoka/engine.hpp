@@ -45,7 +45,8 @@ namespace openxum {
 
                     ~Engine() override;
 
-                    void apply_moves(const openxum::core::common::Moves&) override;
+                    openxum::core::common::Move* build_move() const override
+                    { return new Move(); }
 
                     Engine* clone() const override;
 

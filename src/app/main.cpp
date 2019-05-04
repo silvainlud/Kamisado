@@ -143,7 +143,7 @@ void put_method_handler(const std::shared_ptr<Session>& session)
                 openxum::core::common::Player* player = current_players[id];
 
                 if (player != nullptr) {
-                    openxum::core::common::Move* move = player->build_move();
+                    openxum::core::common::Move* move = player->engine().build_move();
 
                     move->from_object(json_move);
                     player->move(move);

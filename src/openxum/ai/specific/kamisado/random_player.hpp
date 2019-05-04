@@ -34,11 +34,6 @@ namespace openxum {
                 public:
                     RandomPlayer(int c, int o, openxum::core::common::Engine* e)
                             :openxum::ai::common::RandomPlayer(c, o, e) { }
-
-                    openxum::core::common::Move* build_move() const override
-                    {
-                        return new openxum::core::games::kamisado::Move;
-                    }
                 };
 
             }

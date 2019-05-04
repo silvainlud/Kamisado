@@ -34,11 +34,6 @@ namespace openxum {
                 public:
                     MCTSPlayer(int c, int o, openxum::core::common::Engine* e)
                             :openxum::ai::common::MCTSPlayer(c, o, e, 10000) { }
-
-                    openxum::core::common::Move* build_move() const override
-                    {
-                        return new openxum::core::games::kamisado::Move;
-                    }
                 };
 
             }

@@ -100,13 +100,6 @@ namespace openxum {
                 }
 
                 // public methods
-                void Engine::apply_moves(const openxum::core::common::Moves& moves)
-                {
-                    for (auto m: moves) {
-                        move(m);
-                    }
-                }
-
                 Engine* Engine::clone() const
                 {
                     auto e = new Engine(_type, _color);

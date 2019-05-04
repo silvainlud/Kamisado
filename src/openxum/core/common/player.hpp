@@ -37,8 +37,6 @@ namespace openxum {
 
                 virtual ~Player() { delete _engine; }
 
-                virtual Move* build_move() const = 0;
-
                 int color() const { return _color; }
 
                 const Engine& engine() const { return *_engine; }

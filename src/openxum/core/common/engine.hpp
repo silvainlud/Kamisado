@@ -35,7 +35,14 @@ namespace openxum {
 
                 virtual ~Engine() { }
 
-                virtual void apply_moves(const Moves& moves) = 0;
+                virtual void apply_moves(const Moves& moves)
+                {
+                    for (auto m: moves) {
+                        move(m);
+                    }
+                }
+
+                virtual Move* build_move() const = 0;
 
                 virtual Engine* clone() const = 0;
 
