@@ -35,7 +35,11 @@ namespace openxum {
             public:
                 MCTSPlayer(int c, int o, openxum::core::common::Engine* e, int simulation_number)
                         :openxum::core::common::Player(c, o, e), _simulation_number(simulation_number),
-                         _root(nullptr) { }
+                         _root(nullptr), _rng(_random_device())
+                { }
+
+                ~MCTSPlayer() override
+                { delete _root; }
 
                 openxum::core::common::Move* get_move() override;
 
@@ -54,6 +58,8 @@ namespace openxum {
 
                 int _simulation_number;
                 Node* _root;
+                std::random_device _random_device;
+                std::mt19937 _rng;
             };
 
         }

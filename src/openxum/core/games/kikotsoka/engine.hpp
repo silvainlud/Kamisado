@@ -133,6 +133,8 @@ namespace openxum {
 
                     bool is_valid2(const Coordinates& coordinates) const;
 
+                    void next_phase();
+
                     bool possible_forbidden_pattern(const Coordinates& coordinates,
                             const std::vector<Possible_pattern_results>& list) const;
 

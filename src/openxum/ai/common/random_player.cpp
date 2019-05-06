@@ -9,10 +9,9 @@ namespace openxum {
                 const openxum::core::common::Moves& list = engine().get_possible_move_list();
 
                 if (not list.empty()) {
-                    std::mt19937 rng(8372);
-                    std::uniform_int_distribution<std::mt19937::result_type> distribution(0, list.size());
+                    std::uniform_int_distribution<std::mt19937::result_type> distribution(0, list.size() - 1);
 
-                    return list[distribution(rng)];
+                    return list[distribution(_rng)];
                 } else {
                     return nullptr;
                 }

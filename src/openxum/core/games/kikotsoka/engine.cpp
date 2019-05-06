@@ -169,11 +169,14 @@ namespace openxum {
                         if (moves.empty()) {
                             moves.push_back(new Move(MoveType::PASS, _color, Coordinates(), -1));
                         }
-                    } else { // phase = Phase::CHOICE
+                    } else if (_phase == Phase::CHOICE_PIECE) {
+                        moves.push_back(new Move(MoveType::CHOICE_PIECE, _color, Coordinates(), 0));
+                        moves.push_back(new Move(MoveType::CHOICE_PIECE, _color, Coordinates(), 1));
+                    } else { // phase = Phase::CHOICE_PATTERN
                         std::vector<Coordinates> result = check_patterns();
 
                         for (std::vector<Coordinates>::size_type i = 0; i < result.size(); ++i) {
-                            moves.push_back(new Move(MoveType::CHOICE, _color, Coordinates(), (int) i));
+                            moves.push_back(new Move(MoveType::CHOICE_PATTERN, _color, Coordinates(), (int) i));
                         }
                     }
                     return moves;
@@ -198,9 +201,8 @@ namespace openxum {
                             } else {
                                 --_white_shido_number;
                             }
-                            _phase = (_black_shido_number == 0 and _white_shido_number == 0) ? Phase::PUT_PIECE
-                                                                                             : Phase::PUT_SHIDO;
                             change_color();
+                            next_phase();
                         } else if (m->type() == MoveType::PUT_PIECE) {
                             _board[m->to().line()][m->to().column()] =
                                     m->color() == Color::BLACK ? State::BLACK : State::WHITE;
@@ -222,17 +224,23 @@ namespace openxum {
                                     } else {
                                         ++_white_level;
                                     }
-                                    _phase = Phase::PUT_PIECE;
                                     change_color();
+                                    next_phase();
                                 } else {
-                                    _phase = Phase::CHOICE;
+                                    _phase = Phase::CHOICE_PATTERN;
                                 }
                             } else {
-                                _phase = Phase::PUT_PIECE;
                                 change_color();
+                                next_phase();
                             }
                             _pass = 0;
-                        } else if (m->type() == MoveType::CHOICE) {
+                        } else if (m->type() == MoveType::CHOICE_PIECE) {
+                            if (m->index() == 0) {
+                                _phase = Phase::PUT_SHIDO;
+                            } else {
+                                _phase = Phase::PUT_PIECE;
+                            }
+                        } else if (m->type() == MoveType::CHOICE_PATTERN) {
                             std::vector<Coordinates> result = check_patterns();
 
                             capture(result[m->index()]);
@@ -242,13 +250,13 @@ namespace openxum {
                             } else {
                                 ++_white_level;
                             }
-                            _phase = Phase::PUT_PIECE;
                             change_color();
+                            next_phase();
                         } else if (m->type() == MoveType::PASS) {
                             ++_pass;
                             _last_coordinates = Coordinates();
-                            _phase = Phase::PUT_PIECE;
                             change_color();
+                            next_phase();
                         }
                     }
                 }
@@ -264,9 +272,9 @@ namespace openxum {
                 int Engine::winner_is() const
                 {
                     if (is_finished()) {
-                        if (_black_level == 6 or _black_level > _white_level) {
+                        if (_black_level == 6 or _black_level > _white_level or _white_failed) {
                             return Color::BLACK;
-                        } else if (_white_level == 6 or _black_level < _white_level) {
+                        } else if (_white_level == 6 or _black_level < _white_level or _black_failed) {
                             return Color::WHITE;
                         } else {
                             if (_black_captured_piece_number > _white_captured_piece_number) {
@@ -424,8 +432,8 @@ namespace openxum {
                     while (!found && level < 5) {
                         const LevelPattern& pattern = PATTERNS[level];
 
-                        for (LevelPattern::size_type j = 0; j < pattern.size(); ++j) {
-                            const std::vector<Coordinates>& new_origins = check_pattern(pattern[j]);
+                        for (const Pattern& p: pattern) {
+                            const std::vector<Coordinates>& new_origins = check_pattern(p);
 
                             if (not new_origins.empty()) {
                                 origins.insert(
@@ -601,8 +609,8 @@ namespace openxum {
                         const LevelPattern& pattern = PATTERNS[level];
 
                         result.emplace_back(std::vector<Engine::Possible_pattern_results>());
-                        for (LevelPattern::size_type j = 0; j < pattern.size(); ++j) {
-                            Engine::Possible_pattern_results result_pattern = is_possible_pattern(pattern[j]);
+                        for (const Pattern& p: pattern) {
+                            Engine::Possible_pattern_results result_pattern = is_possible_pattern(p);
 
                             result[level].push_back(result_pattern);
                         }
@@ -619,6 +627,27 @@ namespace openxum {
                             or (_last_coordinates.is_valid() and distance(coordinates) > level_distance);
                 }
 
+                void Engine::next_phase()
+                {
+                    if (_color == Color::BLACK) {
+                        if (_black_shido_number == 0) {
+                            _phase = Phase::PUT_PIECE;
+                        } else if (_black_shido_number == 5) {
+                            _phase = Phase::PUT_SHIDO;
+                        } else {
+                            _phase = Phase::CHOICE_PIECE;
+                        }
+                    } else {
+                        if (_white_shido_number == 0) {
+                            _phase = Phase::PUT_PIECE;
+                        } else if (_white_shido_number == 5) {
+                            _phase = Phase::PUT_SHIDO;
+                        } else {
+                            _phase = Phase::CHOICE_PIECE;
+                        }
+                    }
+                }
+
                 bool Engine::possible_forbidden_pattern(const Coordinates& coordinates,
                         const std::vector<Possible_pattern_results>& list) const
                 {
@@ -632,7 +661,7 @@ namespace openxum {
 
                             while (ok and index < list[level].size()) {
                                 if (list[level][index].list[0].column() == coordinates.column() and
-                                list[level][index].list[0].line() == coordinates.line()) {
+                                        list[level][index].list[0].line() == coordinates.line()) {
                                     ok = false;
                                 } else {
                                     ++index;

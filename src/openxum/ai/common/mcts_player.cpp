@@ -47,7 +47,7 @@ namespace openxum {
             int MCTSPlayer::evaluate(const openxum::core::common::Engine* engine)
             {
                 openxum::core::common::Engine* clone = engine->clone();
-                int winner = -1;
+                int winner;
 
                 while (not clone->is_finished()) {
                     play_a_random_turn(clone);
@@ -135,9 +135,9 @@ namespace openxum {
                 const openxum::core::common::Moves& list = engine->get_possible_move_list();
 
                 if (not list.empty()) {
-                    std::mt19937 rng(8372);
-                    std::uniform_int_distribution<std::mt19937::result_type> distribution(0, list.size());
-                    openxum::core::common::Move* move = list[distribution(rng)];
+                    std::uniform_int_distribution<std::mt19937::result_type> distribution(0, list.size() - 1);
+                    unsigned long index = distribution(_rng);
+                    openxum::core::common::Move* move = list[index];
 
                     engine->move(move);
                 }

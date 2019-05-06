@@ -20,15 +20,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-
-//get :
-// curl -w'\n' -v -X GET 'http://localhost:1984/openxum/move'
-// curl http://localhost:1984/openxum/move?game=kamisado&id=2&color=0
-
-//post :
-// curl -w'\n' -v -X POST --data 'Hello, Restbed' 'http://localhost:1984/openxum/game'
-
 #include <iostream>
 #include <restbed>
 
@@ -40,6 +31,7 @@
 
 #include <openxum/core/games/kikotsoka/engine.hpp>
 #include <openxum/ai/specific/kikotsoka/mcts_player.hpp>
+#include <openxum/ai/specific/kikotsoka/random_player.hpp>
 
 using json = nlohmann::json;
 using namespace restbed;
@@ -105,8 +97,8 @@ void post_method_handler(const std::shared_ptr<Session>& session)
                     player = new openxum::ai::specific::kamisado::MCTSPlayer(player_color, opponent_color,
                             new openxum::core::games::kamisado::Engine(game_type, color));
                 } else if (game == "Kikotsoka") {
-//                    player = new openxum::ai::specific::kamisado::RandomPlayer(player_color, opponent_color,
-//                            new openxum::core::games::kamisado::Engine(game_type, color));
+//                    player = new openxum::ai::specific::kikotsoka::RandomPlayer(player_color, opponent_color,
+//                            new openxum::core::games::kikotsoka::Engine(game_type, color));
                     player = new openxum::ai::specific::kikotsoka::MCTSPlayer(player_color, opponent_color,
                             new openxum::core::games::kikotsoka::Engine(game_type, color));
                 }

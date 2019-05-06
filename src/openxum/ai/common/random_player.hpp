@@ -34,9 +34,13 @@ namespace openxum {
             class RandomPlayer : public openxum::core::common::Player {
             public:
                 RandomPlayer(int c, int o, openxum::core::common::Engine* e)
-                        :openxum::core::common::Player(c, o, e) { }
+                        :openxum::core::common::Player(c, o, e), _rng(_random_device()) { }
 
                 openxum::core::common::Move* get_move() override;
+
+            private:
+                std::random_device _random_device;
+                std::mt19937 _rng;
             };
 
         }

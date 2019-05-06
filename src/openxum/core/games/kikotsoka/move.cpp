@@ -38,16 +38,18 @@ namespace openxum {
                 void Move::decode(const std::string& str)
                 {
                     _color = str[0] == 'B' ? Color::BLACK : Color::WHITE;
-                    if (str.size() == 2) {
-                        if (str[1] == '-') {
-                            _type = MoveType::PASS;
-                            _to = Coordinates();
-                            _index = -1;
-                        } else {
-                            _type = MoveType::CHOICE;
-                            _to = Coordinates();
-                            _index = str[1] - '0';
-                        }
+                    if (str[1] == '-') {
+                        _type = MoveType::PASS;
+                        _to = Coordinates();
+                        _index = -1;
+                    } else if (str[1] == 'P') {
+                        _type = MoveType::CHOICE_PATTERN;
+                        _to = Coordinates();
+                        _index = str[1] - '0';
+                    } else if (str[1] == 'p') {
+                        _type = MoveType::CHOICE_PIECE;
+                        _to = Coordinates();
+                        _index = str[1] - '0';
                     } else {
                         _type = str[1] == '+' ? MoveType::PUT_PIECE : MoveType::PUT_SHIDO;
                         if (str.size() == 4) {
@@ -62,9 +64,11 @@ namespace openxum {
                 std::string Move::encode() const
                 {
                     if (_type == MoveType::PASS) {
-                        return std::string(_color == Color::BLACK ? "B" : "W") + '-';
-                    } else if (_type == MoveType::CHOICE) {
-                        return std::string(_color == Color::BLACK ? "B" : "W") + std::to_string(_index);
+                        return std::string(_color == Color::BLACK ? "B" : "W") + "-";
+                    } else if (_type == MoveType::CHOICE_PATTERN) {
+                        return std::string(_color == Color::BLACK ? "B" : "W") + "P" + std::to_string(_index);
+                    } else if (_type == MoveType::CHOICE_PIECE) {
+                        return std::string(_color == Color::BLACK ? "B" : "W") + "p" + std::to_string(_index);
                     } else if (_type == MoveType::PUT_PIECE) {
                         return std::string(_color == Color::BLACK ? "B" : "W") + "+" + _to.to_string();
                     } else if (_type == MoveType::PUT_SHIDO) {
@@ -99,8 +103,14 @@ namespace openxum {
                 {
                     if (_type == MoveType::PASS) {
                         return "PASS";
-                    } else if (_type == MoveType::CHOICE) {
+                    } else if (_type == MoveType::CHOICE_PATTERN) {
                         return "CHOICE pattern " + std::to_string(_index);
+                    } else if (_type == MoveType::CHOICE_PIECE) {
+                        if (_index == 0) {
+                            return "CHOICE shido";
+                        } else {
+                            return "CHOICE piece";
+                        }
                     } else if (_type == MoveType::PUT_PIECE) {
                         return "PUT " + std::string(_color == Color::BLACK ? "black" : "white") + " PIECE at " +
                                 _to.to_string();
