@@ -44,6 +44,8 @@ namespace openxum {
                 openxum::core::common::Move* get_move() override;
 
             private:
+                Node* descent() const;
+
                 int evaluate(const openxum::core::common::Engine*);
 
                 openxum::core::common::Move* get_final_choice();

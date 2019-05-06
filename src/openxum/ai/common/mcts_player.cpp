@@ -23,6 +23,7 @@
 #include <random>
 
 #include <openxum/ai/common/mcts_player.hpp>
+#include <iostream>
 
 namespace openxum {
     namespace ai {
@@ -44,6 +45,16 @@ namespace openxum {
             }
 
             // private methods
+            Node* MCTSPlayer::descent() const
+            {
+                Node* current = _root;
+
+                while (current != nullptr and not current->engine()->is_finished() and current->get_possible_moves().empty()) {
+                    current = current->choice(current->engine()->current_color() == color());
+                }
+                return current;
+            }
+
             int MCTSPlayer::evaluate(const openxum::core::common::Engine* engine)
             {
                 openxum::core::common::Engine* clone = engine->clone();
@@ -57,6 +68,29 @@ namespace openxum {
                 return winner;
             }
 
+            openxum::core::common::Move* MCTSPlayer::get_final_choice()
+            {
+                openxum::core::common::Move* finalChoice = nullptr;
+                double best = -1;
+
+                std::cout << _root->engine()->get_possible_move_list().size() << std::endl;
+
+                for (Node* child: _root->get_children()) {
+                    double score = double(child->get_number_of_wins()) / child->get_visit_number();
+
+                    std::cout << "[" << child->get_number_of_wins() << " " << child->get_visit_number() << "]";
+
+                    if (score > best) {
+                        best = score;
+                        finalChoice = child->get_move();
+                    }
+                }
+
+                std::cout << std::endl;
+
+                return finalChoice;
+            }
+
             void MCTSPlayer::init_search()
             {
                 _root = new Node(engine().clone(), nullptr, nullptr);
@@ -64,28 +98,12 @@ namespace openxum {
 
             void MCTSPlayer::simulate_one_game_from_root()
             {
-                Node* current = _root;
-                Node* node = current;
-                openxum::core::common::Engine* monteCarloEngine = nullptr;
+                Node* current = descent();
 
-                //descent
-                while (current != nullptr and not current->engine()->is_finished()) {
-                    const std::vector<openxum::core::common::Move*>& possible_moves = current->get_possible_moves();
+                if (current != nullptr and not current->get_possible_moves().empty()) {
+                    openxum::core::common::Engine* monteCarloEngine;
 
-                    if (not possible_moves.empty()) {
-                        node = current;
-                        break;
-                    } else {
-                        node = current;
-                        current = current->choice(current->engine()->current_color() == color());
-                    }
-                }
-
-                if (not node->get_possible_moves().empty()) {
-                    //expansion
                     if (current == nullptr or not current->engine()->is_finished()) {
-                        current = node;
-
                         openxum::core::common::Engine* new_engine = current->engine()->clone();
                         openxum::core::common::Move* move = current->get_first_possible_move();
                         Node* newNode = new Node(new_engine, current, move->clone());
@@ -112,22 +130,6 @@ namespace openxum {
                     }
                     current = current->get_father();
                 }
-            }
-
-            openxum::core::common::Move* MCTSPlayer::get_final_choice()
-            {
-                openxum::core::common::Move* finalChoice = nullptr;
-                double best = -1;
-
-                for (Node* child: _root->get_children()) {
-                    double score = double(child->get_number_of_wins()) / child->get_visit_number();
-
-                    if (score > best) {
-                        best = score;
-                        finalChoice = child->get_move();
-                    }
-                }
-                return finalChoice;
             }
 
             void MCTSPlayer::play_a_random_turn(openxum::core::common::Engine* engine)

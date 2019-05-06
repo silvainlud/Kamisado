@@ -29,7 +29,7 @@ namespace openxum {
             namespace kamisado {
 
                 enum Color {
-                    BLACK = 0, WHITE = 1, NONE = 2
+                    NONE = -1, BLACK = 0, WHITE = 1
                 };
 
             }
