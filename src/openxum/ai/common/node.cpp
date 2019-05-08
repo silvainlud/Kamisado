@@ -22,6 +22,7 @@
 
 #include <openxum/ai/common/node.hpp>
 #include <cmath>
+#include <random>
 
 #define KUCT 0.25
 
@@ -42,15 +43,23 @@ namespace openxum {
                     _engine->move(move);
                 }
                 _possible_moves = _engine->get_possible_move_list();
+                _unvisited_child_number = (unsigned int) _possible_moves.size();
+
+                // possible moves in sub tree with this as root
+                _possible_move_number = _unvisited_child_number;
+
+                Node* current = _father;
+
+                while (current != nullptr) {
+                    current->_possible_move_number += _possible_move_number;
+                    current = current->get_father();
+                }
             }
 
             Node::~Node()
             {
                 delete _engine;
                 delete _move;
-                for (Node* child: _children) {
-                    delete child;
-                }
             }
 
             void Node::add_children(Node* n)
@@ -58,30 +67,64 @@ namespace openxum {
                 _children.push_back(n);
             }
 
-            Node* Node::choice(bool max)
+            Node* Node::choice()
             {
                 if (_children.empty()) {
                     return nullptr;
                 } else {
-                    Node* best = nullptr;
-                    double bestScore = -1;
+//                    Node* best = nullptr;
+//                    double bestScore = -1;
+//
+//                    for (Node* child: _children) {
+//                        double score = child->compute_score(is_current);
+//
+//                        if (score > bestScore) {
+//                            bestScore = score;
+//                            best = child;
+//                        }
+//                    }
+//                    return best;
+
+                    double sum = 0;
+                    std::vector<double> scores;
 
                     for (Node* child: _children) {
                         double score = child->compute_score();
 
-                        if ((max and score > bestScore) or (not max and score < bestScore)) {
-                            bestScore = score;
-                            best = child;
+                        scores.push_back(score);
+                        sum += score;
+                    }
+
+                    std::random_device random_device;
+                    std::mt19937 rng(random_device());
+                    std::uniform_real_distribution<double> distribution(0, sum);
+                    double value = distribution(rng);
+                    bool found = false;
+                    std::vector<double>::size_type index = 0;
+
+                    sum = 0;
+                    while (not found and index < scores.size()) {
+                        sum += scores[index];
+                        found = sum > value;
+                        if (not found) {
+                            ++index;
                         }
                     }
-                    return best;
+                    if (found) {
+                        return _children[index];
+                    } else {
+                        return _children[_children.size() - 1];
+                    }
                 }
             }
 
             double Node::compute_score() const
             {
-                double exploration = double(_winNumber) / _visitNumber;
-                double exploitation = sqrt(2 * log(double(_father->get_visit_number()) / _visitNumber));
+                double exploitation = double(_winNumber) / _visitNumber;
+
+//                double exploration = sqrt(2 * log(double(_father->get_visit_number()) / _visitNumber));
+                double exploration = _father->get_possible_move_number() == 0 ? 0 : double(_possible_move_number)
+                        / _father->get_possible_move_number();
 
                 return exploitation + KUCT * exploration;
             }
@@ -94,11 +137,6 @@ namespace openxum {
             Node* Node::get_father() const
             {
                 return _father;
-            }
-
-            openxum::core::common::Move* Node::get_first_possible_move() const
-            {
-                return *_possible_moves.begin();
             }
 
             int Node::get_level() const
@@ -121,11 +159,6 @@ namespace openxum {
                 return _lossNumber;
             }
 
-            const std::vector<openxum::core::common::Move*>& Node::get_possible_moves() const
-            {
-                return _possible_moves;
-            }
-
             int Node::get_visit_number() const
             {
                 return _visitNumber;
@@ -146,17 +179,21 @@ namespace openxum {
                 return _engine->is_finished();
             }
 
-            void Node::remove_first_possible_move()
-            {
-                openxum::core::common::Move* move = *_possible_moves.begin();
-
-                delete move;
-                _possible_moves.erase(_possible_moves.begin());
-            }
-
             void Node::visit()
             {
                 ++_visitNumber;
+            }
+
+            openxum::ai::common::Node* Node::get_first_unvisited_child()
+            {
+                Node* current = this;
+
+                --_unvisited_child_number;
+                while (current != nullptr) {
+                    -- current->_possible_move_number;
+                    current = current->get_father();
+                }
+                return _children[_possible_moves.size() - _unvisited_child_number - 1];
             }
 
         }

@@ -28,8 +28,25 @@ namespace openxum {
         namespace games {
             namespace kamisado {
 
-                enum TowerColor {
-                    ORANGE, BLUE, PURPLE, PINK, YELLOW, RED, GREEN, BROWN
+                class TowerColor {
+                public:
+                    enum Values {
+                        NONE = -1, ORANGE = 0, BLUE, PURPLE, PINK, YELLOW, RED, GREEN, BROWN
+                    };
+
+                    static std::string to_string(const TowerColor::Values& c)
+                    {
+                        if (c == NONE) { return "none"; }
+                        if (c == ORANGE) { return "orange"; }
+                        if (c == BLUE) { return "blue"; }
+                        if (c == PURPLE) { return "purple"; }
+                        if (c == PINK) { return "pink"; }
+                        if (c == YELLOW) { return "yellow"; }
+                        if (c == RED) { return "red"; }
+                        if (c == GREEN) { return "green"; }
+                        if (c == BROWN) { return "brown"; }
+                        return "";
+                    }
                 };
 
             }

@@ -27,7 +27,7 @@ namespace openxum {
         namespace games {
             namespace kamisado {
 
-                State::State(int x, int y, int color)
+                State::State(int x, int y, const TowerColor::Values& color)
                         :_x(x), _y(y), _color(color) { }
 
                 State& State::operator=(const Coordinates& coordinates)

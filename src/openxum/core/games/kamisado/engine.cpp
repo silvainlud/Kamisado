@@ -27,15 +27,15 @@ namespace openxum {
         namespace games {
             namespace kamisado {
 
-                static int initial_colors[8][8] = {
-                        {ORANGE, BLUE,   PURPLE, PINK,   YELLOW, RED,    GREEN,  BROWN},
-                        {RED,    ORANGE, PINK,   GREEN,  BLUE,   YELLOW, BROWN,  PURPLE},
-                        {GREEN,  PINK,   ORANGE, RED,    PURPLE, BROWN,  YELLOW, BLUE},
-                        {PINK,   PURPLE, BLUE,   ORANGE, BROWN,  GREEN,  RED,    YELLOW},
-                        {YELLOW, RED,    GREEN,  BROWN,  ORANGE, BLUE,   PURPLE, PINK},
-                        {BLUE,   YELLOW, BROWN,  PURPLE, RED,    ORANGE, PINK,   GREEN},
-                        {PURPLE, BROWN,  YELLOW, BLUE,   GREEN,  PINK,   ORANGE, RED},
-                        {BROWN,  GREEN,  RED,    YELLOW, PINK,   PURPLE, BLUE,   ORANGE}
+                static TowerColor::Values initial_colors[8][8] = {
+                        {TowerColor::ORANGE, TowerColor::BLUE,   TowerColor::PURPLE, TowerColor::PINK,   TowerColor::YELLOW, TowerColor::RED,    TowerColor::GREEN,  TowerColor::BROWN},
+                        {TowerColor::RED,    TowerColor::ORANGE, TowerColor::PINK,   TowerColor::GREEN,  TowerColor::BLUE,   TowerColor::YELLOW, TowerColor::BROWN,  TowerColor::PURPLE},
+                        {TowerColor::GREEN,  TowerColor::PINK,   TowerColor::ORANGE, TowerColor::RED,    TowerColor::PURPLE, TowerColor::BROWN,  TowerColor::YELLOW, TowerColor::BLUE},
+                        {TowerColor::PINK,   TowerColor::PURPLE, TowerColor::BLUE,   TowerColor::ORANGE, TowerColor::BROWN,  TowerColor::GREEN,  TowerColor::RED,    TowerColor::YELLOW},
+                        {TowerColor::YELLOW, TowerColor::RED,    TowerColor::GREEN,  TowerColor::BROWN,  TowerColor::ORANGE, TowerColor::BLUE,   TowerColor::PURPLE, TowerColor::PINK},
+                        {TowerColor::BLUE,   TowerColor::YELLOW, TowerColor::BROWN,  TowerColor::PURPLE, TowerColor::RED,    TowerColor::ORANGE, TowerColor::PINK,   TowerColor::GREEN},
+                        {TowerColor::PURPLE, TowerColor::BROWN,  TowerColor::YELLOW, TowerColor::BLUE,   TowerColor::GREEN,  TowerColor::PINK,   TowerColor::ORANGE, TowerColor::RED},
+                        {TowerColor::BROWN,  TowerColor::GREEN,  TowerColor::RED,    TowerColor::YELLOW, TowerColor::PINK,   TowerColor::PURPLE, TowerColor::BLUE,   TowerColor::ORANGE}
                 };
 
                 std::string Engine::GAME_NAME = "kamisado";
@@ -51,7 +51,7 @@ namespace openxum {
                         _white_towers.emplace_back(State(i, 7, initial_colors[i][7]));
                     }
                     _phase = MOVE_TOWER;
-                    _play_color = NONE;
+                    _play_color = TowerColor::NONE;
                 }
 
                 Engine::~Engine() { }
@@ -86,18 +86,18 @@ namespace openxum {
 
                     if (playable_tower.is_valid()) {
                         const std::vector<Coordinates>& list = get_possible_moving_list(
-                                State(playable_tower.x(), playable_tower.y(), _color));
+                                State(playable_tower.x(), playable_tower.y(), _play_color), _color);
 
                         for (const Coordinates& c: list) {
                             moves.push_back(new Move(MOVE, playable_tower, c));
                         }
                     } else {
-                        if (_play_color == NONE) {
-                            const std::vector<State>& towers = _color == BLACK ? _black_towers : _white_towers;
+                        if (_play_color == TowerColor::NONE) {
+                            const std::vector<State>& towers = _color == Color::BLACK ? _black_towers : _white_towers;
 
                             for (const State& s: towers) {
                                 const std::vector<Coordinates>& list = get_possible_moving_list(
-                                        State(s.x(), s.y(), _color));
+                                        State(s.x(), s.y(), _play_color), _color);
 
                                 for (const Coordinates& c: list) {
                                     moves.push_back(new Move(MOVE, s.coordinates(), c));
@@ -108,6 +108,19 @@ namespace openxum {
                         }
                     }
                     return moves;
+                }
+
+                std::string Engine::id() const
+                {
+                    std::string str;
+
+                    for (const State& s: _black_towers) {
+                        str += s.id();
+                    }
+                    for (const State& s: _white_towers) {
+                        str += s.id();
+                    }
+                    return str;
                 }
 
                 bool Engine::is_finished() const
@@ -160,8 +173,8 @@ namespace openxum {
                 {
                     Coordinates result;
 
-                    if (_play_color != NONE) {
-                        const std::vector<State>& towers = color == BLACK ? _black_towers : _white_towers;
+                    if (_play_color != TowerColor::NONE) {
+                        const std::vector<State>& towers = color == Color::BLACK ? _black_towers : _white_towers;
 
                         for (const State& s : towers) {
                             if (s.color() == _play_color) {
@@ -174,7 +187,7 @@ namespace openxum {
 
                 State& Engine::find_towers2(const Coordinates& coordinates, int color)
                 {
-                    std::vector<State>& towers = color == BLACK ? _black_towers : _white_towers;
+                    std::vector<State>& towers = color == Color::BLACK ? _black_towers : _white_towers;
                     bool found = false;
                     int i = 0;
 
@@ -188,11 +201,11 @@ namespace openxum {
                     return towers[i];
                 }
 
-                std::vector<Coordinates> Engine::get_possible_moving_list(const State& tower) const
+                std::vector<Coordinates> Engine::get_possible_moving_list(const State& tower, int color) const
                 {
                     std::vector<Coordinates> moves;
-                    int step = tower.color() == BLACK ? 1 : -1;
-                    int limit = tower.color() == BLACK ? 8 : -1;
+                    int step = color == Color::BLACK ? 1 : -1;
+                    int limit = color == Color::BLACK ? 8 : -1;
 
                     //column
                     {
@@ -295,7 +308,7 @@ namespace openxum {
 
                     if (playable_tower.is_valid()) {
                         const std::vector<Coordinates>& list = get_possible_moving_list(
-                                State(playable_tower.x(), playable_tower.y(), color));
+                                State(playable_tower.x(), playable_tower.y(), _play_color), color);
 
                         return list.empty();
                     } else {

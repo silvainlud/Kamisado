@@ -31,65 +31,71 @@ namespace openxum {
     namespace ai {
         namespace common {
 
-                class Node {
-                public:
-                    Node(openxum::core::common::Engine*, Node*, openxum::core::common::Move*);
+            class Node {
+            public:
+                Node(openxum::core::common::Engine*, Node*, openxum::core::common::Move*);
 
-                    virtual ~Node();
+                virtual ~Node();
 
-                    void add_children(Node*);
+                void add_children(Node*);
 
-                    Node* choice(bool);
+                Node* choice();
 
-                    double compute_score() const;
+                double compute_score() const;
 
-                    openxum::core::common::Engine* engine() const;
+                openxum::core::common::Engine* engine() const;
 
-                    const std::vector<Node*>& get_children() const
-                    {
-                        return _children;
-                    }
+                const std::vector<Node*>& get_children() const { return _children; }
 
-                    Node* get_father() const;
+                Node* get_father() const;
 
-                    openxum::core::common::Move* get_first_possible_move() const;
+                int get_level() const;
 
-                    int get_level() const;
+                openxum::core::common::Move* get_move() const;
 
-                    openxum::core::common::Move* get_move() const;
+                int get_number_of_wins() const;
 
-                    int get_number_of_wins() const;
+                int get_number_of_losses() const;
 
-                    int get_number_of_losses() const;
+                openxum::core::common::Moves::size_type
+                get_possible_move_number() const { return _possible_move_number; }
 
-                    const std::vector<openxum::core::common::Move*>& get_possible_moves() const;
+                const std::vector<openxum::core::common::Move*>& get_possible_moves() const
+                { return _possible_moves; }
 
-                    int get_visit_number() const;
+                int get_visit_number() const;
 
-                    void inc_wins();
+                std::string id() const { return _engine->id(); }
 
-                    void inc_losses();
+                void inc_wins();
 
-                    bool is_finished() const;
+                void inc_losses();
 
-                    void remove_first_possible_move();
+                bool is_finished() const;
 
-                    void visit();
+                unsigned int get_unvisited_child_number() const
+                { return _unvisited_child_number; }
 
-                private:
-                    int _level;
-                    openxum::core::common::Engine* _engine;
-                    Node* _father;
-                    openxum::core::common::Move* _move;
-                    int _lossNumber;
-                    int _visitNumber;
-                    int _winNumber;
-                    std::vector<Node*> _children;
-                    openxum::core::common::Moves _possible_moves;
-                };
+                void visit();
 
-            }
+                openxum::ai::common::Node* get_first_unvisited_child();
+
+            private:
+                int _level;
+                openxum::core::common::Engine* _engine;
+                Node* _father;
+                std::vector<Node*> _children;
+                openxum::core::common::Move* _move;
+                openxum::core::common::Moves _possible_moves;
+                int _lossNumber;
+                int _visitNumber;
+                int _winNumber;
+                unsigned int _unvisited_child_number;
+                unsigned int _possible_move_number;
+            };
+
         }
+    }
 }
 
 #endif

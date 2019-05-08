@@ -52,6 +52,8 @@ namespace openxum {
 
                 virtual Moves get_possible_move_list() const = 0;
 
+                virtual std::string id() const = 0;
+
                 virtual bool is_finished() const = 0;
 
                 virtual void move(const Move* move) = 0;

@@ -33,17 +33,19 @@ namespace openxum {
 
             class MCTSPlayer : public openxum::core::common::Player {
             public:
-                MCTSPlayer(int c, int o, openxum::core::common::Engine* e, int simulation_number)
+                MCTSPlayer(int c, int o, openxum::core::common::Engine* e, unsigned int simulation_number)
                         :openxum::core::common::Player(c, o, e), _simulation_number(simulation_number),
-                         _root(nullptr), _rng(_random_device())
-                { }
+                         _root(nullptr), _rng(_random_device()) { }
 
-                ~MCTSPlayer() override
-                { delete _root; }
+                ~MCTSPlayer() override { delete _root; }
 
                 openxum::core::common::Move* get_move() override;
 
             private:
+                void add_children(Node* current);
+
+                void clear();
+
                 Node* descent() const;
 
                 int evaluate(const openxum::core::common::Engine*);
@@ -54,14 +56,15 @@ namespace openxum {
 
                 void play_a_random_turn(openxum::core::common::Engine*);
 
-                void simulate_one_game_from_root();
+                bool simulate_one_game_from_root();
 
                 void updateScore(Node*, int);
 
-                int _simulation_number;
+                unsigned int _simulation_number;
                 Node* _root;
                 std::random_device _random_device;
                 std::mt19937 _rng;
+                std::map<std::string, Node*> _nodes;
             };
 
         }

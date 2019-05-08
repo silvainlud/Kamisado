@@ -23,7 +23,6 @@
 #include <random>
 
 #include <openxum/ai/common/mcts_player.hpp>
-#include <iostream>
 
 namespace openxum {
     namespace ai {
@@ -33,24 +32,61 @@ namespace openxum {
             openxum::core::common::Move* MCTSPlayer::get_move()
             {
                 openxum::core::common::Move* move = nullptr;
+                unsigned int i = 0;
+                bool more = true;
 
                 init_search();
-                for (int i = 0; i < _simulation_number; ++i) {
-                    simulate_one_game_from_root();
+                while (more and i < _simulation_number) {
+                    more = simulate_one_game_from_root();
+                    if (more) {
+                        ++i;
+                    }
                 }
                 move = get_final_choice()->clone();
-                delete _root;
-                _root = nullptr;
+                clear();
                 return move;
             }
 
             // private methods
+            void MCTSPlayer::add_children(Node* current)
+            {
+                const openxum::core::common::Moves& possible_moves = current->get_possible_moves();
+
+                _nodes[current->id()] = current;
+                for (auto move: possible_moves) {
+                    Node* newNode = new Node(current->engine()->clone(), current, move->clone());
+                    std::string id = newNode->id();
+
+                    if (_nodes.find(id) == _nodes.end()) {
+                        _nodes[id] = newNode;
+                    } else {
+                        delete newNode;
+                        newNode = _nodes.find(id)->second;
+                    }
+                    current->add_children(newNode);
+                }
+            }
+
+            void MCTSPlayer::clear()
+            {
+                _root = nullptr;
+                for (auto n: _nodes) {
+                    delete n.second;
+                }
+                _nodes.clear();
+            }
+
             Node* MCTSPlayer::descent() const
             {
-                Node* current = _root;
+                Node* current = nullptr;
 
-                while (current != nullptr and not current->engine()->is_finished() and current->get_possible_moves().empty()) {
-                    current = current->choice(current->engine()->current_color() == color());
+                while ((current == nullptr or current->get_possible_move_number() == 0)
+                        and _root->get_possible_move_number() > 0) {
+                    current = _root;
+                    while (current != nullptr and not current->is_finished()
+                            and current->get_unvisited_child_number() == 0) {
+                        current = current->choice();
+                    }
                 }
                 return current;
             }
@@ -73,49 +109,43 @@ namespace openxum {
                 openxum::core::common::Move* finalChoice = nullptr;
                 double best = -1;
 
-                std::cout << _root->engine()->get_possible_move_list().size() << std::endl;
-
                 for (Node* child: _root->get_children()) {
                     double score = double(child->get_number_of_wins()) / child->get_visit_number();
-
-                    std::cout << "[" << child->get_number_of_wins() << " " << child->get_visit_number() << "]";
 
                     if (score > best) {
                         best = score;
                         finalChoice = child->get_move();
                     }
                 }
-
-                std::cout << std::endl;
-
                 return finalChoice;
             }
 
             void MCTSPlayer::init_search()
             {
                 _root = new Node(engine().clone(), nullptr, nullptr);
+                add_children(_root);
             }
 
-            void MCTSPlayer::simulate_one_game_from_root()
+            bool MCTSPlayer::simulate_one_game_from_root()
             {
                 Node* current = descent();
 
-                if (current != nullptr and not current->get_possible_moves().empty()) {
-                    openxum::core::common::Engine* monteCarloEngine;
+                if (current != nullptr and current->get_unvisited_child_number() > 0) {
+                    openxum::core::common::Engine* currentEngine;
 
-                    if (current == nullptr or not current->engine()->is_finished()) {
-                        openxum::core::common::Engine* new_engine = current->engine()->clone();
-                        openxum::core::common::Move* move = current->get_first_possible_move();
-                        Node* newNode = new Node(new_engine, current, move->clone());
+                    if (not current->engine()->is_finished()) {
+                        openxum::ai::common::Node* child = current->get_first_unvisited_child();
 
-                        current->remove_first_possible_move();
-                        current->add_children(newNode);
-                        monteCarloEngine = newNode->engine();
-                        current = newNode;
+                        add_children(child);
+                        currentEngine = child->engine();
+                        current = child;
                     } else {
-                        monteCarloEngine = current->engine();
+                        currentEngine = current->engine();
                     }
-                    updateScore(current, evaluate(monteCarloEngine));
+                    updateScore(current, evaluate(currentEngine));
+                    return true;
+                } else {
+                    return false;
                 }
             }
 

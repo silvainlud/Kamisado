@@ -25,6 +25,7 @@
 
 #include <openxum/core/common/engine.hpp>
 
+#include <openxum/core/games/kamisado/color.hpp>
 #include <openxum/core/games/kamisado/coordinates.hpp>
 #include <openxum/core/games/kamisado/move.hpp>
 #include <openxum/core/games/kamisado/phase.hpp>
@@ -59,6 +60,8 @@ namespace openxum {
 
                     openxum::core::common::Moves get_possible_move_list() const override;
 
+                    std::string id() const override;
+
                     bool is_finished() const override;
 
                     void move(const openxum::core::common::Move* move) override;
@@ -76,7 +79,7 @@ namespace openxum {
 
                     State& find_towers2(const Coordinates&, int);
 
-                    std::vector<Coordinates> get_possible_moving_list(const State& tower) const;
+                    std::vector<Coordinates> get_possible_moving_list(const State& tower, int color) const;
 
                     bool is_empty(const Coordinates&) const;
 
@@ -90,7 +93,7 @@ namespace openxum {
                     int _type;
                     std::vector<State> _black_towers;
                     std::vector<State> _white_towers;
-                    int _play_color;
+                    TowerColor::Values _play_color;
                     int _phase;
 
                     static std::string GAME_NAME;

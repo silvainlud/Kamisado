@@ -57,9 +57,9 @@ namespace openxum {
                         }
                 };
 
-                Engine::Configuration Engine::CONFIGURATIONS[3] = {{11, 22},
-                                                                   {14, 32},
-                                                                   {17, 42}};
+                Engine::Configuration Engine::CONFIGURATIONS[3] = {{11, 32},
+                                                                   {14, 42},
+                                                                   {17, 52}};
 
                 std::string Engine::GAME_NAME = "kikotsoka";
 
@@ -145,15 +145,15 @@ namespace openxum {
                             }
                         }
                     } else if (_phase == Phase::PUT_PIECE) {
-                        std::vector<std::vector<Possible_pattern_results>> possible_patterns = is_possible_patterns();
-                        int possible_cases_number = count_possible_cases(possible_patterns);
+                        if ((_color == Color::BLACK and _black_piece_number > 0) ||
+                                (_color == Color::WHITE and _white_piece_number > 0)) {
+                            std::vector<std::vector<Possible_pattern_results>> possible_patterns = is_possible_patterns();
+                            int possible_cases_number = count_possible_cases(possible_patterns);
 
-                        if (possible_cases_number > 0) {
-                            std::vector<Engine::Possible_pattern_results> one_piece_patterns = get_one_piece_pattern(
-                                    possible_patterns);
+                            if (possible_cases_number > 0) {
+                                std::vector<Engine::Possible_pattern_results> one_piece_patterns = get_one_piece_pattern(
+                                        possible_patterns);
 
-                            if ((_color == Color::BLACK and _black_piece_number > 0) ||
-                                    (_color == Color::WHITE and _white_piece_number > 0)) {
                                 for (int l = 0; l < _size; ++l) {
                                     for (int c = 0; c < _size; ++c) {
                                         if (is_valid(Coordinates(c, l)) and is_connect(Coordinates(c, l))
@@ -180,6 +180,26 @@ namespace openxum {
                         }
                     }
                     return moves;
+                }
+
+                std::string Engine::id() const
+                {
+                    std::string str;
+
+                    for (int l = 0; l < _size; ++l) {
+                        for (int c = 0; c < _size; ++c) {
+                            str += std::to_string(_board[l][c]);
+                        }
+                    }
+                    str += std::to_string(_black_shido_number);
+                    str += std::to_string(_white_shido_number);
+                    str += std::to_string(_pass);
+                    str += std::to_string(_black_captured_piece_number);
+                    str += std::to_string(_white_captured_piece_number);
+                    str += std::to_string(_black_level);
+                    str += std::to_string(_white_level);
+                    str += std::to_string(_phase);
+                    return str;
                 }
 
                 bool Engine::is_finished() const

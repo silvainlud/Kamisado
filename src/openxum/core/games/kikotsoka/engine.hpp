@@ -45,8 +45,7 @@ namespace openxum {
 
                     ~Engine() override;
 
-                    openxum::core::common::Move* build_move() const override
-                    { return new Move(); }
+                    openxum::core::common::Move* build_move() const override { return new Move(); }
 
                     Engine* clone() const override;
 
@@ -55,6 +54,8 @@ namespace openxum {
                     const std::string& get_name() const override { return GAME_NAME; }
 
                     openxum::core::common::Moves get_possible_move_list() const override;
+
+                    std::string id() const override;
 
                     bool is_finished() const override;
 

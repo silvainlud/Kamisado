@@ -23,8 +23,8 @@
 #ifndef OPENXUM_CORE_GAMES_KAMISADO_STATE_HPP
 #define OPENXUM_CORE_GAMES_KAMISADO_STATE_HPP
 
-#include <openxum/core/games/kamisado/color.hpp>
 #include <openxum/core/games/kamisado/coordinates.hpp>
+#include <openxum/core/games/kamisado/tower_color.hpp>
 
 namespace openxum {
     namespace core {
@@ -33,11 +33,13 @@ namespace openxum {
 
                 class State {
                 public:
-                    explicit State(int x = -1, int y = -1, int color = -1);
+                    explicit State(int x = -1, int y = -1, const TowerColor::Values& color = TowerColor::NONE);
 
-                    int color() const { return _color; }
+                    TowerColor::Values color() const { return _color; }
 
                     Coordinates coordinates() const { return Coordinates(_x, _y); }
+
+                    std::string id() const { return std::to_string(_x) + std::to_string(_y) + std::to_string((int)_color); }
 
                     virtual State& operator=(const Coordinates& coordinates);
 
@@ -47,13 +49,13 @@ namespace openxum {
 
                     std::string to_string() const
                     {
-                        return "[" + coordinates().to_string() + " (" + std::to_string(_color) + ")]";
+                        return "[" + coordinates().to_string() + " (" + TowerColor::to_string(_color) + ")]";
                     }
 
                 private:
                     int _x;
                     int _y;
-                    int _color;
+                    TowerColor::Values _color;
                 };
 
             }
