@@ -86,6 +86,8 @@ namespace openxum {
                     _white_captured_piece_number = 0;
                     _black_level = 0;
                     _white_level = 0;
+                    _previous_black_level = 0;
+                    _previous_white_level = 0;
                     _black_failed = false;
                     _white_failed = false;
                     _phase = Phase::PUT_SHIDO;
@@ -100,10 +102,28 @@ namespace openxum {
                 }
 
                 // public methods
+                int Engine::best_is() const
+                {
+                    if (_black_level == 6 or _black_level > _white_level or _white_failed) {
+                        return Color::BLACK;
+                    } else if (_white_level == 6 or _black_level < _white_level or _black_failed) {
+                        return Color::WHITE;
+                    } else {
+                        if (_black_captured_piece_number > _white_captured_piece_number) {
+                            return Color::BLACK;
+                        } else if (_black_captured_piece_number < _white_captured_piece_number) {
+                            return Color::WHITE;
+                        } else {
+                            return Color::NONE;
+                        }
+                    }
+                }
+
                 Engine* Engine::clone() const
                 {
                     auto e = new Engine(_type, _color);
 
+                    e->_move_number = _move_number;
                     e->_size = _size;
                     for (int l = 0; l < _size; ++l) {
                         for (int c = 0; c < _size; ++c) {
@@ -120,15 +140,12 @@ namespace openxum {
                     e->_white_captured_piece_number = _white_captured_piece_number;
                     e->_black_level = _black_level;
                     e->_white_level = _white_level;
+                    e->_previous_black_level = _previous_black_level;
+                    e->_previous_white_level = _previous_white_level;
                     e->_black_failed = _black_failed;
                     e->_white_failed = _white_failed;
                     e->_phase = _phase;
                     return e;
-                }
-
-                int Engine::current_color() const
-                {
-                    return _color;
                 }
 
                 openxum::core::common::Moves Engine::get_possible_move_list() const
@@ -145,7 +162,7 @@ namespace openxum {
                             }
                         }
                     } else if (_phase == Phase::PUT_PIECE) {
-                        if ((_color == Color::BLACK and _black_piece_number > 0) ||
+                        if ((_color == Color::BLACK and _black_piece_number > 0) or
                                 (_color == Color::WHITE and _white_piece_number > 0)) {
                             std::vector<std::vector<Possible_pattern_results>> possible_patterns = is_possible_patterns();
                             int possible_cases_number = count_possible_cases(possible_patterns);
@@ -208,10 +225,18 @@ namespace openxum {
                             (_black_piece_number == 0 and _white_piece_number == 0);
                 }
 
+                bool Engine::is_stoppable() const
+                {
+                    return is_finished() or _previous_black_level != _black_level or _previous_white_level != _white_level;
+                }
+
                 void Engine::move(const openxum::core::common::Move* move)
                 {
                     auto* m = dynamic_cast<const openxum::core::games::kikotsoka::Move*>(move);
 
+                    ++_move_number;
+                    _previous_black_level = _black_level;
+                    _previous_white_level = _white_level;
                     if (move != nullptr) {
                         if (m->type() == MoveType::PUT_SHIDO) {
                             _board[m->to().line()][m->to().column()] =
@@ -266,8 +291,10 @@ namespace openxum {
                             capture(result[m->index()]);
                             block(result[m->index()]);
                             if (_color == Color::BLACK) {
+                                _previous_black_level = _black_level;
                                 ++_black_level;
                             } else {
+                                _previous_white_level = _white_level;
                                 ++_white_level;
                             }
                             change_color();
@@ -449,7 +476,7 @@ namespace openxum {
                     bool found = false;
                     std::vector<Coordinates> origins;
 
-                    while (!found && level < 5) {
+                    while (!found and level < 5) {
                         const LevelPattern& pattern = PATTERNS[level];
 
                         for (const Pattern& p: pattern) {
@@ -537,8 +564,8 @@ namespace openxum {
 
                         new_list.pop_back();
                         list.push_back(current);
-                        for (int i = -1; i < 2; ++i) {
-                            for (int j = -1; j < 2; ++j) {
+                        for (int i = -1; i < 2 and not found; ++i) {
+                            for (int j = -1; j < 2 and not found; ++j) {
                                 if (i != 0 or j != 0) {
                                     Coordinates new_element(current.column() + j, current.line() + i);
 
@@ -546,15 +573,12 @@ namespace openxum {
                                             and new_element.column() >= 0
                                             and new_element.column() < _size) {
                                         if (std::find(list.begin(), list.end(), new_element) == list.end()) {
-                                            if (_board[new_element.line()][new_element.column()] == color or
-                                                    _board[new_element.line()][new_element.column()] == blocked_color) {
+                                            State::Values cell_color = _board[new_element.line()][new_element.column()];
+
+                                            if (cell_color == color or cell_color == blocked_color) {
                                                 new_list.push_back(new_element);
-                                            } else if (_board[new_element.line()][new_element.column()] == shido_color
-                                                    or _board[new_element.line()][new_element.column()]
-                                                            == shido_blocked_color
-                                                    or _board[new_element.line()][new_element.column()]
-                                                            == blocked_in_color) {
-                                                new_list.push_back(new_element);
+                                            } else if (cell_color == shido_color or cell_color == shido_blocked_color
+                                                    or cell_color == blocked_in_color) {
                                                 found = true;
                                             }
                                         }

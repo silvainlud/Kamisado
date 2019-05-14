@@ -31,9 +31,10 @@ namespace openxum {
 
             class Engine {
             public:
-                Engine() { }
+                Engine()
+                        :_move_number(0) { }
 
-                virtual ~Engine() { }
+                virtual ~Engine() = default;
 
                 virtual void apply_moves(const Moves& moves)
                 {
@@ -41,6 +42,8 @@ namespace openxum {
                         move(m);
                     }
                 }
+
+                virtual int best_is() const = 0;
 
                 virtual Move* build_move() const = 0;
 
@@ -56,13 +59,21 @@ namespace openxum {
 
                 virtual bool is_finished() const = 0;
 
+                virtual bool is_stoppable() const = 0;
+
                 virtual void move(const Move* move) = 0;
+
+                unsigned int move_number() const
+                { return _move_number; }
 
                 virtual void parse(const std::string& str) = 0;
 
                 virtual std::string to_string() const = 0;
 
                 virtual int winner_is() const = 0;
+
+            protected:
+                unsigned int _move_number;
             };
 
         }

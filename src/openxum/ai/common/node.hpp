@@ -43,6 +43,9 @@ namespace openxum {
 
                 double compute_score() const;
 
+                unsigned int depth() const
+                { return _depth; }
+
                 openxum::core::common::Engine* engine() const;
 
                 const std::vector<Node*>& get_children() const { return _children; }
@@ -76,9 +79,12 @@ namespace openxum {
                 unsigned int get_unvisited_child_number() const
                 { return _unvisited_child_number; }
 
+                unsigned int max_depth() const
+                { return _max_depth; }
+
                 void visit();
 
-                openxum::ai::common::Node* get_first_unvisited_child();
+                openxum::ai::common::Node* get_next_unvisited_child();
 
             private:
                 int _level;
@@ -87,11 +93,13 @@ namespace openxum {
                 std::vector<Node*> _children;
                 openxum::core::common::Move* _move;
                 openxum::core::common::Moves _possible_moves;
-                int _lossNumber;
-                int _visitNumber;
-                int _winNumber;
+                int _loss_number;
+                int _visit_number;
+                int _win_number;
                 unsigned int _unvisited_child_number;
                 unsigned int _possible_move_number;
+                unsigned int _depth;
+                unsigned int _max_depth;
             };
 
         }

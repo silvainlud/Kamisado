@@ -32,8 +32,8 @@ namespace openxum {
 
                 class MCTSPlayer : public openxum::ai::common::MCTSPlayer {
                 public:
-                    MCTSPlayer(int c, int o, openxum::core::common::Engine* e)
-                            :openxum::ai::common::MCTSPlayer(c, o, e, 1000) { }
+                    MCTSPlayer(int c, int o, openxum::core::common::Engine* e, unsigned int simulation_number, bool stoppable)
+                            :openxum::ai::common::MCTSPlayer(c, o, e, simulation_number, stoppable) { }
                 };
 
             }

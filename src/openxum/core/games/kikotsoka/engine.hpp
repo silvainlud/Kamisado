@@ -45,11 +45,14 @@ namespace openxum {
 
                     ~Engine() override;
 
+                    int best_is() const override;
+
                     openxum::core::common::Move* build_move() const override { return new Move(); }
 
                     Engine* clone() const override;
 
-                    int current_color() const override;
+                    int current_color() const override
+                    { return _color; }
 
                     const std::string& get_name() const override { return GAME_NAME; }
 
@@ -58,6 +61,8 @@ namespace openxum {
                     std::string id() const override;
 
                     bool is_finished() const override;
+
+                    bool is_stoppable() const override;
 
                     void move(const openxum::core::common::Move* move) override;
 
@@ -69,16 +74,21 @@ namespace openxum {
 
                     int winner_is() const override;
 
+                    struct Configuration {
+                        int size;
+                        int piece_number;
+                    };
+
+                    static Configuration CONFIGURATIONS[3];
+
+                    int _black_level;
+                    int _white_level;
+
                 private:
                     typedef std::vector<bool> PatternLine;
                     typedef std::vector<PatternLine> Pattern;
                     typedef std::vector<Pattern> LevelPattern;
                     typedef std::vector<LevelPattern> Patterns;
-
-                    struct Configuration {
-                        int size;
-                        int piece_number;
-                    };
 
                     struct Possible_pattern_result {
                         bool ok;
@@ -151,14 +161,13 @@ namespace openxum {
                     int _pass;
                     int _black_captured_piece_number;
                     int _white_captured_piece_number;
-                    int _black_level;
-                    int _white_level;
+                    int _previous_black_level;
+                    int _previous_white_level;
                     bool _black_failed;
                     bool _white_failed;
                     int _size;
 
                     static Patterns PATTERNS;
-                    static Configuration CONFIGURATIONS[3];
                     static std::string GAME_NAME;
                 };
 

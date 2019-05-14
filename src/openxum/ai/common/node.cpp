@@ -31,8 +31,8 @@ namespace openxum {
         namespace common {
 
             Node::Node(openxum::core::common::Engine* engine, Node* father, openxum::core::common::Move* move)
-                    :_engine(engine), _father(father), _move(move), _lossNumber(0),
-                     _visitNumber(0), _winNumber(0)
+                    :_engine(engine), _father(father), _move(move), _loss_number(0),
+                     _visit_number(0), _win_number(0), _depth(0), _max_depth(0)
             {
                 if (father != nullptr) {
                     _level = _father->_level + 1;
@@ -50,8 +50,15 @@ namespace openxum {
 
                 Node* current = _father;
 
+                if (_father != nullptr) {
+                    _depth = _father->depth() + 1;
+                    _max_depth = _depth;
+                }
                 while (current != nullptr) {
                     current->_possible_move_number += _possible_move_number;
+                    if (current->_max_depth < _max_depth) {
+                        current->_max_depth = _max_depth;
+                    }
                     current = current->get_father();
                 }
             }
@@ -120,9 +127,9 @@ namespace openxum {
 
             double Node::compute_score() const
             {
-                double exploitation = double(_winNumber) / _visitNumber;
+                double exploitation = _visit_number == 0 ? 0 : double(_win_number) / _visit_number;
 
-//                double exploration = sqrt(2 * log(double(_father->get_visit_number()) / _visitNumber));
+//                double exploration = sqrt(2 * log(double(_father->get_visit_number()) / _visit_number));
                 double exploration = _father->get_possible_move_number() == 0 ? 0 : double(_possible_move_number)
                         / _father->get_possible_move_number();
 
@@ -151,27 +158,27 @@ namespace openxum {
 
             int Node::get_number_of_wins() const
             {
-                return _winNumber;
+                return _win_number;
             }
 
             int Node::get_number_of_losses() const
             {
-                return _lossNumber;
+                return _loss_number;
             }
 
             int Node::get_visit_number() const
             {
-                return _visitNumber;
+                return _visit_number;
             }
 
             void Node::inc_wins()
             {
-                _winNumber++;
+                _win_number++;
             }
 
             void Node::inc_losses()
             {
-                _lossNumber++;
+                _loss_number++;
             }
 
             bool Node::is_finished() const
@@ -181,10 +188,10 @@ namespace openxum {
 
             void Node::visit()
             {
-                ++_visitNumber;
+                ++_visit_number;
             }
 
-            openxum::ai::common::Node* Node::get_first_unvisited_child()
+            openxum::ai::common::Node* Node::get_next_unvisited_child()
             {
                 Node* current = this;
 

@@ -47,6 +47,9 @@ namespace openxum {
 
                     ~Engine() override;
 
+                    int best_is() const override
+                    { return NONE; }
+
                     openxum::core::common::Move* build_move() const override
                     { return new Move(); }
 
@@ -63,6 +66,9 @@ namespace openxum {
                     std::string id() const override;
 
                     bool is_finished() const override;
+
+                    bool is_stoppable() const override
+                    { return false; }
 
                     void move(const openxum::core::common::Move* move) override;
 

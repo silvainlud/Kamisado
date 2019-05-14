@@ -23,6 +23,7 @@
 #include <random>
 
 #include <openxum/ai/common/mcts_player.hpp>
+//#include <iostream>
 
 namespace openxum {
     namespace ai {
@@ -35,6 +36,9 @@ namespace openxum {
                 unsigned int i = 0;
                 bool more = true;
 
+                _move_number = 0;
+                _new_move_number = 0;
+                _evaluation_number = 0;
                 init_search();
                 while (more and i < _simulation_number) {
                     more = simulate_one_game_from_root();
@@ -93,13 +97,35 @@ namespace openxum {
 
             int MCTSPlayer::evaluate(const openxum::core::common::Engine* engine)
             {
+                std::vector<std::string> ids;
                 openxum::core::common::Engine* clone = engine->clone();
                 int winner;
 
-                while (not clone->is_finished()) {
-                    play_a_random_turn(clone);
+                ++_evaluation_number;
+                if (_stoppable) {
+                    while (not clone->is_stoppable()) {
+                        play_a_turn_randomly(clone);
+                        ids.push_back(clone->id());
+                    }
+                    winner = clone->best_is();
+                } else {
+                    while (not clone->is_finished()) {
+                        play_a_turn_randomly(clone);
+                        ids.push_back(clone->id());
+                    }
+                    winner = clone->winner_is();
                 }
-                winner = clone->winner_is();
+                _move_number += clone->move_number();
+                _new_move_number += clone->move_number() - engine->move_number();
+                for (const std::string& id: ids) {
+                    if (_states.find(id) == _states.end()) {
+                        _states[id] = {winner == color() ? 1 : 0, winner == opponent_color() ? 1 : 0, 1};
+                    } else {
+                        _states[id]._win_number += winner == color() ? 1 : 0;
+                        _states[id]._loss_number += winner == opponent_color() ? 1 : 0;
+                        _states[id]._visit_number++;
+                    }
+                }
                 delete clone;
                 return winner;
             }
@@ -108,15 +134,40 @@ namespace openxum {
             {
                 openxum::core::common::Move* finalChoice = nullptr;
                 double best = -1;
+                int best_visit = 0;
 
                 for (Node* child: _root->get_children()) {
-                    double score = double(child->get_number_of_wins()) / child->get_visit_number();
-
+                    double score = child->get_visit_number() == 0 ? 0 : double(child->get_number_of_wins())
+                            / child->get_visit_number();
                     if (score > best) {
                         best = score;
+                        best_visit = child->get_visit_number();
                         finalChoice = child->get_move();
                     }
                 }
+
+                // **** TRACE
+/*
+                unsigned int sum = 0;
+
+                for (const auto& s: _states) {
+                    sum += s.second._visit_number;
+                }
+                std::cout << _root->get_children().size() << ";" << _root->get_possible_move_number() << ";"
+                          << _root->max_depth() << ";" << (double(_move_number) / _evaluation_number) << ";"
+                          << (double(_new_move_number) / _evaluation_number) << ";" << _evaluation_number << ";"
+                          << _states.size() << ";" << (double(sum) / _states.size()) << ";";
+                std::cout << best << ";" << best_visit << ";";
+                for (Node* child: _root->get_children()) {
+                    double score = child->get_visit_number() == 0 ? 0 : double(child->get_number_of_wins())
+                            / child->get_visit_number();
+
+                    std::cout << score << ";";
+                }
+                std::cout << std::endl;
+*/
+                // **** TRACE
+
                 return finalChoice;
             }
 
@@ -124,6 +175,19 @@ namespace openxum {
             {
                 _root = new Node(engine().clone(), nullptr, nullptr);
                 add_children(_root);
+            }
+
+            void MCTSPlayer::play_a_turn_randomly(openxum::core::common::Engine* engine)
+            {
+                const openxum::core::common::Moves& list = engine->get_possible_move_list();
+
+                if (not list.empty()) {
+                    std::uniform_int_distribution<std::mt19937::result_type> distribution(0, list.size() - 1);
+                    unsigned long index = distribution(_rng);
+                    openxum::core::common::Move* move = list[index];
+
+                    engine->move(move);
+                }
             }
 
             bool MCTSPlayer::simulate_one_game_from_root()
@@ -134,7 +198,7 @@ namespace openxum {
                     openxum::core::common::Engine* currentEngine;
 
                     if (not current->engine()->is_finished()) {
-                        openxum::ai::common::Node* child = current->get_first_unvisited_child();
+                        openxum::ai::common::Node* child = current->get_next_unvisited_child();
 
                         add_children(child);
                         currentEngine = child->engine();
@@ -159,19 +223,6 @@ namespace openxum {
                         current->inc_losses();
                     }
                     current = current->get_father();
-                }
-            }
-
-            void MCTSPlayer::play_a_random_turn(openxum::core::common::Engine* engine)
-            {
-                const openxum::core::common::Moves& list = engine->get_possible_move_list();
-
-                if (not list.empty()) {
-                    std::uniform_int_distribution<std::mt19937::result_type> distribution(0, list.size() - 1);
-                    unsigned long index = distribution(_rng);
-                    openxum::core::common::Move* move = list[index];
-
-                    engine->move(move);
                 }
             }
 

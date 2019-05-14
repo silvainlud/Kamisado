@@ -26,6 +26,7 @@
 #include <openxum/core/common/player.hpp>
 #include <openxum/core/common/engine.hpp>
 #include <openxum/ai/common/node.hpp>
+#include <random>
 
 namespace openxum {
     namespace ai {
@@ -33,8 +34,10 @@ namespace openxum {
 
             class MCTSPlayer : public openxum::core::common::Player {
             public:
-                MCTSPlayer(int c, int o, openxum::core::common::Engine* e, unsigned int simulation_number)
+                MCTSPlayer(int c, int o, openxum::core::common::Engine* e, unsigned int simulation_number,
+                        bool stoppable = false)
                         :openxum::core::common::Player(c, o, e), _simulation_number(simulation_number),
+                         _stoppable(stoppable),
                          _root(nullptr), _rng(_random_device()) { }
 
                 ~MCTSPlayer() override { delete _root; }
@@ -54,17 +57,28 @@ namespace openxum {
 
                 void init_search();
 
-                void play_a_random_turn(openxum::core::common::Engine*);
+                void play_a_turn_randomly(openxum::core::common::Engine* engine);
 
                 bool simulate_one_game_from_root();
 
                 void updateScore(Node*, int);
 
+                struct State {
+                    int _win_number;
+                    int _loss_number;
+                    int _visit_number;
+                };
+
                 unsigned int _simulation_number;
+                bool _stoppable;
+                unsigned int _move_number;
+                unsigned int _new_move_number;
+                unsigned int _evaluation_number;
                 Node* _root;
                 std::random_device _random_device;
                 std::mt19937 _rng;
                 std::map<std::string, Node*> _nodes;
+                std::map<std::string, State> _states;
             };
 
         }
