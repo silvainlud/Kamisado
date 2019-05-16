@@ -21,7 +21,7 @@
  */
 
 #include <iostream>
-#include <thread>
+#include "thread_pool.hpp"
 
 #include <openxum/core/games/kikotsoka/engine.hpp>
 #include <openxum/core/games/kikotsoka/game_type.hpp>
@@ -118,44 +118,21 @@ void play(unsigned int a, unsigned int b)
     delete engine;
 }
 
-template<typename Job>
-void start_thread(std::vector<std::thread>& threads, Job job)
-{
-    for (auto&& thread: threads) {
-        if (thread.joinable()) {
-            continue;
-        }
-        thread = std::thread(job);
-        return;
-    }
-
-    // if not wait for one
-    for (auto&& thread: threads) {
-        if (not thread.joinable()) {
-            continue;
-        }
-        thread.join();
-        thread = std::thread(job);
-        return;
-    }
-}
-
 void test_random()
 {
     unsigned int max = std::thread::hardware_concurrency();
-    std::vector<std::thread> threads(max);
+    ThreadPool pool(max);
+    std::vector< std::future<void> > results;
 
     for (unsigned int a = 12; a < 16; ++a) {
         for (unsigned int b = 32; b < 33; ++b) {
             for (unsigned int i = 0; i < 2; ++i) {
-                start_thread(threads, [=] { play(a, b); });
+                results.emplace_back(pool.enqueue([=] { play(a, b); }));
             }
         }
     }
-    for (auto&& thread: threads) {
-        if (thread.joinable()) {
-            thread.join();
-        }
+    for(auto && result: results) {
+        result.get();
     }
 }
 
