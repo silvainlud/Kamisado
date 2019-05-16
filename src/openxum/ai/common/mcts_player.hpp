@@ -63,11 +63,11 @@ namespace openxum {
 
                 void updateScore(Node*, int);
 
-                struct State {
-                    int _win_number;
-                    int _loss_number;
-                    int _visit_number;
-                };
+//                struct State {
+//                    int _win_number;
+//                    int _loss_number;
+//                    int _visit_number;
+//                };
 
                 unsigned int _simulation_number;
                 bool _stoppable;
@@ -78,7 +78,7 @@ namespace openxum {
                 std::random_device _random_device;
                 std::mt19937 _rng;
                 std::map<std::string, Node*> _nodes;
-                std::map<std::string, State> _states;
+//                std::map<std::string, State> _states;
             };
 
         }

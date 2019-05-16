@@ -63,7 +63,7 @@ namespace openxum {
                 openxum::core::common::Moves::size_type
                 get_possible_move_number() const { return _possible_move_number; }
 
-                const std::vector<openxum::core::common::Move*>& get_possible_moves() const
+                const openxum::core::common::Moves& get_possible_moves() const
                 { return _possible_moves; }
 
                 int get_visit_number() const;

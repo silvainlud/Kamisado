@@ -11,7 +11,7 @@ namespace openxum {
                 if (not list.empty()) {
                     std::uniform_int_distribution<std::mt19937::result_type> distribution(0, list.size() - 1);
 
-                    return list[distribution(_rng)];
+                    return list[distribution(_rng)]->clone();
                 } else {
                     return nullptr;
                 }

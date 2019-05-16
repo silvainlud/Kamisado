@@ -36,10 +36,13 @@ void test_mcts()
             openxum::core::games::kikotsoka::Color::BLACK);
     openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka::MCTSPlayer(
             openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
-            engine, 1000, false);
-    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
+            engine, 10, false);
+//    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
+//            openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
+//            engine, 2000, true);
+    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
             openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-            engine, 2000, true);
+            engine);
     openxum::core::common::Player* current_player = player_one;
 
     while (not engine->is_finished()) {
@@ -53,7 +56,7 @@ void test_mcts()
 //        std::cout << "duration = " << double((t1 - t0).count()) / 1000000000. << std::endl;
 
         engine->move(move);
-        if (engine->current_color() == openxum::core::games::kikotsoka::Color::BLACK) {
+        if (engine->current_color() == player_one->color()) {
             current_player = player_one;
         } else {
             current_player = player_two;
@@ -65,11 +68,16 @@ void test_mcts()
     } else {
         std::cout << "Winner is WHITE" << std::endl;
     }
+
+    delete player_one;
+    delete player_two;
+    delete engine;
 }
 
-void play()
+void play(unsigned int a, unsigned int b)
 {
-    std::cout << "START" << std::endl;
+    openxum::core::games::kikotsoka::Engine::CONFIGURATIONS[0].size = a;
+    openxum::core::games::kikotsoka::Engine::CONFIGURATIONS[0].piece_number = b;
 
     openxum::core::games::kikotsoka::Engine* engine = new openxum::core::games::kikotsoka::Engine(
             openxum::core::games::kikotsoka::SMALL,
@@ -77,12 +85,12 @@ void play()
     openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka::RandomPlayer(
             openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
             engine);
-    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
+//    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
+//            openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
+//            engine, 10, false);
+    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
             openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-            engine, 200, false);
-//                openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
-//                        openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-//                        engine);
+            engine);
     openxum::core::common::Player* current_player = player_one;
     unsigned int possible_move_number = 0;
 
@@ -92,14 +100,15 @@ void play()
         possible_move_number += engine->get_possible_move_list().size();
 
         engine->move(move);
-        if (engine->current_color() == openxum::core::games::kikotsoka::Color::BLACK) {
+        if (engine->current_color() == player_one->color()) {
             current_player = player_one;
         } else {
             current_player = player_two;
         }
+        delete move;
     }
 
-    std::cout << ";" << engine->move_number() << ";"
+    std::cout << a << ";" << b << ";" << engine->move_number() << ";"
               << double(possible_move_number) / engine->move_number() << ";"
               << engine->_white_level << ";" << engine->_black_level << ";"
               << std::endl;
@@ -111,18 +120,35 @@ void play()
 
 void test_random()
 {
-    for (unsigned int a = 12; a < 13; ++a) {
-        openxum::core::games::kikotsoka::Engine::CONFIGURATIONS[0].size = a;
-        for (unsigned int b = 32; b < 33; ++b) {
-            std::vector < std::thread* > threads;
+    unsigned int max = std::thread::hardware_concurrency();
+    std::vector<std::thread> threads(max);
 
-            openxum::core::games::kikotsoka::Engine::CONFIGURATIONS[0].piece_number = b;
-            for (unsigned int i = 0; i < 2; ++i) {
-                threads.push_back(new std::thread(play));
+    for (unsigned int a = 12; a < 16; ++a) {
+        for (unsigned int b = 32; b < 33; ++b) {
+            for (unsigned int i = 0; i < 20; ++i) {
+                for (auto&& thread: threads) {
+                    if (thread.joinable()) {
+                        continue;
+                    }
+                    thread = std::thread(play, a, b);
+                    break;
+                }
+
+                // if not wait for one
+                for (auto&& thread: threads) {
+                    if (not thread.joinable()) {
+                        continue;
+                    }
+                    thread.join();
+                    thread = std::thread(play, a, b);
+                    break;
+                }
             }
-            for (auto th: threads) {
-                th->join();
-            }
+        }
+    }
+    for (auto&& thread: threads) {
+        if (thread.joinable()) {
+            thread.join();
         }
     }
 }

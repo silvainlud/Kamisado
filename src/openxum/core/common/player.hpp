@@ -35,7 +35,7 @@ namespace openxum {
                 Player(int c, int o, Engine* e)
                         :_color(c), _opponent_color(o), _engine(e) { _level = 0; }
 
-                virtual ~Player() { }
+                virtual ~Player() = default;
 
                 int color() const { return _color; }
 

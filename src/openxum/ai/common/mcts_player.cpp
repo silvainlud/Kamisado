@@ -74,7 +74,7 @@ namespace openxum {
             void MCTSPlayer::clear()
             {
                 _root = nullptr;
-                for (auto n: _nodes) {
+                for (auto const& n: _nodes) {
                     delete n.second;
                 }
                 _nodes.clear();
@@ -97,7 +97,7 @@ namespace openxum {
 
             int MCTSPlayer::evaluate(const openxum::core::common::Engine* engine)
             {
-                std::vector<std::string> ids;
+//                std::vector<std::string> ids;
                 openxum::core::common::Engine* clone = engine->clone();
                 int winner;
 
@@ -105,27 +105,27 @@ namespace openxum {
                 if (_stoppable) {
                     while (not clone->is_stoppable()) {
                         play_a_turn_randomly(clone);
-                        ids.push_back(clone->id());
+//                        ids.push_back(clone->id());
                     }
                     winner = clone->best_is();
                 } else {
                     while (not clone->is_finished()) {
                         play_a_turn_randomly(clone);
-                        ids.push_back(clone->id());
+//                        ids.push_back(clone->id());
                     }
                     winner = clone->winner_is();
                 }
                 _move_number += clone->move_number();
                 _new_move_number += clone->move_number() - engine->move_number();
-                for (const std::string& id: ids) {
-                    if (_states.find(id) == _states.end()) {
-                        _states[id] = {winner == color() ? 1 : 0, winner == opponent_color() ? 1 : 0, 1};
-                    } else {
-                        _states[id]._win_number += winner == color() ? 1 : 0;
-                        _states[id]._loss_number += winner == opponent_color() ? 1 : 0;
-                        _states[id]._visit_number++;
-                    }
-                }
+//                for (const std::string& id: ids) {
+//                    if (_states.find(id) == _states.end()) {
+//                        _states[id] = {winner == color() ? 1 : 0, winner == opponent_color() ? 1 : 0, 1};
+//                    } else {
+//                        _states[id]._win_number += winner == color() ? 1 : 0;
+//                        _states[id]._loss_number += winner == opponent_color() ? 1 : 0;
+//                        _states[id]._visit_number++;
+//                    }
+//                }
                 delete clone;
                 return winner;
             }
@@ -134,14 +134,14 @@ namespace openxum {
             {
                 openxum::core::common::Move* finalChoice = nullptr;
                 double best = -1;
-                int best_visit = 0;
+//                int best_visit = 0;
 
                 for (Node* child: _root->get_children()) {
                     double score = child->get_visit_number() == 0 ? 0 : double(child->get_number_of_wins())
                             / child->get_visit_number();
                     if (score > best) {
                         best = score;
-                        best_visit = child->get_visit_number();
+                        // best_visit = child->get_visit_number();
                         finalChoice = child->get_move();
                     }
                 }

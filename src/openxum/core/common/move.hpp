@@ -49,7 +49,27 @@ namespace openxum {
                 virtual std::string to_string() const = 0;
             };
 
-            typedef std::vector<Move*> Moves;
+            class Moves : public std::vector<Move*>
+            {
+            public:
+                Moves() = default;
+
+                virtual ~Moves() {
+                    for (auto move: *this) {
+                        delete move;
+                    }
+                }
+
+                Moves& operator=(const Moves& m) {
+                    for (auto move: *this) {
+                        delete move;
+                    }
+                    for (auto move: m) {
+                        push_back(move->clone());
+                    }
+                    return *this;
+                }
+            };
         }
     }
 }
