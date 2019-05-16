@@ -85,12 +85,12 @@ void play(unsigned int a, unsigned int b)
     openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka::RandomPlayer(
             openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
             engine);
-//    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
-//            openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-//            engine, 10, false);
-    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
+    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
             openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-            engine);
+            engine, 5, false);
+//    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
+//            openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
+//            engine);
     openxum::core::common::Player* current_player = player_one;
     unsigned int possible_move_number = 0;
 
@@ -118,6 +118,28 @@ void play(unsigned int a, unsigned int b)
     delete engine;
 }
 
+template<typename Job>
+void start_thread(std::vector<std::thread>& threads, Job job)
+{
+    for (auto&& thread: threads) {
+        if (thread.joinable()) {
+            continue;
+        }
+        thread = std::thread(job);
+        return;
+    }
+
+    // if not wait for one
+    for (auto&& thread: threads) {
+        if (not thread.joinable()) {
+            continue;
+        }
+        thread.join();
+        thread = std::thread(job);
+        return;
+    }
+}
+
 void test_random()
 {
     unsigned int max = std::thread::hardware_concurrency();
@@ -125,24 +147,8 @@ void test_random()
 
     for (unsigned int a = 12; a < 16; ++a) {
         for (unsigned int b = 32; b < 33; ++b) {
-            for (unsigned int i = 0; i < 20; ++i) {
-                for (auto&& thread: threads) {
-                    if (thread.joinable()) {
-                        continue;
-                    }
-                    thread = std::thread(play, a, b);
-                    break;
-                }
-
-                // if not wait for one
-                for (auto&& thread: threads) {
-                    if (not thread.joinable()) {
-                        continue;
-                    }
-                    thread.join();
-                    thread = std::thread(play, a, b);
-                    break;
-                }
+            for (unsigned int i = 0; i < 2; ++i) {
+                start_thread(threads, [=] { play(a, b); });
             }
         }
     }
