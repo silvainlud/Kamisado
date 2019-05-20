@@ -21,6 +21,7 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include "thread_pool.hpp"
 
 #include <openxum/core/games/kikotsoka/engine.hpp>
@@ -28,6 +29,8 @@
 #include <openxum/ai/specific/kikotsoka/mcts_player.hpp>
 #include <openxum/ai/specific/kikotsoka/random_player.hpp>
 //#include <chrono>
+
+std::ofstream output_file("result");
 
 void test_mcts()
 {
@@ -85,12 +88,12 @@ void play(unsigned int a, unsigned int b)
     openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka::RandomPlayer(
             openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
             engine);
-    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
-            openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-            engine, 5, false);
-//    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
+//    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
 //            openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-//            engine);
+//            engine, 5, false);
+    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
+            openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
+            engine);
     openxum::core::common::Player* current_player = player_one;
     unsigned int possible_move_number = 0;
 
@@ -108,7 +111,7 @@ void play(unsigned int a, unsigned int b)
         delete move;
     }
 
-    std::cout << a << ";" << b << ";" << engine->move_number() << ";"
+    output_file << a << ";" << b << ";" << engine->move_number() << ";"
               << double(possible_move_number) / engine->move_number() << ";"
               << engine->_white_level << ";" << engine->_black_level << ";"
               << std::endl;
@@ -122,16 +125,16 @@ void test_random()
 {
     unsigned int max = std::thread::hardware_concurrency();
     ThreadPool pool(max);
-    std::vector< std::future<void> > results;
+    std::vector<std::future<void> > results;
 
     for (unsigned int a = 12; a < 16; ++a) {
-        for (unsigned int b = 32; b < 33; ++b) {
+        for (unsigned int b = 32; b < 43; ++b) {
             for (unsigned int i = 0; i < 2; ++i) {
                 results.emplace_back(pool.enqueue([=] { play(a, b); }));
             }
         }
     }
-    for(auto && result: results) {
+    for (auto&& result: results) {
         result.get();
     }
 }
@@ -140,5 +143,6 @@ int main(int, const char**)
 {
 //    test_mcts();
     test_random();
+    output_file.close();
     return EXIT_SUCCESS;
 }
