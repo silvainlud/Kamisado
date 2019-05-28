@@ -59,6 +59,8 @@ namespace openxum {
 
                     Coordinates find_playable_tower(int) const;
 
+                    double gain() const override  { return 1; }
+
                     const std::string& get_name() const override { return GAME_NAME; }
 
                     openxum::core::common::Moves get_possible_move_list() const override;

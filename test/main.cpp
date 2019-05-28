@@ -88,12 +88,12 @@ void play(unsigned int a, unsigned int b)
     openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka::RandomPlayer(
             openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
             engine);
-//    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
-//            openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-//            engine, 5, false);
-    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
+    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
             openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-            engine);
+            engine, 1000, false);
+//    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
+//            openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
+//            engine);
     openxum::core::common::Player* current_player = player_one;
     unsigned int possible_move_number = 0;
 
@@ -101,7 +101,6 @@ void play(unsigned int a, unsigned int b)
         openxum::core::common::Move* move = current_player->get_move();
 
         possible_move_number += engine->get_possible_move_list().size();
-
         engine->move(move);
         if (engine->current_color() == player_one->color()) {
             current_player = player_one;
@@ -127,9 +126,9 @@ void test_random()
     ThreadPool pool(max);
     std::vector<std::future<void> > results;
 
-    for (unsigned int a = 12; a < 16; ++a) {
-        for (unsigned int b = 32; b < 43; ++b) {
-            for (unsigned int i = 0; i < 2; ++i) {
+    for (unsigned int a = 15; a < 16; ++a) {
+        for (unsigned int b = 50; b < 51; ++b) {
+            for (unsigned int i = 0; i < 20; ++i) {
                 results.emplace_back(pool.enqueue([=] { play(a, b); }));
             }
         }

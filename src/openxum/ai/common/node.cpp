@@ -79,61 +79,58 @@ namespace openxum {
                 if (_children.empty()) {
                     return nullptr;
                 } else {
-//                    Node* best = nullptr;
-//                    double bestScore = -1;
-//
-//                    for (Node* child: _children) {
-//                        double score = child->compute_score(is_current);
-//
-//                        if (score > bestScore) {
-//                            bestScore = score;
-//                            best = child;
-//                        }
-//                    }
-//                    return best;
-
-                    double sum = 0;
-                    std::vector<double> scores;
+                    Node* best = nullptr;
+                    double bestScore = -1;
 
                     for (Node* child: _children) {
                         double score = child->compute_score();
 
-                        scores.push_back(score);
-                        sum += score;
-                    }
-
-                    std::random_device random_device;
-                    std::mt19937 rng(random_device());
-                    std::uniform_real_distribution<double> distribution(0, sum);
-                    double value = distribution(rng);
-                    bool found = false;
-                    std::vector<double>::size_type index = 0;
-
-                    sum = 0;
-                    while (not found and index < scores.size()) {
-                        sum += scores[index];
-                        found = sum > value;
-                        if (not found) {
-                            ++index;
+                        if (score > bestScore) {
+                            bestScore = score;
+                            best = child;
                         }
                     }
-                    if (found) {
-                        return _children[index];
-                    } else {
-                        return _children[_children.size() - 1];
-                    }
+                    return best;
+
+//                    double sum = 0;
+//                    std::vector<double> scores;
+//
+//                    for (Node* child: _children) {
+//                        double score = child->compute_score();
+//
+//                        scores.push_back(score);
+//                        sum += score;
+//                    }
+//
+//                    std::random_device random_device;
+//                    std::mt19937 rng(random_device());
+//                    std::uniform_real_distribution<double> distribution(0, sum);
+//                    double value = distribution(rng);
+//                    bool found = false;
+//                    std::vector<double>::size_type index = 0;
+//
+//                    sum = 0;
+//                    while (not found and index < scores.size()) {
+//                        sum += scores[index];
+//                        found = sum > value;
+//                        if (not found) {
+//                            ++index;
+//                        }
+//                    }
+//                    if (found) {
+//                        return _children[index];
+//                    } else {
+//                        return _children[_children.size() - 1];
+//                    }
                 }
             }
 
             double Node::compute_score() const
             {
-                double exploitation = _visit_number == 0 ? 0 : double(_win_number) / _visit_number;
+                double exploitation = _visit_number == 0 ? 0 : _win_number / _visit_number;
+                double exploration = sqrt(2 * log(double(_father->get_visit_number()) / _visit_number));
 
-//                double exploration = sqrt(2 * log(double(_father->get_visit_number()) / _visit_number));
-                double exploration = _father->get_possible_move_number() == 0 ? 0 : double(_possible_move_number)
-                        / _father->get_possible_move_number();
-
-                return exploitation + KUCT * exploration;
+                return exploitation + 5 * KUCT * exploration;
             }
 
             openxum::core::common::Engine* Node::engine() const
@@ -156,12 +153,12 @@ namespace openxum {
                 return _move;
             }
 
-            int Node::get_number_of_wins() const
+            double Node::get_number_of_wins() const
             {
                 return _win_number;
             }
 
-            int Node::get_number_of_losses() const
+            double Node::get_number_of_losses() const
             {
                 return _loss_number;
             }
@@ -171,14 +168,14 @@ namespace openxum {
                 return _visit_number;
             }
 
-            void Node::inc_wins()
+            void Node::inc_wins(double delta)
             {
-                _win_number++;
+                _win_number += delta;
             }
 
-            void Node::inc_losses()
+            void Node::inc_losses(double delta)
             {
-                _loss_number++;
+                _loss_number += delta;
             }
 
             bool Node::is_finished() const
@@ -197,7 +194,7 @@ namespace openxum {
 
                 --_unvisited_child_number;
                 while (current != nullptr) {
-                    -- current->_possible_move_number;
+                    --current->_possible_move_number;
                     current = current->get_father();
                 }
                 return _children[_possible_moves.size() - _unvisited_child_number - 1];

@@ -100,7 +100,7 @@ void post_method_handler(const std::shared_ptr<Session>& session)
 //                    player = new openxum::ai::specific::kikotsoka::RandomPlayer(player_color, opponent_color,
 //                            new openxum::core::games::kikotsoka::Engine(game_type, color));
                     player = new openxum::ai::specific::kikotsoka::MCTSPlayer(player_color, opponent_color,
-                            new openxum::core::games::kikotsoka::Engine(game_type, color));
+                            new openxum::core::games::kikotsoka::Engine(game_type, color), 1000, false);
                 }
 
                 if (player != nullptr) {

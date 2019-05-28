@@ -56,9 +56,9 @@ namespace openxum {
 
                 openxum::core::common::Move* get_move() const;
 
-                int get_number_of_wins() const;
+                double get_number_of_wins() const;
 
-                int get_number_of_losses() const;
+                double get_number_of_losses() const;
 
                 openxum::core::common::Moves::size_type
                 get_possible_move_number() const { return _possible_move_number; }
@@ -70,9 +70,9 @@ namespace openxum {
 
                 std::string id() const { return _engine->id(); }
 
-                void inc_wins();
+                void inc_wins(double delta);
 
-                void inc_losses();
+                void inc_losses(double delta);
 
                 bool is_finished() const;
 
@@ -93,9 +93,9 @@ namespace openxum {
                 std::vector<Node*> _children;
                 openxum::core::common::Move* _move;
                 openxum::core::common::Moves _possible_moves;
-                int _loss_number;
+                double _loss_number;
                 int _visit_number;
-                int _win_number;
+                double _win_number;
                 unsigned int _unvisited_child_number;
                 unsigned int _possible_move_number;
                 unsigned int _depth;

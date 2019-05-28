@@ -54,6 +54,8 @@ namespace openxum {
                     int current_color() const override
                     { return _color; }
 
+                    double gain() const override;
+
                     const std::string& get_name() const override { return GAME_NAME; }
 
                     openxum::core::common::Moves get_possible_move_list() const override;

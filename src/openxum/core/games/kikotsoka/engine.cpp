@@ -148,6 +148,24 @@ namespace openxum {
                     return e;
                 }
 
+                double Engine::gain() const
+                {
+                    if (winner_is() == Color::BLACK) {
+                        if (_black_level == _white_level) {
+                            return (_black_captured_piece_number - _white_captured_piece_number) / 2.;
+                        } else {
+                            return 2 * (_black_level - _white_level);
+                        }
+                    } else if (winner_is() == Color::WHITE) {
+                        if (_black_level == _white_level) {
+                            return (_white_captured_piece_number - _black_captured_piece_number) / 2.;
+                        } else {
+                            return 2 * (_white_level - _black_level);
+                        }
+                    }
+                    return 0;
+                }
+
                 openxum::core::common::Moves Engine::get_possible_move_list() const
                 {
                     openxum::core::common::Moves moves;
@@ -160,6 +178,9 @@ namespace openxum {
                                             new Move(MoveType::PUT_SHIDO, _color, Coordinates(c, l), -1));
                                 }
                             }
+                        }
+                        if (moves.empty()) {
+                            moves.push_back(new Move(MoveType::PASS, _color, Coordinates(), -1));
                         }
                     } else if (_phase == Phase::PUT_PIECE) {
                         if ((_color == Color::BLACK and _black_piece_number > 0) or
@@ -227,7 +248,8 @@ namespace openxum {
 
                 bool Engine::is_stoppable() const
                 {
-                    return is_finished() or _previous_black_level != _black_level or _previous_white_level != _white_level;
+                    return is_finished() or _previous_black_level != _black_level
+                            or _previous_white_level != _white_level;
                 }
 
                 void Engine::move(const openxum::core::common::Move* move)
@@ -246,8 +268,27 @@ namespace openxum {
                             } else {
                                 --_white_shido_number;
                             }
-                            change_color();
-                            next_phase();
+                            std::vector<Coordinates> result = check_patterns();
+
+                            if (not result.empty()) {
+                                if (result.size() == 1) {
+                                    capture(result[0]);
+                                    block(result[0]);
+                                    if (_color == Color::BLACK) {
+                                        ++_black_level;
+                                    } else {
+                                        ++_white_level;
+                                    }
+                                    change_color();
+                                    next_phase();
+                                } else {
+                                    _phase = Phase::CHOICE_PATTERN;
+                                }
+                            } else {
+                                change_color();
+                                next_phase();
+                            }
+                            _pass = 0;
                         } else if (m->type() == MoveType::PUT_PIECE) {
                             _board[m->to().line()][m->to().column()] =
                                     m->color() == Color::BLACK ? State::BLACK : State::WHITE;
@@ -310,18 +351,43 @@ namespace openxum {
 
                 std::string Engine::to_string() const
                 {
-                    std::string str;
+                    std::string str("   ");
 
-                    // TODO
+                    for (int c = 0; c < _size; ++c) {
+                        std::string column;
+
+                        column = char(c + 65);
+                        str += " " + column + " ";
+                    }
+                    str += "\n";
+                    for (int l = 0; l < _size; ++l) {
+                        if (l < 9) {
+                            str += std::to_string(l + 1) + "  ";
+                        } else {
+                            str += std::to_string(l + 1) + " ";
+                        }
+                        for (int c = 0; c < _size; ++c) {
+                            str += State::to_string(_board[l][c]);
+                        }
+                        str += "\n";
+                    }
+
+                    str += std::to_string(_black_level) + " " +  std::to_string(_white_level) + " " +
+                            std::to_string(_black_captured_piece_number) + " " +
+                            std::to_string(_white_captured_piece_number) + " " +
+                            std::to_string(_black_piece_number) + " " + std::to_string(_white_piece_number) + " " +
+                            std::to_string(_black_shido_number) + " " + std::to_string(_white_shido_number) + " " +
+                            std::to_string(_black_failed) + " " + std::to_string(_white_failed) + " " + std::to_string(_pass);
+
                     return str;
                 }
 
                 int Engine::winner_is() const
                 {
                     if (is_finished()) {
-                        if (_black_level == 6 or _black_level > _white_level or _white_failed) {
+                        if (_black_level == 5 or _black_level > _white_level or _white_failed) {
                             return Color::BLACK;
-                        } else if (_white_level == 6 or _black_level < _white_level or _black_failed) {
+                        } else if (_white_level == 5 or _black_level < _white_level or _black_failed) {
                             return Color::WHITE;
                         } else {
                             if (_black_captured_piece_number > _white_captured_piece_number) {

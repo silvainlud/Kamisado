@@ -51,7 +51,7 @@ namespace openxum {
 
                 Node* descent() const;
 
-                int evaluate(const openxum::core::common::Engine*);
+                int evaluate(const openxum::core::common::Engine* engine, openxum::core::common::Engine*);
 
                 openxum::core::common::Move* get_final_choice();
 
@@ -59,9 +59,9 @@ namespace openxum {
 
                 void play_a_turn_randomly(openxum::core::common::Engine* engine);
 
-                bool simulate_one_game_from_root();
+                void simulate_one_game_from_root();
 
-                void updateScore(Node*, int);
+                void updateScore(Node* current, int winner, const openxum::core::common::Engine& engine);
 
 //                struct State {
 //                    int _win_number;

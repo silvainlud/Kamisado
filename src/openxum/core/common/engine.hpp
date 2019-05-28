@@ -51,6 +51,8 @@ namespace openxum {
 
                 virtual int current_color() const = 0;
 
+                virtual double gain() const = 0;
+
                 virtual const std::string& get_name() const = 0;
 
                 virtual Moves get_possible_move_list() const = 0;

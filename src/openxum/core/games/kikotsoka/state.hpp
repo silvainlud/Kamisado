@@ -57,7 +57,8 @@ namespace openxum {
                         if (s == WHITE_SHIDO) { return "*w*"; }
                         if (s == BLACK_SHIDO_BLOCKED) { return "+b+"; }
                         if (s == WHITE_SHIDO_BLOCKED) { return "+w+"; }
-                        if (s == BLOCKED_IN_BLACK || s == BLOCKED_IN_WHITE) { return ""   ""; }
+                        if (s == BLOCKED_IN_BLACK || s == BLOCKED_IN_WHITE) { return "   "; }
+                        return "";
                     }
                 };
 
