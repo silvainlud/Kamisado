@@ -162,8 +162,13 @@ namespace openxum {
                         } else {
                             return 2 * (_white_level - _black_level);
                         }
+                    } else {
+                        if (_black_level == _white_level) {
+                            return (_black_captured_piece_number - _white_captured_piece_number) / 2.;
+                        } else {
+                            return 2 * (_black_level - _white_level);
+                        }
                     }
-                    return 0;
                 }
 
                 openxum::core::common::Moves Engine::get_possible_move_list() const
