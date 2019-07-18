@@ -124,7 +124,7 @@ namespace openxum {
             {
                 openxum::core::common::Move* finalChoice = nullptr;
                 double best = -1;
-                int best_visit = 0;
+//                int best_visit = 0;
 
                 for (Node* child: _root->get_children()) {
                     double score = child->get_visit_number() == 0 ? 0 : child->get_number_of_wins()
@@ -132,7 +132,7 @@ namespace openxum {
 
                     if (score > best) {
                         best = score;
-                        best_visit = child->get_visit_number();
+//                        best_visit = child->get_visit_number();
                         finalChoice = child->get_move();
                     }
                 }

@@ -5,3 +5,4 @@ LINK_DIRECTORIES()
 
 ADD_SUBDIRECTORY(kamisado)
 ADD_SUBDIRECTORY(kikotsoka)
+ADD_SUBDIRECTORY(kikotsoka-polyomino)

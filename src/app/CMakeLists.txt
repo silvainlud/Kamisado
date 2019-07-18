@@ -1,12 +1,12 @@
 INCLUDE_DIRECTORIES(
-  ${CMAKE_SOURCE_DIR}/src
-  ${OPENXUM_WS_CPP_BINARY_DIR}/src)
+        ${CMAKE_SOURCE_DIR}/src
+        ${OPENXUM_WS_CPP_BINARY_DIR}/src)
 
 LINK_DIRECTORIES()
 
 CONFIGURE_FILE(version.hpp.in
-  ${OPENXUM_WS_CPP_BINARY_DIR}/src/app/version.hpp)
+        ${OPENXUM_WS_CPP_BINARY_DIR}/src/app/version.hpp)
 
 ADD_EXECUTABLE(openxum-ws-cpp-main main.cpp)
 
-TARGET_LINK_LIBRARIES(openxum-ws-cpp-main openxum-core-games-kamisado openxum-core-games-kikotsoka openxum-ai-common restbed)
+TARGET_LINK_LIBRARIES(openxum-ws-cpp-main openxum-core-games-kamisado openxum-core-games-kikotsoka openxum-core-games-kikotsoka-polyomino openxum-ai-common restbed)

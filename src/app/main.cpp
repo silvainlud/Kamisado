@@ -33,6 +33,10 @@
 #include <openxum/ai/specific/kikotsoka/mcts_player.hpp>
 #include <openxum/ai/specific/kikotsoka/random_player.hpp>
 
+#include <openxum/core/games/kikotsoka-polyomino/engine.hpp>
+#include <openxum/ai/specific/kikotsoka-polyomino/mcts_player.hpp>
+#include <openxum/ai/specific/kikotsoka-polyomino/random_player.hpp>
+
 using json = nlohmann::json;
 using namespace restbed;
 
@@ -101,6 +105,11 @@ void post_method_handler(const std::shared_ptr<Session>& session)
 //                            new openxum::core::games::kikotsoka::Engine(game_type, color));
                     player = new openxum::ai::specific::kikotsoka::MCTSPlayer(player_color, opponent_color,
                             new openxum::core::games::kikotsoka::Engine(game_type, color), 1000, false);
+                } else if (game == "KikotsokaPolyomino") {
+//                    player = new openxum::ai::specific::kikotsoka_polyomino::RandomPlayer(player_color, opponent_color,
+//                            new openxum::core::games::kikotsoka_polyomino::Engine(game_type, color));
+                    player = new openxum::ai::specific::kikotsoka_polyomino::MCTSPlayer(player_color, opponent_color,
+                            new openxum::core::games::kikotsoka_polyomino::Engine(game_type, color), 1000, false);
                 }
 
                 if (player != nullptr) {

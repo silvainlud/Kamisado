@@ -6,4 +6,8 @@ LINK_DIRECTORIES()
 
 ADD_EXECUTABLE(openxum-ws-cpp-test main.cpp)
 
-TARGET_LINK_LIBRARIES(openxum-ws-cpp-test openxum-core-games-kamisado openxum-core-games-kikotsoka openxum-ai-common)
+TARGET_LINK_LIBRARIES(openxum-ws-cpp-test openxum-core-games-kikotsoka openxum-ai-common)
+
+ADD_EXECUTABLE(openxum-ws-cpp-test-kikotsoka-polyomino main_kikotsoka_polyomino.cpp)
+
+TARGET_LINK_LIBRARIES(openxum-ws-cpp-test-kikotsoka-polyomino openxum-core-games-kikotsoka-polyomino openxum-ai-common)
