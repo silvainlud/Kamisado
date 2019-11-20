@@ -29,39 +29,42 @@
 #include <random>
 
 namespace openxum {
-    namespace ai {
-        namespace common {
+namespace ai {
+namespace common {
 
-            class MCTSPlayer : public openxum::core::common::Player {
-            public:
-                MCTSPlayer(int c, int o, openxum::core::common::Engine* e, unsigned int simulation_number,
-                        bool stoppable = false)
-                        :openxum::core::common::Player(c, o, e), _simulation_number(simulation_number),
-                         _stoppable(stoppable),
-                         _root(nullptr), _rng(_random_device()) { }
+class MCTSPlayer : public openxum::core::common::Player
+{
+public:
+  MCTSPlayer(int c, int o, openxum::core::common::Engine *e, unsigned int simulation_number,
+             bool stoppable = false)
+      : openxum::core::common::Player(c, o, e), _simulation_number(simulation_number),
+        _stoppable(stoppable),
+        _root(nullptr), _rng(_random_device())
+  {}
 
-                ~MCTSPlayer() override { delete _root; }
+  ~MCTSPlayer() override
+  { delete _root; }
 
-                openxum::core::common::Move* get_move() override;
+  openxum::core::common::Move *get_move() override;
 
-            private:
-                void add_children(Node* current);
+private:
+  void add_children(Node *current);
 
-                void clear();
+  void clear();
 
-                Node* descent() const;
+  Node *descent() const;
 
-                int evaluate(const openxum::core::common::Engine* engine, openxum::core::common::Engine*);
+  int evaluate(const openxum::core::common::Engine *engine, openxum::core::common::Engine *);
 
-                openxum::core::common::Move* get_final_choice();
+  openxum::core::common::Move *get_final_choice();
 
-                void init_search();
+  void init_search();
 
-                void play_a_turn_randomly(openxum::core::common::Engine* engine);
+  void play_a_turn_randomly(openxum::core::common::Engine *engine);
 
-                void simulate_one_game_from_root();
+  void simulate_one_game_from_root();
 
-                void updateScore(Node* current, int winner, const openxum::core::common::Engine& engine);
+  void updateScore(Node *current, int winner, const openxum::core::common::Engine &engine);
 
 //                struct State {
 //                    int _win_number;
@@ -69,20 +72,20 @@ namespace openxum {
 //                    int _visit_number;
 //                };
 
-                unsigned int _simulation_number;
-                bool _stoppable;
-                unsigned int _move_number;
-                unsigned int _new_move_number;
-                unsigned int _evaluation_number;
-                Node* _root;
-                std::random_device _random_device;
-                std::mt19937 _rng;
-                std::map<std::string, Node*> _nodes;
+  unsigned int _simulation_number;
+  bool _stoppable;
+  unsigned int _move_number;
+  unsigned int _new_move_number;
+  unsigned int _evaluation_number;
+  Node *_root;
+  std::random_device _random_device;
+  std::mt19937 _rng;
+  std::map<std::string, Node *> _nodes;
 //                std::map<std::string, State> _states;
-            };
+};
 
-        }
-    }
+}
+}
 }
 
 #endif

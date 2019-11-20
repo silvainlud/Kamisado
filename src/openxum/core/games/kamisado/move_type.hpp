@@ -27,17 +27,18 @@
 #include <openxum/core/games/kamisado/coordinates.hpp>
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kamisado {
+namespace core {
+namespace games {
+namespace kamisado {
 
-                enum MoveType {
-                    MOVE = 0, PASS = 1
-                };
+enum MoveType
+{
+  MOVE = 0, PASS = 1
+};
 
-            }
-        }
-    }
+}
+}
+}
 }
 
 #endif

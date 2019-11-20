@@ -26,45 +26,67 @@
 #include <string>
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kikotsoka {
+namespace core {
+namespace games {
+namespace kikotsoka {
 
-                class State {
-                public:
-                    enum Values {
-                        VACANT = 0,
-                        BLACK = 1,
-                        WHITE = 2,
-                        BLACK_BLOCKED = 3,
-                        WHITE_BLOCKED = 4,
-                        BLACK_SHIDO = 5,
-                        WHITE_SHIDO = 6,
-                        BLACK_SHIDO_BLOCKED = 7,
-                        WHITE_SHIDO_BLOCKED = 8,
-                        BLOCKED_IN_BLACK = 9,
-                        BLOCKED_IN_WHITE = 10
-                    };
+class State
+{
+public:
+  enum Values
+  {
+    VACANT = 0,
+    BLACK = 1,
+    WHITE = 2,
+    BLACK_BLOCKED = 3,
+    WHITE_BLOCKED = 4,
+    BLACK_SHIDO = 5,
+    WHITE_SHIDO = 6,
+    BLACK_SHIDO_BLOCKED = 7,
+    WHITE_SHIDO_BLOCKED = 8,
+    BLOCKED_IN_BLACK = 9,
+    BLOCKED_IN_WHITE = 10
+  };
 
-                    static std::string to_string(const State::Values& s)
-                    {
-                        if (s == VACANT) { return "[ ]"; }
-                        if (s == BLACK) { return "[B]"; }
-                        if (s == WHITE) { return "[W]"; }
-                        if (s == BLACK_BLOCKED) { return " b "; }
-                        if (s == WHITE_BLOCKED) { return " w "; }
-                        if (s == BLACK_SHIDO) { return "*b*"; }
-                        if (s == WHITE_SHIDO) { return "*w*"; }
-                        if (s == BLACK_SHIDO_BLOCKED) { return "+b+"; }
-                        if (s == WHITE_SHIDO_BLOCKED) { return "+w+"; }
-                        if (s == BLOCKED_IN_BLACK || s == BLOCKED_IN_WHITE) { return "   "; }
-                        return "";
-                    }
-                };
-
-            }
-        }
+  static std::string to_string(const State::Values &s)
+  {
+    if (s == VACANT) {
+      return "[ ]";
     }
+    if (s == BLACK) {
+      return "[B]";
+    }
+    if (s == WHITE) {
+      return "[W]";
+    }
+    if (s == BLACK_BLOCKED) {
+      return " b ";
+    }
+    if (s == WHITE_BLOCKED) {
+      return " w ";
+    }
+    if (s == BLACK_SHIDO) {
+      return "*b*";
+    }
+    if (s == WHITE_SHIDO) {
+      return "*w*";
+    }
+    if (s == BLACK_SHIDO_BLOCKED) {
+      return "+b+";
+    }
+    if (s == WHITE_SHIDO_BLOCKED) {
+      return "+w+";
+    }
+    if (s == BLOCKED_IN_BLACK || s == BLOCKED_IN_WHITE) {
+      return "   ";
+    }
+    return "";
+  }
+};
+
+}
+}
+}
 }
 
 #endif

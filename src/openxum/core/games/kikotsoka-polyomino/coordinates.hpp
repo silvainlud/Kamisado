@@ -27,50 +27,55 @@
 #include <string>
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kikotsoka_polyomino {
+namespace core {
+namespace games {
+namespace kikotsoka_polyomino {
 
-                class Coordinates {
-                public:
-                    explicit Coordinates(int = -1, int = -1);
+class Coordinates
+{
+public:
+  explicit Coordinates(int = -1, int = -1);
 
-                    int column() const { return _column; }
+  int column() const
+  { return _column; }
 
-                    void from_object(const nlohmann::json& json)
-                    {
-                        _column = json["column"].get<int>();
-                        _line = json["line"].get<int>();
-                    }
+  void from_object(const nlohmann::json &json)
+  {
+    _column = json["column"].get<int>();
+    _line = json["line"].get<int>();
+  }
 
-                    bool is_valid() const { return _column != -1 and _line != -1; }
+  bool is_valid() const
+  { return _column != -1 and _line != -1; }
 
-                    int line() const { return _line; }
+  int line() const
+  { return _line; }
 
-                    bool operator==(const Coordinates& coordinates) const
-                    {
-                        return _line == coordinates.line() and _column == coordinates.column();
-                    }
+  bool operator==(const Coordinates &coordinates) const
+  {
+    return _line == coordinates.line() and _column == coordinates.column();
+  }
 
-                    nlohmann::json to_object() const
-                    {
-                        nlohmann::json json;
+  nlohmann::json to_object() const
+  {
+    nlohmann::json json;
 
-                        json["column"] = _column;
-                        json["line"] = _line;
-                        return json;
-                    }
+    json["column"] = _column;
+    json["line"] = _line;
+    return json;
+  }
 
-                    std::string to_string() const { return char('A' + _column) + std::to_string(_line + 1); }
+  std::string to_string() const
+  { return char('A' + _column) + std::to_string(_line + 1); }
 
-                private:
-                    int _column;
-                    int _line;
-                };
+private:
+  int _column;
+  int _line;
+};
 
-            }
-        }
-    }
+}
+}
+}
 }
 
 #endif

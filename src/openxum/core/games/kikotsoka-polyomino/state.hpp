@@ -26,41 +26,59 @@
 #include <string>
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kikotsoka_polyomino {
+namespace core {
+namespace games {
+namespace kikotsoka_polyomino {
 
-                class State {
-                public:
-                    enum Values {
-                        VACANT = 0,
-                        BLACK = 1,
-                        WHITE = 2,
-                        BLACK_BLOCKED = 3,
-                        WHITE_BLOCKED = 4,
-                        BLOCKED_IN_BLACK = 5,
-                        BLOCKED_IN_WHITE = 6,
-                        BLACK_NO_VACANT = 7,
-                        WHITE_NO_VACANT = 8
-                    };
+class State
+{
+public:
+  enum Values
+  {
+    VACANT = 0,
+    BLACK = 1,
+    WHITE = 2,
+    BLACK_BLOCKED = 3,
+    WHITE_BLOCKED = 4,
+    BLOCKED_IN_BLACK = 5,
+    BLOCKED_IN_WHITE = 6,
+    BLACK_NO_VACANT = 7,
+    WHITE_NO_VACANT = 8
+  };
 
-                    static std::string to_string(const State::Values& s)
-                    {
-                        if (s == VACANT) { return "[ ]"; }
-                        if (s == BLACK) { return "[B]"; }
-                        if (s == WHITE) { return "[W]"; }
-                        if (s == BLACK_BLOCKED) { return " b "; }
-                        if (s == WHITE_BLOCKED) { return " w "; }
-                        if (s == BLOCKED_IN_BLACK || s == BLOCKED_IN_WHITE) { return "   "; }
-                        if (s == BLACK_NO_VACANT) { return "*B*"; }
-                        if (s == WHITE_NO_VACANT) { return "*W*"; }
-                        return "";
-                    }
-                };
-
-            }
-        }
+  static std::string to_string(const State::Values &s)
+  {
+    if (s == VACANT) {
+      return "[ ]";
     }
+    if (s == BLACK) {
+      return "[B]";
+    }
+    if (s == WHITE) {
+      return "[W]";
+    }
+    if (s == BLACK_BLOCKED) {
+      return " b ";
+    }
+    if (s == WHITE_BLOCKED) {
+      return " w ";
+    }
+    if (s == BLOCKED_IN_BLACK || s == BLOCKED_IN_WHITE) {
+      return "   ";
+    }
+    if (s == BLACK_NO_VACANT) {
+      return "*B*";
+    }
+    if (s == WHITE_NO_VACANT) {
+      return "*W*";
+    }
+    return "";
+  }
+};
+
+}
+}
+}
 }
 
 #endif

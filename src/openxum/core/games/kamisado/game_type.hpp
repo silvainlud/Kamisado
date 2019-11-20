@@ -24,17 +24,18 @@
 #define OPENXUM_CORE_GAMES_KAMISADO_GAME_TYPE_HPP
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kamisado {
+namespace core {
+namespace games {
+namespace kamisado {
 
-                enum GameType {
-                    SIMPLE, STANDARD, LONG, MARATHON
-                };
+enum GameType
+{
+  SIMPLE, STANDARD, LONG, MARATHON
+};
 
-            }
-        }
-    }
+}
+}
+}
 }
 
 #endif

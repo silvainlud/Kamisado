@@ -23,21 +23,22 @@
 #include <openxum/core/games/kamisado/state.hpp>
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kamisado {
+namespace core {
+namespace games {
+namespace kamisado {
 
-                State::State(int x, int y, const TowerColor::Values& color)
-                        :_x(x), _y(y), _color(color) { }
+State::State(int x, int y, const TowerColor::Values &color)
+    : _x(x), _y(y), _color(color)
+{}
 
-                State& State::operator=(const Coordinates& coordinates)
-                {
-                    _x = coordinates.x();
-                    _y = coordinates.y();
-                    return *this;
-                }
+State &State::operator=(const Coordinates &coordinates)
+{
+  _x = coordinates.x();
+  _y = coordinates.y();
+  return *this;
+}
 
-            }
-        }
-    }
+}
+}
+}
 }

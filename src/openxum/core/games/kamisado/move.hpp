@@ -28,50 +28,54 @@
 #include <openxum/core/games/kamisado/move_type.hpp>
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kamisado {
+namespace core {
+namespace games {
+namespace kamisado {
 
-                class Move : public openxum::core::common::Move {
-                public:
-                    Move() = default;
+class Move : public openxum::core::common::Move
+{
+public:
+  Move() = default;
 
-                    Move(const MoveType& type, const Coordinates& to, const Coordinates& from);
+  Move(const MoveType &type, const Coordinates &to, const Coordinates &from);
 
-                    openxum::core::common::Move* clone() const override;
+  openxum::core::common::Move *clone() const override;
 
-                    void decode(const std::string&) override;
+  void decode(const std::string &) override;
 
-                    std::string encode() const override;
+  std::string encode() const override;
 
-                    const Coordinates& from() const { return _from; }
+  const Coordinates &from() const
+  { return _from; }
 
-                    void from_object(const nlohmann::json&) override;
+  void from_object(const nlohmann::json &) override;
 
-                    const Coordinates& to() const { return _to; }
+  const Coordinates &to() const
+  { return _to; }
 
-                    nlohmann::json to_object() const override;
+  nlohmann::json to_object() const override;
 
-                    std::string to_string() const override
-                    {
-                        if (_type == MOVE) {
-                            return "move tower from " + _from.to_string() + " to " + _to.to_string();
-                        } else {
-                            return "pass";
-                        }
-                    }
-
-                    MoveType type() const { return _type; }
-
-                private:
-                    MoveType _type;
-                    Coordinates _from;
-                    Coordinates _to;
-                };
-
-            }
-        }
+  std::string to_string() const override
+  {
+    if (_type == MOVE) {
+      return "move tower from " + _from.to_string() + " to " + _to.to_string();
+    } else {
+      return "pass";
     }
+  }
+
+  MoveType type() const
+  { return _type; }
+
+private:
+  MoveType _type;
+  Coordinates _from;
+  Coordinates _to;
+};
+
+}
+}
+}
 }
 
 #endif

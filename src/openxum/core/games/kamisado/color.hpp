@@ -24,17 +24,18 @@
 #define OPENXUM_CORE_GAMES_KAMISADO_COLOR_HPP
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kamisado {
+namespace core {
+namespace games {
+namespace kamisado {
 
-                enum Color {
-                    NONE = -1, BLACK = 0, WHITE = 1
-                };
+enum Color
+{
+  NONE = -1, BLACK = 0, WHITE = 1
+};
 
-            }
-        }
-    }
+}
+}
+}
 }
 
 #endif

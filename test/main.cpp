@@ -30,142 +30,165 @@
 #include <openxum/ai/specific/kikotsoka/random_player.hpp>
 //#include <chrono>
 
-std::ofstream output_file("result");
+std::ofstream output_file("result.csv");
 
 void test_mcts()
 {
-    openxum::core::games::kikotsoka::Engine* engine = new openxum::core::games::kikotsoka::Engine(
-            openxum::core::games::kikotsoka::SMALL,
-            openxum::core::games::kikotsoka::Color::BLACK);
-    openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka::MCTSPlayer(
-            openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
-            engine, 10, false);
+  auto engine = new openxum::core::games::kikotsoka::Engine(
+      openxum::core::games::kikotsoka::SMALL,
+      openxum::core::games::kikotsoka::Color::BLACK);
+  openxum::core::common::Player *player_one = new openxum::ai::specific::kikotsoka::MCTSPlayer(
+      openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
+      engine, 100, false);
 //    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
 //            openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
 //            engine, 2000, true);
-    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
-            openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-            engine);
-    openxum::core::common::Player* current_player = player_one;
+  openxum::core::common::Player *player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
+      openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
+      engine);
+  openxum::core::common::Player *current_player = player_one;
 
-    while (not engine->is_finished()) {
+  while (not engine->is_finished()) {
 
 //        auto t0 = std::chrono::high_resolution_clock::now();
 
-        openxum::core::common::Move* move = current_player->get_move();
+    openxum::core::common::Move *move = current_player->get_move();
 
 //        auto t1 = std::chrono::high_resolution_clock::now();
 
 //        std::cout << "duration = " << double((t1 - t0).count()) / 1000000000. << std::endl;
 
-        engine->move(move);
-        if (engine->current_color() == player_one->color()) {
-            current_player = player_one;
-        } else {
-            current_player = player_two;
-        }
-    }
-
-    if (engine->winner_is() == openxum::core::games::kikotsoka::Color::BLACK) {
-        std::cout << "Winner is BLACK" << std::endl;
+    engine->move(move);
+    if (engine->current_color() == player_one->color()) {
+      current_player = player_one;
     } else {
-        std::cout << "Winner is WHITE" << std::endl;
+      current_player = player_two;
     }
+  }
 
-    delete player_one;
-    delete player_two;
-    delete engine;
+  if (engine->winner_is() == openxum::core::games::kikotsoka::Color::BLACK) {
+    std::cout << "Winner is BLACK" << std::endl;
+  } else {
+    std::cout << "Winner is WHITE" << std::endl;
+  }
+
+  delete player_one;
+  delete player_two;
+  delete engine;
 }
 
 void play(unsigned int a, unsigned int b)
 {
-    openxum::core::games::kikotsoka::Engine::CONFIGURATIONS[0].size = a;
-    openxum::core::games::kikotsoka::Engine::CONFIGURATIONS[0].piece_number = b;
+  openxum::core::games::kikotsoka::Engine::CONFIGURATIONS[0].size = a;
+  openxum::core::games::kikotsoka::Engine::CONFIGURATIONS[0].piece_number = b;
 
-    openxum::core::games::kikotsoka::Engine* engine = new openxum::core::games::kikotsoka::Engine(
-            openxum::core::games::kikotsoka::SMALL,
-            openxum::core::games::kikotsoka::Color::BLACK);
-    openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka::MCTSPlayer(
-            openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
-            engine, 5, false);
+  openxum::core::games::kikotsoka::Engine *engine = new openxum::core::games::kikotsoka::Engine(
+      openxum::core::games::kikotsoka::SMALL,
+      openxum::core::games::kikotsoka::Color::BLACK);
+  openxum::core::common::Player *player_one = new openxum::ai::specific::kikotsoka::MCTSPlayer(
+      openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
+      engine, 500, false);
 //    openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //            openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
 //            engine);
-    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
-            openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-            engine, 5, false);
-//    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
+//    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
 //            openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-//            engine);
-    openxum::core::common::Player* current_player = player_one;
-    unsigned int possible_move_number = 0;
+//            engine, 5, false);
+  openxum::core::common::Player *player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
+      openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
+      engine);
+  openxum::core::common::Player *current_player = player_one;
+  unsigned int possible_move_number = 0;
 
-    std::vector < int > sizes;
-    std::vector < double > gains;
+  std::map<int, std::vector<int>> sizes;
+  std::map<int, std::vector<double>> gains;
 
-    while (not engine->is_finished()) {
-        openxum::core::common::Move* move = current_player->get_move();
+  sizes[openxum::core::games::kikotsoka::Color::BLACK] = std::vector<int>();
+  sizes[openxum::core::games::kikotsoka::Color::WHITE] = std::vector<int>();
+  gains[openxum::core::games::kikotsoka::Color::BLACK] = std::vector<double>();
+  gains[openxum::core::games::kikotsoka::Color::WHITE] = std::vector<double>();
 
-        possible_move_number += engine->get_possible_move_list().size();
+  while (not engine->is_finished()) {
+    openxum::core::common::Move *move = current_player->get_move();
 
-        sizes.push_back(engine->get_possible_move_list().size());
+    possible_move_number += engine->get_possible_move_list().size();
 
-        engine->move(move);
+    sizes[engine->current_color()].push_back(engine->get_possible_move_list().size());
 
-        gains.push_back(engine->gain());
+    engine->move(move);
 
-        if (engine->current_color() == player_one->color()) {
-            current_player = player_one;
-        } else {
-            current_player = player_two;
-        }
-        delete move;
+    gains[engine->current_color()].push_back(engine->gain(engine->current_color()));
+
+    if (engine->current_color() == player_one->color()) {
+      current_player = player_one;
+    } else {
+      current_player = player_two;
     }
+    delete move;
+  }
 
-    output_file << "S;";
-    for (int e: sizes) {
-        output_file << e << ";";
-    }
-    output_file << std::endl;
-    output_file << "G;";
-    for (int e: gains) {
-        output_file << e << ";";
-    }
-    output_file << std::endl;
+  output_file << "S[BLACK];";
+  for (int e: sizes[openxum::core::games::kikotsoka::Color::BLACK]) {
+    output_file << e << ";";
+  }
+  output_file << std::endl;
+  output_file << "S[WHITE];";
+  for (int e: sizes[openxum::core::games::kikotsoka::Color::WHITE]) {
+    output_file << e << ";";
+  }
+  output_file << std::endl;
+  output_file << "G[BLACK];";
+  for (int e: gains[openxum::core::games::kikotsoka::Color::BLACK]) {
+    output_file << e << ";";
+  }
+  output_file << std::endl;
+  output_file << "G[WHITE];";
+  for (int e: gains[openxum::core::games::kikotsoka::Color::WHITE]) {
+    output_file << e << ";";
+  }
+  output_file << std::endl;
 
-//    output_file << a << ";" << b << ";" << engine->move_number() << ";"
-//              << double(possible_move_number) / engine->move_number() << ";"
-//              << engine->_white_level << ";" << engine->_black_level << ";"
-//              << std::endl;
+  output_file << a << ";" << b << ";" << engine->move_number() << ";"
+              << double(possible_move_number) / engine->move_number() << ";"
+              << engine->_white_level << ";" << engine->_black_level << ";"
+              << std::endl;
+  output_file << std::endl;
 
-    delete player_one;
-    delete player_two;
-    delete engine;
+  delete player_one;
+  delete player_two;
+  delete engine;
 }
 
 void test_random()
 {
-    unsigned int max = std::thread::hardware_concurrency();
-    ThreadPool pool(max);
-    std::vector<std::future<void> > results;
+  unsigned int max = std::thread::hardware_concurrency();
+  ThreadPool pool(max);
+  std::vector<std::future<void> > results;
 
-    for (unsigned int a = 12; a < 13; ++a) {
-        for (unsigned int b = 42; b < 43; ++b) {
-            for (unsigned int i = 0; i < 20; ++i) {
-                results.emplace_back(pool.enqueue([=] { play(a, b); }));
-            }
-        }
+  for (unsigned int a = 12; a < 13; ++a) {
+    for (unsigned int b = 42; b < 43; ++b) {
+      for (unsigned int i = 0; i < 20; ++i) {
+        results.emplace_back(pool.enqueue([=] { play(a, b); }));
+      }
     }
-    for (auto&& result: results) {
-        result.get();
-    }
+  }
+  for (auto &&result: results) {
+    result.get();
+  }
 }
 
-int main(int, const char**)
+int main(int, const char **)
 {
 //    test_mcts();
-    test_random();
+//    test_random();
 
-    output_file.close();
-    return EXIT_SUCCESS;
+  for (int i = 0; i < 20; ++i) {
+    play(12, 42);
+
+    std::cout << "Game: " << (i + 1) << std::endl;
+
+  }
+
+  output_file.close();
+  return EXIT_SUCCESS;
 }

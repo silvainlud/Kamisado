@@ -27,40 +27,46 @@
 #include <openxum/core/games/kamisado/tower_color.hpp>
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kamisado {
+namespace core {
+namespace games {
+namespace kamisado {
 
-                class State {
-                public:
-                    explicit State(int x = -1, int y = -1, const TowerColor::Values& color = TowerColor::NONE);
+class State
+{
+public:
+  explicit State(int x = -1, int y = -1, const TowerColor::Values &color = TowerColor::NONE);
 
-                    TowerColor::Values color() const { return _color; }
+  TowerColor::Values color() const
+  { return _color; }
 
-                    Coordinates coordinates() const { return Coordinates(_x, _y); }
+  Coordinates coordinates() const
+  { return Coordinates(_x, _y); }
 
-                    std::string id() const { return std::to_string(_x) + std::to_string(_y) + std::to_string((int)_color); }
+  std::string id() const
+  { return std::to_string(_x) + std::to_string(_y) + std::to_string((int) _color); }
 
-                    virtual State& operator=(const Coordinates& coordinates);
+  virtual State &operator=(const Coordinates &coordinates);
 
-                    int x() const { return _x; }
+  int x() const
+  { return _x; }
 
-                    int y() const { return _y; }
+  int y() const
+  { return _y; }
 
-                    std::string to_string() const
-                    {
-                        return "[" + coordinates().to_string() + " (" + TowerColor::to_string(_color) + ")]";
-                    }
+  std::string to_string() const
+  {
+    return "[" + coordinates().to_string() + " (" + TowerColor::to_string(_color) + ")]";
+  }
 
-                private:
-                    int _x;
-                    int _y;
-                    TowerColor::Values _color;
-                };
+private:
+  int _x;
+  int _y;
+  TowerColor::Values _color;
+};
 
-            }
-        }
-    }
+}
+}
+}
 }
 
 #endif

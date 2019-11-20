@@ -27,45 +27,50 @@
 #include <string>
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kamisado {
+namespace core {
+namespace games {
+namespace kamisado {
 
-                class Coordinates {
-                public:
-                    explicit Coordinates(int = -1, int = -1);
+class Coordinates
+{
+public:
+  explicit Coordinates(int = -1, int = -1);
 
-                    void from_object(const nlohmann::json& json)
-                    {
-                        _x = json["x"].get<int>();
-                        _y = json["y"].get<int>();
-                    }
+  void from_object(const nlohmann::json &json)
+  {
+    _x = json["x"].get<int>();
+    _y = json["y"].get<int>();
+  }
 
-                    bool is_valid() const { return _x != -1 and _y != -1; }
+  bool is_valid() const
+  { return _x != -1 and _y != -1; }
 
-                    nlohmann::json to_object() const
-                    {
-                        nlohmann::json json;
+  nlohmann::json to_object() const
+  {
+    nlohmann::json json;
 
-                        json["x"] = _x;
-                        json["y"] = _y;
-                        return json;
-                    }
+    json["x"] = _x;
+    json["y"] = _y;
+    return json;
+  }
 
-                    std::string to_string() const { return char('a' + _x) + std::to_string(_y + 1); }
+  std::string to_string() const
+  { return char('a' + _x) + std::to_string(_y + 1); }
 
-                    int x() const { return _x; }
+  int x() const
+  { return _x; }
 
-                    int y() const { return _y; }
+  int y() const
+  { return _y; }
 
-                private:
-                    int _x;
-                    int _y;
-                };
+private:
+  int _x;
+  int _y;
+};
 
-            }
-        }
-    }
+}
+}
+}
 }
 
 #endif

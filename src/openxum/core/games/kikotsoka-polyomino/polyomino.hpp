@@ -26,53 +26,61 @@
 #include <openxum/core/games/kikotsoka-polyomino/coordinates.hpp>
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kikotsoka_polyomino {
+namespace core {
+namespace games {
+namespace kikotsoka_polyomino {
 
-                class Polyomino {
-                public:
-                    typedef int Matrix_3_3[3][3];
-                    typedef std::vector<bool> ShapeLine;
-                    typedef std::vector<ShapeLine> Shape;
-                    typedef std::vector<Shape> Shapes;
-                    typedef std::vector<Shapes> Polyominos;
+class Polyomino
+{
+public:
+  typedef int Matrix_3_3[3][3];
+  typedef std::vector<bool> ShapeLine;
+  typedef std::vector<ShapeLine> Shape;
+  typedef std::vector<Shape> Shapes;
+  typedef std::vector<Shapes> Polyominos;
 
-                    static Polyominos POLYOMINOS;
+  static Polyominos POLYOMINOS;
 
-                    Polyomino(int shape_index, const Matrix_3_3& points);
+  Polyomino(int shape_index, const Matrix_3_3 &points);
 
-                    Polyomino* clone() const;
+  Polyomino *clone() const;
 
-                    const Coordinates& coordinates() const { return _coordinates; }
+  const Coordinates &coordinates() const
+  { return _coordinates; }
 
-                    bool is_free() const { return not _coordinates.is_valid(); }
+  bool is_free() const
+  { return not _coordinates.is_valid(); }
 
-                    void put(const Coordinates& coordinates) { _coordinates = coordinates; }
+  void put(const Coordinates &coordinates)
+  { _coordinates = coordinates; }
 
-                    void remove() { _coordinates = Coordinates(); }
+  void remove()
+  { _coordinates = Coordinates(); }
 
-                    void rotate();
+  void rotate();
 
-                    int rotation() const { return _rotation; }
+  int rotation() const
+  { return _rotation; }
 
-                    const Matrix_3_3& shape() const { return _shape; }
+  const Matrix_3_3 &shape() const
+  { return _shape; }
 
-                    int shape_index() const { return _shape_index; }
+  int shape_index() const
+  { return _shape_index; }
 
-                    std::string to_string() const;
+  std::string to_string() const;
 
-                private:
-                    int _shape_index;
-                    int _rotation;
-                    Matrix_3_3 _points;
-                    Coordinates _coordinates;
-                    Matrix_3_3 _shape;
-                };
+private:
+  int _shape_index;
+  int _rotation;
+  Matrix_3_3 _points;
+  Coordinates _coordinates;
+  Matrix_3_3 _shape;
+};
 
-            }
-        }
-    }
+}
+}
+}
 }
 
 #endif

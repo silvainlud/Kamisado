@@ -24,20 +24,22 @@
 #define OPENXUM_CORE_GAMES_KIKOTSOKA_PHASE_HPP
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kikotsoka {
+namespace core {
+namespace games {
+namespace kikotsoka {
 
-                class Phase {
-                public:
-                    enum Values {
-                        PUT_SHIDO = 0, PUT_PIECE = 1, CHOICE_PIECE = 2, CHOICE_PATTERN = 3
-                    };
-                };
+class Phase
+{
+public:
+  enum Values
+  {
+    PUT_SHIDO = 0, PUT_PIECE = 1, CHOICE_PIECE = 2, CHOICE_PATTERN = 3
+  };
+};
 
-            }
-        }
-    }
+}
+}
+}
 }
 
 #endif

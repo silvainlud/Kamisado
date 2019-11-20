@@ -23,56 +23,57 @@
 #include <openxum/core/games/kamisado/move.hpp>
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kamisado {
+namespace core {
+namespace games {
+namespace kamisado {
 
-                Move::Move(const MoveType& type, const Coordinates& from, const Coordinates& to)
-                        :_type(type), _from(from), _to(to) { }
+Move::Move(const MoveType &type, const Coordinates &from, const Coordinates &to)
+    : _type(type), _from(from), _to(to)
+{}
 
-                openxum::core::common::Move* Move::clone() const
-                {
-                    return new Move(_type, _from, _to);
-                }
+openxum::core::common::Move *Move::clone() const
+{
+  return new Move(_type, _from, _to);
+}
 
-                void Move::decode(const std::string& str)
-                {
-                    if (str[0] == 'M') {
-                        _type = MOVE;
-                    } else {
-                        _type = PASS;
-                    }
-                    _from = Coordinates(str[1] - 'a', str[2] - '1');
-                    _to = Coordinates(str[3] - 'a', str[4] - '1');
-                }
+void Move::decode(const std::string &str)
+{
+  if (str[0] == 'M') {
+    _type = MOVE;
+  } else {
+    _type = PASS;
+  }
+  _from = Coordinates(str[1] - 'a', str[2] - '1');
+  _to = Coordinates(str[3] - 'a', str[4] - '1');
+}
 
-                std::string Move::encode() const
-                {
-                    return (_type == MOVE ? "M" : "P") + _from.to_string() + _to.to_string();
-                }
+std::string Move::encode() const
+{
+  return (_type == MOVE ? "M" : "P") + _from.to_string() + _to.to_string();
+}
 
-                void Move::from_object(const nlohmann::json& json)
-                {
-                    Coordinates from, to;
+void Move::from_object(const nlohmann::json &json)
+{
+  Coordinates from, to;
 
-                    from.from_object(json["from"]);
-                    to.from_object(json["to"]);
-                    _type = MoveType(json["type"].get<int>());
-                    _from = from;
-                    _to = to;
-                }
+  from.from_object(json["from"]);
+  to.from_object(json["to"]);
+  _type = MoveType(json["type"].get<int>());
+  _from = from;
+  _to = to;
+}
 
-                nlohmann::json Move::to_object() const
-                {
-                    nlohmann::json json;
+nlohmann::json Move::to_object() const
+{
+  nlohmann::json json;
 
-                    json["type"] = _type;
-                    json["from"] = _from.to_object();
-                    json["to"] = _to.to_object();
-                    return json;
-                }
+  json["type"] = _type;
+  json["from"] = _from.to_object();
+  json["to"] = _to.to_object();
+  return json;
+}
 
-            }
-        }
-    }
+}
+}
+}
 }

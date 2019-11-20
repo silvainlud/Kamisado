@@ -26,60 +26,62 @@
 #include <openxum/core/common/move.hpp>
 
 namespace openxum {
-    namespace core {
-        namespace common {
+namespace core {
+namespace common {
 
-            class Engine {
-            public:
-                Engine()
-                        :_move_number(0) { }
+class Engine
+{
+public:
+  Engine()
+      : _move_number(0)
+  {}
 
-                virtual ~Engine() = default;
+  virtual ~Engine() = default;
 
-                virtual void apply_moves(const Moves& moves)
-                {
-                    for (auto m: moves) {
-                        move(m);
-                    }
-                }
-
-                virtual int best_is() const = 0;
-
-                virtual Move* build_move() const = 0;
-
-                virtual Engine* clone() const = 0;
-
-                virtual int current_color() const = 0;
-
-                virtual double gain() const = 0;
-
-                virtual const std::string& get_name() const = 0;
-
-                virtual Moves get_possible_move_list() const = 0;
-
-                virtual std::string id() const = 0;
-
-                virtual bool is_finished() const = 0;
-
-                virtual bool is_stoppable() const = 0;
-
-                virtual void move(const Move* move) = 0;
-
-                unsigned int move_number() const
-                { return _move_number; }
-
-                virtual void parse(const std::string& str) = 0;
-
-                virtual std::string to_string() const = 0;
-
-                virtual int winner_is() const = 0;
-
-            protected:
-                unsigned int _move_number;
-            };
-
-        }
+  virtual void apply_moves(const Moves &moves)
+  {
+    for (auto m: moves) {
+      move(m);
     }
+  }
+
+  virtual int best_is() const = 0;
+
+  virtual Move *build_move() const = 0;
+
+  virtual Engine *clone() const = 0;
+
+  virtual int current_color() const = 0;
+
+  virtual double gain(int color) const = 0;
+
+  virtual const std::string &get_name() const = 0;
+
+  virtual Moves get_possible_move_list() const = 0;
+
+  virtual std::string id() const = 0;
+
+  virtual bool is_finished() const = 0;
+
+  virtual bool is_stoppable() const = 0;
+
+  virtual void move(const Move *move) = 0;
+
+  unsigned int move_number() const
+  { return _move_number; }
+
+  virtual void parse(const std::string &str) = 0;
+
+  virtual std::string to_string() const = 0;
+
+  virtual int winner_is() const = 0;
+
+protected:
+  unsigned int _move_number;
+};
+
+}
+}
 }
 
 #endif

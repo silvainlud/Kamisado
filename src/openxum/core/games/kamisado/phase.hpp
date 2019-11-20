@@ -24,17 +24,18 @@
 #define OPENXUM_CORE_GAMES_KAMISADO_PHASE_HPP
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kamisado {
+namespace core {
+namespace games {
+namespace kamisado {
 
-                enum Phase {
-                    MOVE_TOWER = 0, FINISH = 1
-                };
+enum Phase
+{
+  MOVE_TOWER = 0, FINISH = 1
+};
 
-            }
-        }
-    }
+}
+}
+}
 }
 
 #endif

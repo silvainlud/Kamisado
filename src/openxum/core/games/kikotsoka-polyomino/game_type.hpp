@@ -24,17 +24,18 @@
 #define OPENXUM_CORE_GAMES_KIKOTSOKA_POLYOMINO_GAME_TYPE_HPP
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kikotsoka_polyomino {
+namespace core {
+namespace games {
+namespace kikotsoka_polyomino {
 
-                enum GameType {
-                    SMALL, MEDIUM, LARGE
-                };
+enum GameType
+{
+  SMALL, MEDIUM, LARGE
+};
 
-            }
-        }
-    }
+}
+}
+}
 }
 
 #endif

@@ -26,19 +26,25 @@
 #include <openxum/ai/common/mcts_player.hpp>
 
 namespace openxum {
-    namespace ai {
-        namespace specific {
-            namespace kikotsoka {
+namespace ai {
+namespace specific {
+namespace kikotsoka {
 
-                class MCTSPlayer : public openxum::ai::common::MCTSPlayer {
-                public:
-                    MCTSPlayer(int c, int o, openxum::core::common::Engine* e, unsigned int simulation_number, bool stoppable)
-                            :openxum::ai::common::MCTSPlayer(c, o, e, simulation_number, stoppable) { }
-                };
+class MCTSPlayer : public openxum::ai::common::MCTSPlayer
+{
+public:
+  MCTSPlayer(int c,
+             int o,
+             openxum::core::common::Engine *e,
+             unsigned int simulation_number,
+             bool stoppable)
+      : openxum::ai::common::MCTSPlayer(c, o, e, simulation_number, stoppable)
+  {}
+};
 
-            }
-        }
-    }
+}
+}
+}
 }
 
 #endif

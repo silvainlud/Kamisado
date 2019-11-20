@@ -26,19 +26,21 @@
 #include <openxum/ai/common/random_player.hpp>
 
 namespace openxum {
-    namespace ai {
-        namespace specific {
-            namespace kikotsoka_polyomino {
+namespace ai {
+namespace specific {
+namespace kikotsoka_polyomino {
 
-                class RandomPlayer : public openxum::ai::common::RandomPlayer {
-                public:
-                    RandomPlayer(int c, int o, openxum::core::common::Engine* e)
-                            :openxum::ai::common::RandomPlayer(c, o, e) { }
-                };
+class RandomPlayer : public openxum::ai::common::RandomPlayer
+{
+public:
+  RandomPlayer(int c, int o, openxum::core::common::Engine *e)
+      : openxum::ai::common::RandomPlayer(c, o, e)
+  {}
+};
 
-            }
-        }
-    }
+}
+}
+}
 }
 
 #endif

@@ -35,81 +35,86 @@
 #include <vector>
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kamisado {
+namespace core {
+namespace games {
+namespace kamisado {
 
-                class Engine : public openxum::core::common::Engine {
-                public:
-                    Engine() = default;
+class Engine : public openxum::core::common::Engine
+{
+public:
+  Engine() = default;
 
-                    Engine(int type, int color);
+  Engine(int type, int color);
 
-                    ~Engine() override;
+  ~Engine() override;
 
-                    int best_is() const override
-                    { return NONE; }
+  int best_is() const override
+  { return NONE; }
 
-                    openxum::core::common::Move* build_move() const override
-                    { return new Move(); }
+  openxum::core::common::Move *build_move() const override
+  { return new Move(); }
 
-                    Engine* clone() const override;
+  Engine *clone() const override;
 
-                    int current_color() const override;
+  int current_color() const override;
 
-                    Coordinates find_playable_tower(int) const;
+  Coordinates find_playable_tower(int) const;
 
-                    double gain() const override  { return 1; }
+  double gain(int /* color */) const override
+  { return 1; }
 
-                    const std::string& get_name() const override { return GAME_NAME; }
+  const std::string &get_name() const override
+  { return GAME_NAME; }
 
-                    openxum::core::common::Moves get_possible_move_list() const override;
+  openxum::core::common::Moves get_possible_move_list() const override;
 
-                    std::string id() const override;
+  std::string id() const override;
 
-                    bool is_finished() const override;
+  bool is_finished() const override;
 
-                    bool is_stoppable() const override
-                    { return false; }
+  bool is_stoppable() const override
+  { return false; }
 
-                    void move(const openxum::core::common::Move* move) override;
+  void move(const openxum::core::common::Move *move) override;
 
-                    void parse(const std::string&) override { }
+  void parse(const std::string &) override
+  {}
 
-                    int type() const { return _type; }
+  int type() const
+  { return _type; }
 
-                    std::string to_string() const override;
+  std::string to_string() const override;
 
-                    int winner_is() const override;
+  int winner_is() const override;
 
-                private:
-                    void change_color();
+private:
+  void change_color();
 
-                    State& find_towers2(const Coordinates&, int);
+  State &find_towers2(const Coordinates &, int);
 
-                    std::vector<Coordinates> get_possible_moving_list(const State& tower, int color) const;
+  std::vector<Coordinates> get_possible_moving_list(const State &tower, int color) const;
 
-                    bool is_empty(const Coordinates&) const;
+  bool is_empty(const Coordinates &) const;
 
-                    void move_tower(const Coordinates& selected_tower, const Coordinates& selected_cell);
+  void move_tower(const Coordinates &selected_tower, const Coordinates &selected_cell);
 
-                    int next_color(int color);
+  int next_color(int color);
 
-                    bool pass(int) const;
+  bool pass(int) const;
 
-                    int _color;
-                    int _type;
-                    std::vector<State> _black_towers;
-                    std::vector<State> _white_towers;
-                    TowerColor::Values _play_color;
-                    int _phase;
+  int _color;
+  int _type;
+  std::vector<State> _black_towers;
+  std::vector<State> _white_towers;
+  TowerColor::Values _play_color;
+  int _phase;
 
-                    static std::string GAME_NAME;
-                };
+  static std::string GAME_NAME;
+};
 
-            }
-        }
-    }
+}
+}
+}
 }
 
 #endif //KAMISADO_ENGINE_H

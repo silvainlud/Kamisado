@@ -23,14 +23,15 @@
 #include <openxum/core/games/kikotsoka/coordinates.hpp>
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kikotsoka {
+namespace core {
+namespace games {
+namespace kikotsoka {
 
-                Coordinates::Coordinates(int c, int l)
-                        :_column(c), _line(l) { }
+Coordinates::Coordinates(int c, int l)
+    : _column(c), _line(l)
+{}
 
-            }
-        }
-    }
+}
+}
+}
 }

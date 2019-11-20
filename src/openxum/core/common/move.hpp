@@ -27,51 +27,54 @@
 #include <vector>
 
 namespace openxum {
-    namespace core {
-        namespace common {
+namespace core {
+namespace common {
 
-            class Move {
-            public:
-                Move() = default;
+class Move
+{
+public:
+  Move() = default;
 
-                virtual ~Move() = default;
+  virtual ~Move() = default;
 
-                virtual Move* clone() const = 0;
+  virtual Move *clone() const = 0;
 
-                virtual void decode(const std::string&) = 0;
+  virtual void decode(const std::string &) = 0;
 
-                virtual std::string encode() const = 0;
+  virtual std::string encode() const = 0;
 
-                virtual void from_object(const nlohmann::json&) = 0;
+  virtual void from_object(const nlohmann::json &) = 0;
 
-                virtual nlohmann::json to_object() const = 0;
+  virtual nlohmann::json to_object() const = 0;
 
-                virtual std::string to_string() const = 0;
-            };
+  virtual std::string to_string() const = 0;
+};
 
-            class Moves : public std::vector<Move*>
-            {
-            public:
-                Moves() = default;
+class Moves : public std::vector<Move *>
+{
+public:
+  Moves() = default;
 
-                virtual ~Moves() {
-                    for (auto move: *this) {
-                        delete move;
-                    }
-                }
-
-                Moves& operator=(const Moves& m) {
-                    for (auto move: *this) {
-                        delete move;
-                    }
-                    for (auto move: m) {
-                        push_back(move->clone());
-                    }
-                    return *this;
-                }
-            };
-        }
+  virtual ~Moves()
+  {
+    for (auto move: *this) {
+      delete move;
     }
+  }
+
+  Moves &operator=(const Moves &m)
+  {
+    for (auto move: *this) {
+      delete move;
+    }
+    for (auto move: m) {
+      push_back(move->clone());
+    }
+    return *this;
+  }
+};
+}
+}
 }
 
 #endif

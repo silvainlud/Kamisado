@@ -29,52 +29,64 @@
 #include <openxum/core/games/kikotsoka-polyomino/move_type.hpp>
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kikotsoka_polyomino {
+namespace core {
+namespace games {
+namespace kikotsoka_polyomino {
 
-                class Move : public openxum::core::common::Move {
-                public:
-                    Move() = default;
+class Move : public openxum::core::common::Move
+{
+public:
+  Move() = default;
 
-                    Move(const MoveType::Values& type, const Color& color, const Coordinates& to, int polyomino_index, int rotation, int index);
+  Move(const MoveType::Values &type,
+       const Color &color,
+       const Coordinates &to,
+       int polyomino_index,
+       int rotation,
+       int index);
 
-                    openxum::core::common::Move* clone() const override;
+  openxum::core::common::Move *clone() const override;
 
-                    const Color& color() const { return _color; }
+  const Color &color() const
+  { return _color; }
 
-                    void decode(const std::string&) override;
+  void decode(const std::string &) override;
 
-                    std::string encode() const override;
+  std::string encode() const override;
 
-                    int index() const { return _index; }
+  int index() const
+  { return _index; }
 
-                    void from_object(const nlohmann::json&) override;
+  void from_object(const nlohmann::json &) override;
 
-                    int polyomino_index() const { return _polyomino_index; }
+  int polyomino_index() const
+  { return _polyomino_index; }
 
-                    int rotation() const { return _rotation; }
+  int rotation() const
+  { return _rotation; }
 
-                    const Coordinates& to() const { return _to; }
+  const Coordinates &to() const
+  { return _to; }
 
-                    nlohmann::json to_object() const override;
+  nlohmann::json to_object() const override;
 
-                    std::string to_string() const override;
+  std::string to_string() const override;
 
-                    MoveType::Values type() const { return _type; }
+  MoveType::Values type() const
+  { return _type; }
 
-                private:
-                    MoveType::Values _type;
-                    Color _color;
-                    Coordinates _to;
-                    int _polyomino_index;
-                    int _rotation;
-                    int _index;
-                };
+private:
+  MoveType::Values _type;
+  Color _color;
+  Coordinates _to;
+  int _polyomino_index;
+  int _rotation;
+  int _index;
+};
 
-            }
-        }
-    }
+}
+}
+}
 }
 
 #endif

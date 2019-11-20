@@ -24,20 +24,22 @@
 #define OPENXUM_CORE_GAMES_KIKOTSOKA_POLYOMINO_MOVE_TYPE_HPP
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kikotsoka_polyomino {
+namespace core {
+namespace games {
+namespace kikotsoka_polyomino {
 
-                class MoveType {
-                public:
-                    enum Values {
-                        PUT_POLYOMINO = 0, CHOICE_PATTERN = 1, PASS = 2
-                    };
-                };
+class MoveType
+{
+public:
+  enum Values
+  {
+    PUT_POLYOMINO = 0, CHOICE_PATTERN = 1, PASS = 2
+  };
+};
 
-            }
-        }
-    }
+}
+}
+}
 }
 
 #endif

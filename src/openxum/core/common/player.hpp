@@ -27,39 +27,47 @@
 #include <openxum/core/common/move.hpp>
 
 namespace openxum {
-    namespace core {
-        namespace common {
+namespace core {
+namespace common {
 
-            class Player {
-            public:
-                Player(int c, int o, Engine* e)
-                        :_color(c), _opponent_color(o), _engine(e) { _level = 0; }
+class Player
+{
+public:
+  Player(int c, int o, Engine *e)
+      : _color(c), _opponent_color(o), _engine(e)
+  { _level = 0; }
 
-                virtual ~Player() = default;
+  virtual ~Player() = default;
 
-                int color() const { return _color; }
+  int color() const
+  { return _color; }
 
-                const Engine& engine() const { return *_engine; }
+  const Engine &engine() const
+  { return *_engine; }
 
-                Engine& engine() { return *_engine; }
+  Engine &engine()
+  { return *_engine; }
 
-                virtual Move* get_move() = 0;
+  virtual Move *get_move() = 0;
 
-                void move(const Move* move) { _engine->move(move); }
+  void move(const Move *move)
+  { _engine->move(move); }
 
-                int opponent_color() const { return _opponent_color; }
+  int opponent_color() const
+  { return _opponent_color; }
 
-                void set_level(int l) { _level = l; }
+  void set_level(int l)
+  { _level = l; }
 
-            private:
-                int _color;
-                int _opponent_color;
-                Engine* _engine;
-                int _level;
-            };
+private:
+  int _color;
+  int _opponent_color;
+  Engine *_engine;
+  int _level;
+};
 
-        }
-    }
+}
+}
 }
 
 #endif

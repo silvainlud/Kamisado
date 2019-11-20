@@ -23,11 +23,11 @@
 #include <openxum/core/games/kikotsoka/state.hpp>
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kikotsoka {
+namespace core {
+namespace games {
+namespace kikotsoka {
 
-            }
-        }
-    }
+}
+}
+}
 }

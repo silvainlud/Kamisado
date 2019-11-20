@@ -27,20 +27,22 @@
 #include <openxum/core/games/kamisado/coordinates.hpp>
 
 namespace openxum {
-    namespace core {
-        namespace games {
-            namespace kikotsoka {
+namespace core {
+namespace games {
+namespace kikotsoka {
 
-                class MoveType {
-                public:
-                    enum Values {
-                        PUT_SHIDO = 0, PUT_PIECE = 1, CHOICE_PIECE = 2, CHOICE_PATTERN = 3, PASS = 4
-                    };
-                };
+class MoveType
+{
+public:
+  enum Values
+  {
+    PUT_SHIDO = 0, PUT_PIECE = 1, CHOICE_PIECE = 2, CHOICE_PATTERN = 3, PASS = 4
+  };
+};
 
-            }
-        }
-    }
+}
+}
+}
 }
 
 #endif

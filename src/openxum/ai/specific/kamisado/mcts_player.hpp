@@ -26,19 +26,21 @@
 #include <openxum/ai/common/mcts_player.hpp>
 
 namespace openxum {
-    namespace ai {
-        namespace specific {
-            namespace kamisado {
+namespace ai {
+namespace specific {
+namespace kamisado {
 
-                class MCTSPlayer : public openxum::ai::common::MCTSPlayer {
-                public:
-                    MCTSPlayer(int c, int o, openxum::core::common::Engine* e)
-                            :openxum::ai::common::MCTSPlayer(c, o, e, 10000) { }
-                };
+class MCTSPlayer : public openxum::ai::common::MCTSPlayer
+{
+public:
+  MCTSPlayer(int c, int o, openxum::core::common::Engine *e)
+      : openxum::ai::common::MCTSPlayer(c, o, e, 10000)
+  {}
+};
 
-            }
-        }
-    }
+}
+}
+}
 }
 
 #endif
