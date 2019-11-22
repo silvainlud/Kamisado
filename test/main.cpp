@@ -100,6 +100,7 @@ void play(unsigned int a, unsigned int b)
 //      engine);
   openxum::core::common::Player *current_player = player_one;
   unsigned int possible_move_number = 0;
+  unsigned int turn_number = 0;
 
   std::map<int, std::vector<int>> sizes;
   std::map<int, std::vector<double>> gains;
@@ -111,6 +112,7 @@ void play(unsigned int a, unsigned int b)
 
   while (not engine->is_finished()) {
     openxum::core::common::Move *move = current_player->get_move();
+    int color = engine->current_color();
 
     possible_move_number += engine->get_possible_move_list().size();
 
@@ -124,6 +126,9 @@ void play(unsigned int a, unsigned int b)
       current_player = player_one;
     } else {
       current_player = player_two;
+    }
+    if (color != engine->current_color()) {
+      ++turn_number;
     }
     delete move;
   }
@@ -154,8 +159,8 @@ void play(unsigned int a, unsigned int b)
 
     output_file << a << ";" << b << ";" << engine->move_number() << ";"
                 << double(possible_move_number) / engine->move_number() << ";"
-                << engine->_white_level << ";" << engine->_black_level << ";"
-                << std::endl;
+                << engine->_black_level << ";" << engine->_white_level << ";"
+                << turn_number << std::endl;
     output_file << std::endl;
   }
 
