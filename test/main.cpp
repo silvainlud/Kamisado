@@ -31,6 +31,7 @@
 //#include <chrono>
 
 std::ofstream output_file("result.csv");
+std::mutex mutex;
 
 void test_mcts()
 {
@@ -87,13 +88,13 @@ void play(unsigned int a, unsigned int b)
       openxum::core::games::kikotsoka::Color::BLACK);
   openxum::core::common::Player *player_one = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
-      engine, 5, false);
+      engine, 200, false);
 //    openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //            openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
 //            engine);
   openxum::core::common::Player *player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-      engine, 5, false);
+      engine, 200, false);
 //  openxum::core::common::Player *player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //      openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
 //      engine);
@@ -127,32 +128,36 @@ void play(unsigned int a, unsigned int b)
     delete move;
   }
 
-  output_file << "S[BLACK];";
-  for (int e: sizes[openxum::core::games::kikotsoka::Color::BLACK]) {
-    output_file << e << ";";
-  }
-  output_file << std::endl;
-  output_file << "S[WHITE];";
-  for (int e: sizes[openxum::core::games::kikotsoka::Color::WHITE]) {
-    output_file << e << ";";
-  }
-  output_file << std::endl;
-  output_file << "G[BLACK];";
-  for (int e: gains[openxum::core::games::kikotsoka::Color::BLACK]) {
-    output_file << e << ";";
-  }
-  output_file << std::endl;
-  output_file << "G[WHITE];";
-  for (int e: gains[openxum::core::games::kikotsoka::Color::WHITE]) {
-    output_file << e << ";";
-  }
-  output_file << std::endl;
+  {
+    std::unique_lock<std::mutex> lock(mutex);
 
-  output_file << a << ";" << b << ";" << engine->move_number() << ";"
-              << double(possible_move_number) / engine->move_number() << ";"
-              << engine->_white_level << ";" << engine->_black_level << ";"
-              << std::endl;
-  output_file << std::endl;
+    output_file << "S[BLACK];";
+    for (int e: sizes[openxum::core::games::kikotsoka::Color::BLACK]) {
+      output_file << e << ";";
+    }
+    output_file << std::endl;
+    output_file << "S[WHITE];";
+    for (int e: sizes[openxum::core::games::kikotsoka::Color::WHITE]) {
+      output_file << e << ";";
+    }
+    output_file << std::endl;
+    output_file << "G[BLACK];";
+    for (int e: gains[openxum::core::games::kikotsoka::Color::BLACK]) {
+      output_file << e << ";";
+    }
+    output_file << std::endl;
+    output_file << "G[WHITE];";
+    for (int e: gains[openxum::core::games::kikotsoka::Color::WHITE]) {
+      output_file << e << ";";
+    }
+    output_file << std::endl;
+
+    output_file << a << ";" << b << ";" << engine->move_number() << ";"
+                << double(possible_move_number) / engine->move_number() << ";"
+                << engine->_white_level << ";" << engine->_black_level << ";"
+                << std::endl;
+    output_file << std::endl;
+  }
 
   delete player_one;
   delete player_two;
@@ -182,11 +187,15 @@ int main(int, const char **)
 //    test_mcts();
 //    test_random();
 
+  unsigned int max = std::thread::hardware_concurrency();
+  ThreadPool pool(max);
+  std::vector<std::future<void> > results;
+
   for (int i = 0; i < 20; ++i) {
-    play(12, 42);
-
-    std::cout << "Game: " << (i + 1) << std::endl;
-
+    results.emplace_back(pool.enqueue([=] { play(12, 42); }));
+  }
+  for (auto &&result: results) {
+    result.get();
   }
 
   output_file.close();
