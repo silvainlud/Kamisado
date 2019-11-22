@@ -87,16 +87,16 @@ void play(unsigned int a, unsigned int b)
       openxum::core::games::kikotsoka::Color::BLACK);
   openxum::core::common::Player *player_one = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
-      engine, 500, false);
+      engine, 5, false);
 //    openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //            openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
 //            engine);
-//    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
-//            openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-//            engine, 5, false);
-  openxum::core::common::Player *player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
+  openxum::core::common::Player *player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-      engine);
+      engine, 5, false);
+//  openxum::core::common::Player *player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
+//      openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
+//      engine);
   openxum::core::common::Player *current_player = player_one;
   unsigned int possible_move_number = 0;
 
