@@ -124,7 +124,7 @@ int MCTSPlayer::evaluate(const openxum::core::common::Engine *engine,
 openxum::core::common::Move *MCTSPlayer::get_final_choice()
 {
   openxum::core::common::Move *finalChoice = nullptr;
-  double best = -10000000;
+  double best = -1;
 //                int best_visit = 0;
 
   for (Node *child: _root->get_children()) {
