@@ -57,9 +57,9 @@ Engine::Patterns Engine::PATTERNS = {
     }
 };
 
-Engine::Configuration Engine::CONFIGURATIONS[3] = {{11, 32},
-                                                   {14, 42},
-                                                   {17, 52}};
+Engine::Configuration Engine::CONFIGURATIONS[3] = {{11, 32, 5},
+                                                   {14, 42, 5},
+                                                   {17, 52, 5}};
 
 std::string Engine::GAME_NAME = "kikotsoka";
 

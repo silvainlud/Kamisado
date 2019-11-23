@@ -78,10 +78,11 @@ void test_mcts()
   delete engine;
 }
 
-void play(unsigned int a, unsigned int b)
+void play(int a, int b, int c)
 {
   openxum::core::games::kikotsoka::Engine::CONFIGURATIONS[0].size = a;
   openxum::core::games::kikotsoka::Engine::CONFIGURATIONS[0].piece_number = b;
+  openxum::core::games::kikotsoka::Engine::CONFIGURATIONS[0].shido_number = c;
 
   openxum::core::games::kikotsoka::Engine *engine = new openxum::core::games::kikotsoka::Engine(
       openxum::core::games::kikotsoka::SMALL,
@@ -161,11 +162,15 @@ void play(unsigned int a, unsigned int b)
     }
     output_file << std::endl;
 
-    output_file << a << ";" << b << ";"
+    output_file << "T;" << a << ";" << b << ";"
                 << engine->move_number() << ";" << possible_move_number << ";"
+                << turn_number << " "
                 << engine->_black_level << ";" << engine->_white_level << ";"
-                << turn_number << std::endl;
-    output_file << std::endl;
+                << engine->_black_captured_piece_number << ";"
+                << engine->_white_captured_piece_number << ";"
+                << (engine->winner_is() == openxum::core::games::kikotsoka::Color::BLACK ? "b"
+                                                                                         : "w")
+                << std::endl;
   }
 
   delete player_one;
@@ -182,7 +187,7 @@ void test_random()
   for (unsigned int a = 12; a < 13; ++a) {
     for (unsigned int b = 42; b < 43; ++b) {
       for (unsigned int i = 0; i < 20; ++i) {
-        results.emplace_back(pool.enqueue([=] { play(a, b); }));
+        results.emplace_back(pool.enqueue([=] { play(a, b, 5); }));
       }
     }
   }
@@ -198,10 +203,10 @@ int main(int, const char **)
 
   unsigned int max = std::thread::hardware_concurrency();
   ThreadPool pool(max);
-  std::vector<std::future<void> > results;
+  std::vector<std::future<void> > results(200);
 
-  for (int i = 0; i < 20; ++i) {
-    results.emplace_back(pool.enqueue([=] { play(12, 42); }));
+  for (int i = 0; i < 200; ++i) {
+    results.emplace_back(pool.enqueue([=] { play(12, 42, 5); }));
   }
   for (auto &&result: results) {
     result.get();

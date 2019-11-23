@@ -85,12 +85,15 @@ public:
   {
     int size;
     int piece_number;
+    int shido_number;
   };
 
   static Configuration CONFIGURATIONS[3];
 
   int _black_level;
   int _white_level;
+  int _black_captured_piece_number;
+  int _white_captured_piece_number;
 
 private:
   typedef std::vector<bool> PatternLine;
@@ -168,8 +171,6 @@ private:
   int _white_shido_number;
   Coordinates _last_coordinates;
   int _pass;
-  int _black_captured_piece_number;
-  int _white_captured_piece_number;
   int _previous_black_level;
   int _previous_white_level;
   bool _black_failed;
