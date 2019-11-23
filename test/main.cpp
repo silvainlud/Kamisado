@@ -161,8 +161,8 @@ void play(unsigned int a, unsigned int b)
     }
     output_file << std::endl;
 
-    output_file << a << ";" << b << ";" << engine->move_number() << ";"
-                << double(possible_move_number) / engine->move_number() << ";"
+    output_file << a << ";" << b << ";"
+                << engine->move_number() << ";" << possible_move_number << ";"
                 << engine->_black_level << ";" << engine->_white_level << ";"
                 << turn_number << std::endl;
     output_file << std::endl;
