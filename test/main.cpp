@@ -203,7 +203,7 @@ int main(int, const char **)
 
   unsigned int max = std::thread::hardware_concurrency();
   ThreadPool pool(max);
-  std::vector<std::future<void> > results(200);
+  std::vector<std::future<void> > results;
 
   for (int i = 0; i < 200; ++i) {
     results.emplace_back(pool.enqueue([=] { play(12, 42, 5); }));
