@@ -120,14 +120,18 @@ void play(unsigned int a, unsigned int b)
 
     engine->move(move);
 
-    gains[engine->current_color()].push_back(engine->gain(engine->current_color()));
-
     if (engine->current_color() == player_one->color()) {
       current_player = player_one;
     } else {
       current_player = player_two;
     }
     if (color != engine->current_color()) {
+      int opponent_color = engine->current_color() == openxum::core::games::kikotsoka::Color::BLACK
+                           ? openxum::core::games::kikotsoka::Color::WHITE
+                           : openxum::core::games::kikotsoka::Color::BLACK;
+
+      gains[engine->current_color()].push_back(engine->gain(engine->current_color()));
+      gains[opponent_color].push_back(engine->gain(opponent_color));
       ++turn_number;
     }
     delete move;
