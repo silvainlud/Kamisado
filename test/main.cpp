@@ -89,13 +89,13 @@ void play(int a, int b, int c)
       openxum::core::games::kikotsoka::Color::BLACK);
   openxum::core::common::Player *player_one = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
-      engine, 200, false);
+      engine, 1000, false);
 //    openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //            openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
 //            engine);
   openxum::core::common::Player *player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-      engine, 200, false);
+      engine, 1000, false);
 //  openxum::core::common::Player *player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //      openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
 //      engine);
@@ -105,6 +105,7 @@ void play(int a, int b, int c)
 
   std::map<int, std::vector<int>> sizes;
   std::map<int, std::vector<double>> gains;
+  std::vector<std::string> moves;
 
   sizes[openxum::core::games::kikotsoka::Color::BLACK] = std::vector<int>();
   sizes[openxum::core::games::kikotsoka::Color::WHITE] = std::vector<int>();
@@ -118,6 +119,7 @@ void play(int a, int b, int c)
     possible_move_number += engine->get_possible_move_list().size();
 
     sizes[engine->current_color()].push_back(engine->get_possible_move_list().size());
+    moves.push_back(move->encode());
 
     engine->move(move);
 
@@ -159,6 +161,11 @@ void play(int a, int b, int c)
     output_file << "G[WHITE];";
     for (int e: gains[openxum::core::games::kikotsoka::Color::WHITE]) {
       output_file << e << ";";
+    }
+    output_file << std::endl;
+    output_file << "X;";
+    for (const std::string &m: moves) {
+      output_file << m << ";";
     }
     output_file << std::endl;
 
@@ -205,7 +212,7 @@ int main(int, const char **)
   ThreadPool pool(max);
   std::vector<std::future<void> > results;
 
-  for (int i = 0; i < 200; ++i) {
+  for (int i = 0; i < 1000; ++i) {
     results.emplace_back(pool.enqueue([=] { play(12, 42, 5); }));
   }
   for (auto &&result: results) {
