@@ -69,6 +69,7 @@ void MCTSPlayer::add_children(Node *current)
 
 void MCTSPlayer::clear()
 {
+  delete _root;
   _root = nullptr;
   for (auto const &n: _nodes) {
     delete n.second;

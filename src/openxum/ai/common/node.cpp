@@ -67,6 +67,9 @@ Node::~Node()
 {
   delete _engine;
   delete _move;
+  for (auto c: _children) {
+    delete c;
+  }
 }
 
 void Node::add_children(Node *n)
