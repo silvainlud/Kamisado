@@ -250,6 +250,8 @@ void Engine::move(const openxum::core::common::Move *move)
 {
   auto *m = dynamic_cast<const openxum::core::games::kikotsoka::Move *>(move);
 
+  _pattern_origin = Coordinates();
+
   ++_move_number;
   _previous_black_level = _black_level;
   _previous_white_level = _white_level;
@@ -403,6 +405,8 @@ void Engine::block(const Coordinates &origin)
 {
   int l = origin.line();
   int c = origin.column();
+
+  _pattern_origin = origin;
 
   while (l < origin.line() + 3) {
     block_coordinates(Coordinates(c, l));

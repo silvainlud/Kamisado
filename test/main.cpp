@@ -106,22 +106,31 @@ void play(int a, int b, int c)
   std::map<int, std::vector<int>> sizes;
   std::map<int, std::vector<double>> gains;
   std::vector<std::string> moves;
+  std::map<int, std::vector<int>> levels;
+  std::map<int, std::vector<std::string>> patterns;
 
   sizes[openxum::core::games::kikotsoka::Color::BLACK] = std::vector<int>();
   sizes[openxum::core::games::kikotsoka::Color::WHITE] = std::vector<int>();
   gains[openxum::core::games::kikotsoka::Color::BLACK] = std::vector<double>();
   gains[openxum::core::games::kikotsoka::Color::WHITE] = std::vector<double>();
+  patterns[openxum::core::games::kikotsoka::Color::BLACK] = std::vector<std::string>();
+  patterns[openxum::core::games::kikotsoka::Color::WHITE] = std::vector<std::string>();
 
   while (not engine->is_finished()) {
     openxum::core::common::Move *move = current_player->get_move();
     int color = engine->current_color();
 
     possible_move_number += engine->get_possible_move_list().size();
-
     sizes[engine->current_color()].push_back(engine->get_possible_move_list().size());
     moves.push_back(move->encode());
 
     engine->move(move);
+
+    if (engine->_pattern_origin.is_valid()) {
+      patterns[color].push_back(engine->_pattern_origin.to_string());
+    } else {
+      patterns[color].push_back("");
+    }
 
     if (engine->current_color() == player_one->color()) {
       current_player = player_one;
@@ -135,6 +144,8 @@ void play(int a, int b, int c)
 
       gains[engine->current_color()].push_back(engine->gain(engine->current_color()));
       gains[opponent_color].push_back(engine->gain(opponent_color));
+      levels[openxum::core::games::kikotsoka::Color::BLACK].push_back(engine->_black_level);
+      levels[openxum::core::games::kikotsoka::Color::WHITE].push_back(engine->_white_level);
       ++turn_number;
     }
     delete move;
@@ -160,6 +171,26 @@ void play(int a, int b, int c)
     output_file << std::endl;
     output_file << "G[WHITE];";
     for (int e: gains[openxum::core::games::kikotsoka::Color::WHITE]) {
+      output_file << e << ";";
+    }
+    output_file << std::endl;
+    output_file << "L[BLACK];";
+    for (int e: levels[openxum::core::games::kikotsoka::Color::BLACK]) {
+      output_file << e << ";";
+    }
+    output_file << std::endl;
+    output_file << "L[WHITE];";
+    for (int e: levels[openxum::core::games::kikotsoka::Color::WHITE]) {
+      output_file << e << ";";
+    }
+    output_file << std::endl;
+    output_file << "P[BLACK];";
+    for (const std::string &e: patterns[openxum::core::games::kikotsoka::Color::BLACK]) {
+      output_file << e << ";";
+    }
+    output_file << std::endl;
+    output_file << "P[WHITE];";
+    for (const std::string &e: patterns[openxum::core::games::kikotsoka::Color::WHITE]) {
       output_file << e << ";";
     }
     output_file << std::endl;
