@@ -171,7 +171,7 @@ void play(int a, int b, int c)
 
     output_file << "T;" << a << ";" << b << ";"
                 << engine->move_number() << ";" << possible_move_number << ";"
-                << turn_number << " "
+                << turn_number << ";"
                 << engine->_black_level << ";" << engine->_white_level << ";"
                 << engine->_black_captured_piece_number << ";"
                 << engine->_white_captured_piece_number << ";"
