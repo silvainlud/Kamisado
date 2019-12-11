@@ -58,6 +58,11 @@ public:
 
   openxum::core::common::Move *get_move() const;
 
+  double get_next_goal_distance()  const
+  { return _next_gloal_distance; }
+
+  openxum::ai::common::Node *get_next_unvisited_child();
+
   double get_number_of_wins() const;
 
   double get_number_of_losses() const;
@@ -86,9 +91,10 @@ public:
   unsigned int max_depth() const
   { return _max_depth; }
 
-  void visit();
+  void set_next_goal_distance(double distance)
+  { _next_gloal_distance = distance; }
 
-  openxum::ai::common::Node *get_next_unvisited_child();
+  void visit();
 
 private:
   int _level;
@@ -104,6 +110,7 @@ private:
   unsigned int _possible_move_number;
   unsigned int _depth;
   unsigned int _max_depth;
+  double _next_gloal_distance;
 };
 
 }

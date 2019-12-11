@@ -56,7 +56,13 @@ public:
   int current_color() const override
   { return _color; }
 
+  unsigned int current_goal(int color) const override
+  { return color == Color::BLACK ? _black_level : _white_level; }
+
   double gain(int color) const override;
+
+  unsigned int get_goal_number() const override
+  { return 5; }
 
   const std::string &get_name() const override
   { return GAME_NAME; }

@@ -36,13 +36,21 @@ openxum::core::common::Move *MCTSPlayer::get_move()
   _move_number = 0;
   _new_move_number = 0;
   _evaluation_number = 0;
+  _best = nullptr;
   init_search();
   for (unsigned int i = 0; i < _simulation_number; ++i) {
     simulate_one_game_from_root();
   }
-  move = get_final_choice()->clone();
+  _best = get_final_choice();
+  move = _best->get_move()->clone();
+  compute_next_goal_distance(move);
   clear();
   return move;
+}
+
+void MCTSPlayer::compute_next_goal_distance(const openxum::core::common::Move * /* move */)
+{
+  _next_goal_distance = _best->get_next_goal_distance();
 }
 
 // private methods
@@ -51,7 +59,6 @@ void MCTSPlayer::add_children(Node *current)
   if (not current->is_finished()) {
     const openxum::core::common::Moves &possible_moves = current->get_possible_moves();
 
-//                    _nodes[current->id()] = current;
     for (auto move: possible_moves) {
       Node *newNode = new Node(current->engine()->clone(), current, move->clone());
       std::string id = newNode->id();
@@ -88,45 +95,34 @@ Node *MCTSPlayer::descent() const
   return current;
 }
 
-int MCTSPlayer::evaluate(const openxum::core::common::Engine *engine,
-                         openxum::core::common::Engine *clone)
+void MCTSPlayer::evaluate(const openxum::core::common::Engine *engine,
+                          openxum::core::common::Engine *clone, int &winner, unsigned int &distance)
 {
-//                std::vector<std::string> ids;
-  int winner = -1;
-
+  winner = -1;
+  distance = 0;
   ++_evaluation_number;
   if (_stoppable) {
     while (not clone->is_stoppable()) {
       play_a_turn_randomly(clone);
-//                        ids.push_back(clone->id());
     }
     winner = clone->best_is();
   } else {
     while (not clone->is_finished()) {
+      if (engine->current_goal(color()) == clone->current_goal(color())) {
+        ++distance;
+      }
       play_a_turn_randomly(clone);
-//                        ids.push_back(clone->id());
     }
     winner = clone->winner_is();
   }
   _move_number += clone->move_number();
   _new_move_number += clone->move_number() - engine->move_number();
-//                for (const std::string& id: ids) {
-//                    if (_states.find(id) == _states.end()) {
-//                        _states[id] = {winner == color() ? 1 : 0, winner == opponent_color() ? 1 : 0, 1};
-//                    } else {
-//                        _states[id]._win_number += winner == color() ? 1 : 0;
-//                        _states[id]._loss_number += winner == opponent_color() ? 1 : 0;
-//                        _states[id]._visit_number++;
-//                    }
-//                }
-  return winner;
 }
 
-openxum::core::common::Move *MCTSPlayer::get_final_choice()
+openxum::ai::common::Node *MCTSPlayer::get_final_choice()
 {
-  openxum::core::common::Move *finalChoice = nullptr;
+  openxum::ai::common::Node *finalChoice = nullptr;
   double best = -1;
-//                int best_visit = 0;
 
   for (Node *child: _root->get_children()) {
     double score = child->get_visit_number() == 0 ? 0 : child->get_number_of_wins()
@@ -134,31 +130,15 @@ openxum::core::common::Move *MCTSPlayer::get_final_choice()
 
     if (score > best) {
       best = score;
-//                        best_visit = child->get_visit_number();
-      finalChoice = child->get_move();
+      finalChoice = child;
     }
   }
-
-  // **** TRACE
-//                std::cout << _root->get_children().size() << ";" << _root->get_possible_move_number() << ";"
-//                          << _root->max_depth() << ";" << (double(_move_number) / _evaluation_number) << ";"
-//                          << (double(_new_move_number) / _evaluation_number) << ";" << _evaluation_number << std::endl;
-//                for (Node* child: _root->get_children()) {
-//                    double score = child->get_visit_number() == 0 ? 0 : child->get_number_of_wins()
-//                            / child->get_visit_number();
-//
-//                    std::cout << child->get_move()->to_string() << " => " << score << " " << child->get_number_of_wins()
-//                              << " " << child->get_visit_number() << std::endl;
-//                }
-//                std::cout << best << ";" << best_visit << ";" << finalChoice->to_string() << std::endl;
-  // **** TRACE
   return finalChoice;
 }
 
 void MCTSPlayer::init_search()
 {
   _root = new Node(engine().clone(), nullptr, nullptr);
-  // add_children(_root);
 }
 
 void MCTSPlayer::play_a_turn_randomly(openxum::core::common::Engine *engine)
@@ -193,8 +173,30 @@ void MCTSPlayer::simulate_one_game_from_root()
 
     openxum::core::common::Engine *engine = currentEngine->clone();
 
-    updateScore(current, evaluate(currentEngine, engine), *engine);
+    int winner;
+    unsigned int distance = 0;
+
+    evaluate(currentEngine, engine, winner, distance);
+    updateScore(current, winner, *engine);
+    updateDistance(current, distance);
     delete engine;
+  }
+}
+
+void MCTSPlayer::updateDistance(Node *current, unsigned int distance)
+{
+  if (current != nullptr) {
+    if (current->get_next_goal_distance() < 0 or current->get_next_goal_distance() < distance) {
+      current->set_next_goal_distance(distance);
+      current = current->get_father();
+      while (current != nullptr) {
+        ++distance;
+        if (current->get_next_goal_distance() > distance) {
+          current->set_next_goal_distance(distance);
+        }
+        current = current->get_father();
+      }
+    }
   }
 }
 

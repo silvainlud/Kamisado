@@ -47,16 +47,24 @@ public:
 
   openxum::core::common::Move *get_move() override;
 
+  double get_next_goal_distance() override
+  { return _next_goal_distance; }
+
 private:
   void add_children(Node *current);
 
   void clear();
 
+  void compute_next_goal_distance(const openxum::core::common::Move *move);
+
   Node *descent() const;
 
-  int evaluate(const openxum::core::common::Engine *engine, openxum::core::common::Engine *);
+  void evaluate(const openxum::core::common::Engine *engine,
+                openxum::core::common::Engine *clone,
+                int &winner,
+                unsigned int &distance);
 
-  openxum::core::common::Move *get_final_choice();
+  openxum::ai::common::Node *get_final_choice();
 
   void init_search();
 
@@ -64,13 +72,9 @@ private:
 
   void simulate_one_game_from_root();
 
-  void updateScore(Node *current, int winner, const openxum::core::common::Engine &engine);
+  void updateDistance(Node *current, unsigned int distance);
 
-//                struct State {
-//                    int _win_number;
-//                    int _loss_number;
-//                    int _visit_number;
-//                };
+  void updateScore(Node *current, int winner, const openxum::core::common::Engine &engine);
 
   unsigned int _simulation_number;
   bool _stoppable;
@@ -81,7 +85,8 @@ private:
   std::random_device _random_device;
   std::mt19937 _rng;
   std::map<std::string, Node *> _nodes;
-//                std::map<std::string, State> _states;
+  Node *_best;
+  double _next_goal_distance;
 };
 
 }

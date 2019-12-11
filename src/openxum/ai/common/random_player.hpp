@@ -40,9 +40,15 @@ public:
 
   openxum::core::common::Move *get_move() override;
 
+  double get_next_goal_distance() override
+  { return _next_goal_distance; }
+
 private:
+  unsigned int compute_next_goal_distance(const openxum::core::common::Move *move);
+
   std::random_device _random_device;
   std::mt19937 _rng;
+  unsigned int _next_goal_distance;
 };
 
 }

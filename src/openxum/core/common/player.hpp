@@ -50,6 +50,8 @@ public:
 
   virtual Move *get_move() = 0;
 
+  virtual double get_next_goal_distance() = 0;
+
   void move(const Move *move)
   { _engine->move(move); }
 

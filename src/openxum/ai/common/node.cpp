@@ -32,7 +32,7 @@ namespace common {
 
 Node::Node(openxum::core::common::Engine *engine, Node *father, openxum::core::common::Move *move)
     : _engine(engine), _father(father), _move(move), _loss_number(0),
-      _visit_number(0), _win_number(0), _depth(0), _max_depth(0)
+      _visit_number(0), _win_number(0), _depth(0), _max_depth(0), _next_gloal_distance(-1)
 {
   if (father != nullptr) {
     _level = _father->_level + 1;
@@ -94,37 +94,6 @@ Node *Node::choice()
       }
     }
     return best;
-
-//                    double sum = 0;
-//                    std::vector<double> scores;
-//
-//                    for (Node* child: _children) {
-//                        double score = child->compute_score();
-//
-//                        scores.push_back(score);
-//                        sum += score;
-//                    }
-//
-//                    std::random_device random_device;
-//                    std::mt19937 rng(random_device());
-//                    std::uniform_real_distribution<double> distribution(0, sum);
-//                    double value = distribution(rng);
-//                    bool found = false;
-//                    std::vector<double>::size_type index = 0;
-//
-//                    sum = 0;
-//                    while (not found and index < scores.size()) {
-//                        sum += scores[index];
-//                        found = sum > value;
-//                        if (not found) {
-//                            ++index;
-//                        }
-//                    }
-//                    if (found) {
-//                        return _children[index];
-//                    } else {
-//                        return _children[_children.size() - 1];
-//                    }
   }
 }
 
