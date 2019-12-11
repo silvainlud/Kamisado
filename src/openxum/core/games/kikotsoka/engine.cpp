@@ -79,8 +79,8 @@ Engine::Engine(int type, int color)
   }
   _black_piece_number = CONFIGURATIONS[_type].piece_number;
   _white_piece_number = CONFIGURATIONS[_type].piece_number;
-  _black_shido_number = 5;
-  _white_shido_number = 5;
+  _black_shido_number = CONFIGURATIONS[_type].shido_number;
+  _white_shido_number = CONFIGURATIONS[_type].shido_number;
   _pass = 0;
   _black_captured_piece_number = 0;
   _white_captured_piece_number = 0;
