@@ -193,8 +193,10 @@ void MCTSPlayer::updateDistance(Node *current, unsigned int distance)
         ++distance;
         if (current->get_next_goal_distance() > distance) {
           current->set_next_goal_distance(distance);
+          current = current->get_father();
+        } else {
+          break;
         }
-        current = current->get_father();
       }
     }
   }

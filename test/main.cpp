@@ -179,6 +179,7 @@ void play(int a, int b, int c)
                 << (engine->winner_is() == openxum::core::games::kikotsoka::Color::BLACK ? "b"
                                                                                          : "w")
                 << std::endl;
+    output_file.flush();
   }
 
   delete player_one;
@@ -192,10 +193,10 @@ int main(int, const char **)
   ThreadPool pool(max);
   std::vector<std::future<void> > results;
 
-  for (unsigned int a = 12; a < 13; ++a) {
-    for (unsigned int b = 42; b < 43; ++b) {
-      for (unsigned int c = 5; c < 6; ++c) {
-        for (int i = 0; i < 1000; ++i) {
+  for (unsigned int a = 12; a < 21; ++a) {
+    for (unsigned int b = 33; b < 45; ++b) {
+      for (unsigned int c = 2; c < 6; ++c) {
+        for (int i = 0; i < 1; ++i) {
           results.emplace_back(pool.enqueue([=] { play(a, b, c); }));
         }
       }
