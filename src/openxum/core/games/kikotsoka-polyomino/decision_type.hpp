@@ -1,5 +1,5 @@
 /**
- * @file openxum/ai/common/node.hpp
+ * @file openxum/core/games/kikotsoka-polyomino/decision_type.hpp
  * See the AUTHORS or Authors.txt file
  */
 
@@ -20,12 +20,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <openxum/ai/common/node.hpp>
+#ifndef OPENXUM_CORE_GAMES_KIKOTSOKA_POLYOMINO_DECISION_TYPE_HPP
+#define OPENXUM_CORE_GAMES_KIKOTSOKA_POLYOMINO_DECISION_TYPE_HPP
 
 namespace openxum {
-namespace ai {
-namespace common {
+namespace core {
+namespace games {
+namespace kikotsoka_polyomino {
+
+class DecisionType
+{
+public:
+  enum Values
+  {
+    PUT_POLYOMINO = 0, CHOICE_PATTERN = 1, PASS = 2
+  };
+};
 
 }
 }
 }
+}
+
+#endif

@@ -36,7 +36,7 @@ void test_random()
             openxum::core::games::kikotsoka_polyomino::SMALL,
             openxum::core::games::kikotsoka_polyomino::Color::BLACK);
 
-    openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka_polyomino::MCTSPlayer(
+    openxum::core::common::Player<openxum::core::games::kikotsoka_polyomino::Decision>* player_one = new openxum::ai::specific::kikotsoka_polyomino::MCTSPlayer(
             openxum::core::games::kikotsoka_polyomino::Color::BLACK,
             openxum::core::games::kikotsoka_polyomino::Color::WHITE,
             engine, 100, false);
@@ -46,18 +46,18 @@ void test_random()
 //            openxum::core::games::kikotsoka_polyomino::Color::WHITE,
 //            engine);
 
-    openxum::core::common::Player* player_two = new openxum::ai::specific::kikotsoka_polyomino::RandomPlayer(
+    openxum::core::common::Player<openxum::core::games::kikotsoka_polyomino::Decision>* player_two = new openxum::ai::specific::kikotsoka_polyomino::RandomPlayer(
             openxum::core::games::kikotsoka_polyomino::Color::WHITE,
             openxum::core::games::kikotsoka_polyomino::Color::BLACK,
             engine);
-    openxum::core::common::Player* current_player = player_one;
+    openxum::core::common::Player<openxum::core::games::kikotsoka_polyomino::Decision>* current_player = player_one;
 
     while (not engine->is_finished()) {
-        openxum::core::common::Move* move = current_player->get_move();
+        openxum::core::common::Move<openxum::core::games::kikotsoka_polyomino::Decision> move = current_player->get_move();
 
         engine->move(move);
 
-        std::cout << move->to_string() << std::endl;
+        std::cout << move.to_string() << std::endl;
 
         if (engine->current_color() == player_one->color()) {
             current_player = player_one;

@@ -1,5 +1,5 @@
 /**
- * @file openxum/core/games/kamisado/move_type.hpp
+ * @file openxum/core/games/kamisado/decision_type.hpp
  * See the AUTHORS or Authors.txt file
  */
 
@@ -20,10 +20,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef OPENXUM_CORE_GAMES_KAMISADO_MOVE_TYPE_HPP
-#define OPENXUM_CORE_GAMES_KAMISADO_MOVE_TYPE_HPP
+#ifndef OPENXUM_CORE_GAMES_KAMISADO_DECISION_TYPE_HPP
+#define OPENXUM_CORE_GAMES_KAMISADO_DECISION_TYPE_HPP
 
-#include <openxum/core/common/move.hpp>
+#include <openxum/core/common/decision.hpp>
 #include <openxum/core/games/kamisado/coordinates.hpp>
 
 namespace openxum {
@@ -31,7 +31,7 @@ namespace core {
 namespace games {
 namespace kamisado {
 
-enum MoveType
+enum DecisionType
 {
   MOVE = 0, PASS = 1
 };

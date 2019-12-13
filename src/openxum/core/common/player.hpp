@@ -30,10 +30,11 @@ namespace openxum {
 namespace core {
 namespace common {
 
+template <class Decision>
 class Player
 {
 public:
-  Player(int c, int o, Engine *e)
+  Player(int c, int o, Engine<Decision> *e)
       : _color(c), _opponent_color(o), _engine(e)
   { _level = 0; }
 
@@ -42,17 +43,17 @@ public:
   int color() const
   { return _color; }
 
-  const Engine &engine() const
+  const Engine<Decision> &engine() const
   { return *_engine; }
 
-  Engine &engine()
+  Engine<Decision> &engine()
   { return *_engine; }
 
-  virtual Move *get_move() = 0;
+  virtual Move<Decision> get_move() = 0;
 
   virtual double get_next_goal_distance() = 0;
 
-  void move(const Move *move)
+  void move(const Move<Decision> *move)
   { _engine->move(move); }
 
   int opponent_color() const
@@ -64,7 +65,7 @@ public:
 private:
   int _color;
   int _opponent_color;
-  Engine *_engine;
+  Engine<Decision> *_engine;
   int _level;
 };
 

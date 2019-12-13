@@ -88,9 +88,9 @@ int Engine::current_color() const
   return _color;
 }
 
-openxum::core::common::Moves Engine::get_possible_move_list() const
+openxum::core::common::Moves<Decision> Engine::get_possible_move_list() const
 {
-  openxum::core::common::Moves moves;
+  openxum::core::common::Moves<Decision> moves;
   const Coordinates &playable_tower = find_playable_tower(_color);
 
   if (playable_tower.is_valid()) {
@@ -98,7 +98,7 @@ openxum::core::common::Moves Engine::get_possible_move_list() const
         State(playable_tower.x(), playable_tower.y(), _play_color), _color);
 
     for (const Coordinates &c: list) {
-      moves.push_back(new Move(MOVE, playable_tower, c));
+      moves.push_back(common::Move<Decision>(Decision(MOVE, playable_tower, c)));
     }
   } else {
     if (_play_color == TowerColor::NONE) {
@@ -109,11 +109,11 @@ openxum::core::common::Moves Engine::get_possible_move_list() const
             State(s.x(), s.y(), _play_color), _color);
 
         for (const Coordinates &c: list) {
-          moves.push_back(new Move(MOVE, s.coordinates(), c));
+          moves.push_back(common::Move<Decision>(Decision(MOVE, s.coordinates(), c)));
         }
       }
     } else {
-      moves.push_back(new Move(PASS, Coordinates(), Coordinates()));
+      moves.push_back(common::Move<Decision>(Decision(PASS, Coordinates(), Coordinates())));
     }
   }
   return moves;
@@ -137,15 +137,15 @@ bool Engine::is_finished() const
   return _phase == FINISH;
 }
 
-void Engine::move(const openxum::core::common::Move *move)
+void Engine::move(const openxum::core::common::Move<Decision> &move)
 {
-  auto *m = dynamic_cast<const openxum::core::games::kamisado::Move *>(move);
-
-  if (m->type() == MOVE) {
-    move_tower(m->from(), m->to());
-  } else {
-    change_color();
-  }
+  std::for_each(move.begin(), move.end(), [this](const Decision &m) {
+    if (m.type() == MOVE) {
+      move_tower(m.from(), m.to());
+    } else {
+      change_color();
+    }
+  });
 }
 
 std::string Engine::to_string() const

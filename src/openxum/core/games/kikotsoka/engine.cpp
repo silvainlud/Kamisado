@@ -21,7 +21,7 @@
  */
 
 #include <openxum/core/games/kikotsoka/engine.hpp>
-#include <openxum/core/games/kikotsoka/move.hpp>
+#include <openxum/core/games/kikotsoka/decision.hpp>
 
 namespace openxum {
 namespace core {
@@ -148,58 +148,83 @@ Engine *Engine::clone() const
   return e;
 }
 
-openxum::core::common::Moves Engine::get_possible_move_list() const
+openxum::core::common::Moves<Decision> Engine::get_possible_move_list() const
 {
-  openxum::core::common::Moves moves;
+  openxum::core::common::Moves<Decision> moves;
 
   if (_phase == Phase::PUT_SHIDO) {
-    for (int l = 0; l < _size; ++l) {
-      for (int c = 0; c < _size; ++c) {
-        if (is_valid(Coordinates(c, l))) {
-          moves.push_back(
-              new Move(MoveType::PUT_SHIDO, _color, Coordinates(c, l), -1));
-        }
-      }
-    }
+    get_possible_put_shido(moves);
     if (moves.empty()) {
-      moves.push_back(new Move(MoveType::PASS, _color, Coordinates(), -1));
+      moves.push_back(common::Move<Decision>(
+          Decision(DecisionType::PASS, _color, Coordinates(), -1)));
     }
   } else if (_phase == Phase::PUT_PIECE) {
-    if ((_color == Color::BLACK and _black_piece_number > 0) or
-        (_color == Color::WHITE and _white_piece_number > 0)) {
-      std::vector<std::vector<Possible_pattern_results>> possible_patterns = is_possible_patterns();
-      int possible_cases_number = count_possible_cases(possible_patterns);
+    get_possible_put_piece(moves);
+    if (moves.empty()) {
+      moves.push_back(common::Move<Decision>(
+          Decision(DecisionType::PASS, _color, Coordinates(), -1)));
+    }
+  } else if (_phase == Phase::CHOICE_PIECE) {
+    get_possible_put_shido(moves, true);
+    get_possible_put_piece(moves, true);
+  } else { // phase = Phase::CHOICE_PATTERN
+    std::vector<Coordinates> result = check_patterns();
 
-      if (possible_cases_number > 0) {
-        std::vector<Engine::Possible_pattern_results> one_piece_patterns = get_one_piece_pattern(
-            possible_patterns);
+    for (std::vector<Coordinates>::size_type i = 0; i < result.size(); ++i) {
+      moves.push_back(common::Move<Decision>(
+          Decision(DecisionType::CHOICE_PATTERN, _color, Coordinates(), (int) i)));
+    }
+  }
+  return moves;
+}
 
-        for (int l = 0; l < _size; ++l) {
-          for (int c = 0; c < _size; ++c) {
-            if (is_valid(Coordinates(c, l)) and is_connect(Coordinates(c, l))
-                and not possible_forbidden_pattern(Coordinates(c, l),
-                                                   one_piece_patterns)) {
-              moves.push_back(
-                  new Move(MoveType::PUT_PIECE, _color, Coordinates(c, l), -1));
+void Engine::get_possible_put_piece(common::Moves<Decision> &moves, bool decision) const
+{
+  if ((_color == Color::BLACK and _black_piece_number > 0) or
+      (_color == Color::WHITE and _white_piece_number > 0)) {
+    std::vector<std::vector<Possible_pattern_results>> possible_patterns = is_possible_patterns();
+    int possible_cases_number = count_possible_cases(possible_patterns);
+
+    if (possible_cases_number > 0) {
+      std::vector<Engine::Possible_pattern_results> one_piece_patterns = get_one_piece_pattern(
+          possible_patterns);
+
+      for (int l = 0; l < _size; ++l) {
+        for (int c = 0; c < _size; ++c) {
+          if (is_valid(Coordinates(c, l)) and is_connect(Coordinates(c, l))
+              and not possible_forbidden_pattern(Coordinates(c, l),
+                                                 one_piece_patterns)) {
+            if (decision) {
+              moves.push_back(common::Move<Decision>(
+                  {Decision(DecisionType::CHOICE_PIECE, _color, Coordinates(), 0),
+                   Decision(DecisionType::PUT_PIECE, _color, Coordinates(c, l), -1)}));
+            } else {
+              moves.push_back(common::Move<Decision>(
+                  Decision(DecisionType::PUT_PIECE, _color, Coordinates(c, l), -1)));
             }
           }
         }
       }
     }
-    if (moves.empty()) {
-      moves.push_back(new Move(MoveType::PASS, _color, Coordinates(), -1));
-    }
-  } else if (_phase == Phase::CHOICE_PIECE) {
-    moves.push_back(new Move(MoveType::CHOICE_PIECE, _color, Coordinates(), 0));
-    moves.push_back(new Move(MoveType::CHOICE_PIECE, _color, Coordinates(), 1));
-  } else { // phase = Phase::CHOICE_PATTERN
-    std::vector<Coordinates> result = check_patterns();
+  }
+}
 
-    for (std::vector<Coordinates>::size_type i = 0; i < result.size(); ++i) {
-      moves.push_back(new Move(MoveType::CHOICE_PATTERN, _color, Coordinates(), (int) i));
+void Engine::get_possible_put_shido(common::Moves<Decision> &moves, bool decision) const
+{
+  for (int l = 0; l < _size; ++l) {
+    for (int c = 0; c < _size; ++c) {
+      if (is_valid(Coordinates(c, l))) {
+        if (decision) {
+          moves.push_back(common::Move<Decision>(
+              {Decision(DecisionType::CHOICE_PIECE, _color, Coordinates(), 0),
+               Decision(DecisionType::PUT_SHIDO, _color, Coordinates(c, l), -1)}));
+        } else {
+          moves.push_back(common::Move<Decision>(
+              Decision(DecisionType::PUT_SHIDO, _color, Coordinates(c, l), -1)));
+        }
+      }
     }
   }
-  return moves;
 }
 
 double Engine::gain(int color) const
@@ -209,7 +234,8 @@ double Engine::gain(int color) const
   if (_black_level == _white_level) {
     g = (_black_captured_piece_number - _white_captured_piece_number) / 2.;
   } else {
-    g = 2 * (_black_level - _white_level) + (_black_captured_piece_number - _white_captured_piece_number) / 2.;
+    g = 2 * (_black_level - _white_level)
+        + (_black_captured_piece_number - _white_captured_piece_number) / 2.;
   }
   return color == Color::BLACK ? g : -g;
 }
@@ -246,19 +272,16 @@ bool Engine::is_stoppable() const
       or _previous_white_level != _white_level;
 }
 
-void Engine::move(const openxum::core::common::Move *move)
+void Engine::move(const openxum::core::common::Move<Decision> &move)
 {
-  auto *m = dynamic_cast<const openxum::core::games::kikotsoka::Move *>(move);
-
-  _pattern_origin = Coordinates();
-
-  ++_move_number;
-  _previous_black_level = _black_level;
-  _previous_white_level = _white_level;
-  if (move != nullptr) {
-    if (m->type() == MoveType::PUT_SHIDO) {
-      _board[m->to().line()][m->to().column()] =
-          m->color() == Color::BLACK ? State::BLACK_SHIDO : State::WHITE_SHIDO;
+  std::for_each(move.begin(), move.end(), [this](const Decision &m) {
+    _pattern_origin = Coordinates();
+    ++_move_number;
+    _previous_black_level = _black_level;
+    _previous_white_level = _white_level;
+    if (m.type() == DecisionType::PUT_SHIDO) {
+      _board[m.to().line()][m.to().column()] =
+          m.color() == Color::BLACK ? State::BLACK_SHIDO : State::WHITE_SHIDO;
       if (_color == Color::BLACK) {
         --_black_shido_number;
       } else {
@@ -285,15 +308,15 @@ void Engine::move(const openxum::core::common::Move *move)
         next_phase();
       }
       _pass = 0;
-    } else if (m->type() == MoveType::PUT_PIECE) {
-      _board[m->to().line()][m->to().column()] =
-          m->color() == Color::BLACK ? State::BLACK : State::WHITE;
+    } else if (m.type() == DecisionType::PUT_PIECE) {
+      _board[m.to().line()][m.to().column()] =
+          m.color() == Color::BLACK ? State::BLACK : State::WHITE;
       if (_color == Color::BLACK) {
         --_black_piece_number;
       } else {
         --_white_piece_number;
       }
-      _last_coordinates = m->to();
+      _last_coordinates = m.to();
 
       std::vector<Coordinates> result = check_patterns();
 
@@ -316,17 +339,17 @@ void Engine::move(const openxum::core::common::Move *move)
         next_phase();
       }
       _pass = 0;
-    } else if (m->type() == MoveType::CHOICE_PIECE) {
-      if (m->index() == 0) {
+    } else if (m.type() == DecisionType::CHOICE_PIECE) {
+      if (m.index() == 0) {
         _phase = Phase::PUT_SHIDO;
       } else {
         _phase = Phase::PUT_PIECE;
       }
-    } else if (m->type() == MoveType::CHOICE_PATTERN) {
+    } else if (m.type() == DecisionType::CHOICE_PATTERN) {
       std::vector<Coordinates> result = check_patterns();
 
-      capture(result[m->index()]);
-      block(result[m->index()]);
+      capture(result[m.index()]);
+      block(result[m.index()]);
       if (_color == Color::BLACK) {
         _previous_black_level = _black_level;
         ++_black_level;
@@ -336,13 +359,13 @@ void Engine::move(const openxum::core::common::Move *move)
       }
       change_color();
       next_phase();
-    } else if (m->type() == MoveType::PASS) {
+    } else if (m.type() == DecisionType::PASS) {
       ++_pass;
       _last_coordinates = Coordinates();
       change_color();
       next_phase();
     }
-  }
+  });
 }
 
 std::string Engine::to_string() const

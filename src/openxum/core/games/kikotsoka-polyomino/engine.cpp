@@ -21,7 +21,7 @@
  */
 
 #include <openxum/core/games/kikotsoka-polyomino/engine.hpp>
-#include <openxum/core/games/kikotsoka-polyomino/move.hpp>
+#include <openxum/core/games/kikotsoka-polyomino/decision.hpp>
 
 namespace openxum {
 namespace core {
@@ -246,9 +246,9 @@ double Engine::gain(int color) const
   return color == Color::BLACK ? g : -g;
 }
 
-openxum::core::common::Moves Engine::get_possible_move_list() const
+openxum::core::common::Moves<Decision> Engine::get_possible_move_list() const
 {
-  openxum::core::common::Moves moves;
+  openxum::core::common::Moves<Decision> moves;
 
   if (_phase == Phase::PUT_POLYOMINO) {
     Engine *e = clone();
@@ -266,9 +266,8 @@ openxum::core::common::Moves Engine::get_possible_move_list() const
           for (int l = 0; l < _size; ++l) {
             for (int c = 0; c < _size; ++c) {
               if (e->is_valid(polyomino, Coordinates(c, l), first)) {
-                moves.push_back(
-                    new Move(MoveType::PUT_POLYOMINO, _color, Coordinates(c, l), k,
-                             r, -1));
+                moves.push_back(common::Move<Decision>(
+                    Decision(DecisionType::PUT_POLYOMINO, _color, Coordinates(c, l), k, r, -1)));
               }
             }
           }
@@ -278,14 +277,16 @@ openxum::core::common::Moves Engine::get_possible_move_list() const
       }
     }
     if (moves.empty()) {
-      moves.push_back(new Move(MoveType::PASS, _color, Coordinates(), -1, -1, -1));
+      moves.push_back(common::Move<Decision>(
+          Decision(DecisionType::PASS, _color, Coordinates(), -1, -1, -1)));
     }
     delete e;
   } else { // phase = Phase::CHOICE_PATTERN
     std::vector<Coordinates> result = check_patterns(_last_coordinates);
 
     for (int i = 0; i < (int) result.size(); ++i) {
-      moves.push_back(new Move(MoveType::CHOICE_PATTERN, _color, Coordinates(), -1, -1, i));
+      moves.push_back(common::Move<Decision>(
+          Decision(DecisionType::CHOICE_PATTERN, _color, Coordinates(), -1, -1, i)));
     }
   }
   return moves;
@@ -332,24 +333,22 @@ bool Engine::is_stoppable() const
       or _previous_white_level != _white_level;
 }
 
-void Engine::move(const openxum::core::common::Move *move)
+void Engine::move(const openxum::core::common::Move<Decision> &move)
 {
-  auto *m = dynamic_cast<const openxum::core::games::kikotsoka_polyomino::Move *>(move);
-
-  ++_move_number;
-  _previous_black_level = _black_level;
-  _previous_white_level = _white_level;
-  if (m != nullptr) {
-    if (m->type() == MoveType::PUT_POLYOMINO) {
+  std::for_each(move.begin(), move.end(), [this](const Decision &m) {
+    ++_move_number;
+    _previous_black_level = _black_level;
+    _previous_white_level = _white_level;
+    if (m.type() == DecisionType::PUT_POLYOMINO) {
       Polyomino *polyomino =
-          m->color() == Color::BLACK ? _black_polyominos[m->polyomino_index()] :
-          _white_polyominos[m->polyomino_index()];
+          m.color() == Color::BLACK ? _black_polyominos[m.polyomino_index()] :
+          _white_polyominos[m.polyomino_index()];
 
-      for (int i = polyomino->rotation(); i < m->rotation(); ++i) {
+      for (int i = polyomino->rotation(); i < m.rotation(); ++i) {
         polyomino->rotate();
       }
-      put_polyomino(polyomino, m->to());
-      _last_coordinates = m->to();
+      put_polyomino(polyomino, m.to());
+      _last_coordinates = m.to();
 
       std::vector<Coordinates> result = check_patterns(_last_coordinates);
 
@@ -372,11 +371,11 @@ void Engine::move(const openxum::core::common::Move *move)
         _phase = Phase::PUT_POLYOMINO;
       }
       _pass = 0;
-    } else if (m->type() == MoveType::CHOICE_PATTERN) {
+    } else if (m.type() == DecisionType::CHOICE_PATTERN) {
       std::vector<Coordinates> result = check_patterns(_last_coordinates);
 
-      capture(result[m->index()]);
-      block(result[m->index()]);
+      capture(result[m.index()]);
+      block(result[m.index()]);
       if (_color == Color::BLACK) {
         ++_black_level;
       } else {
@@ -384,13 +383,13 @@ void Engine::move(const openxum::core::common::Move *move)
       }
       change_color();
       _phase = Phase::PUT_POLYOMINO;
-    } else if (m->type() == MoveType::PASS) {
+    } else if (m.type() == DecisionType::PASS) {
       ++_pass;
       _last_coordinates = Coordinates();
       change_color();
       _phase = Phase::PUT_POLYOMINO;
     }
-  }
+  });
 }
 
 std::string Engine::to_string() const
@@ -513,8 +512,9 @@ bool Engine::check_no_blocked(const Coordinates &origin) const
   bool blocked = false;
 
   while (not blocked and l < origin.line() + 3) {
-    blocked = _board[l][c] == State::BLOCKED_IN_BLACK or _board[l][c] == State::BLOCKED_IN_WHITE or
-        _board[l][c] == State::BLACK_BLOCKED or _board[l][c] == State::WHITE_BLOCKED;
+    blocked =
+        _board[l][c] == State::BLOCKED_IN_BLACK or _board[l][c] == State::BLOCKED_IN_WHITE or
+            _board[l][c] == State::BLACK_BLOCKED or _board[l][c] == State::WHITE_BLOCKED;
     ++c;
     if (c == origin.column() + 3) {
       c = origin.column();

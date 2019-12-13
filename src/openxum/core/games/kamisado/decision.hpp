@@ -1,5 +1,5 @@
 /**
- * @file openxum/core/games/kikotsoka/move.hpp
+ * @file openxum/core/games/kamisado/decision.hpp
  * See the AUTHORS or Authors.txt file
  */
 
@@ -20,37 +20,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef OPENXUM_CORE_GAMES_KIKOTSOKA_MOVE_HPP
-#define OPENXUM_CORE_GAMES_KIKOTSOKA_MOVE_HPP
+#ifndef OPENXUM_CORE_GAMES_KAMISADO_DECISION_HPP
+#define OPENXUM_CORE_GAMES_KAMISADO_DECISION_HPP
 
-#include <openxum/core/common/move.hpp>
-#include <openxum/core/games/kikotsoka/color.hpp>
-#include <openxum/core/games/kikotsoka/coordinates.hpp>
-#include <openxum/core/games/kikotsoka/move_type.hpp>
+#include <openxum/core/common/decision.hpp>
+#include <openxum/core/games/kamisado/coordinates.hpp>
+#include <openxum/core/games/kamisado/decision_type.hpp>
 
 namespace openxum {
 namespace core {
 namespace games {
-namespace kikotsoka {
+namespace kamisado {
 
-class Move : public openxum::core::common::Move
+class Decision : public openxum::core::common::Decision
 {
 public:
-  Move() = default;
+  Decision() = default;
 
-  Move(const MoveType::Values &type, const Color &color, const Coordinates &to, int index);
-
-  openxum::core::common::Move *clone() const override;
-
-  const Color &color() const
-  { return _color; }
+  Decision(const DecisionType &type, const Coordinates &to, const Coordinates &from);
 
   void decode(const std::string &) override;
 
   std::string encode() const override;
 
-  int index() const
-  { return _index; }
+  const Coordinates &from() const
+  { return _from; }
 
   void from_object(const nlohmann::json &) override;
 
@@ -59,16 +53,22 @@ public:
 
   nlohmann::json to_object() const override;
 
-  std::string to_string() const override;
+  std::string to_string() const override
+  {
+    if (_type == MOVE) {
+      return "move tower from " + _from.to_string() + " to " + _to.to_string();
+    } else {
+      return "pass";
+    }
+  }
 
-  MoveType::Values type() const
+  DecisionType type() const
   { return _type; }
 
 private:
-  MoveType::Values _type;
-  Color _color;
+  DecisionType _type;
+  Coordinates _from;
   Coordinates _to;
-  int _index;
 };
 
 }

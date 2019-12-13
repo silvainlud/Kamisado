@@ -26,7 +26,7 @@
 #include <openxum/core/common/engine.hpp>
 
 #include <openxum/core/games/kikotsoka-polyomino/coordinates.hpp>
-#include <openxum/core/games/kikotsoka-polyomino/move.hpp>
+#include <openxum/core/games/kikotsoka-polyomino/decision.hpp>
 #include <openxum/core/games/kikotsoka-polyomino/phase.hpp>
 #include <openxum/core/games/kikotsoka-polyomino/polyomino.hpp>
 #include <openxum/core/games/kikotsoka-polyomino/state.hpp>
@@ -38,7 +38,7 @@ namespace core {
 namespace games {
 namespace kikotsoka_polyomino {
 
-class Engine : public openxum::core::common::Engine
+class Engine : public openxum::core::common::Engine<Decision>
 {
 public:
   Engine() = default;
@@ -48,9 +48,6 @@ public:
   ~Engine() override;
 
   int best_is() const override;
-
-  openxum::core::common::Move *build_move() const override
-  { return new Move(); }
 
   Engine *clone() const override;
 
@@ -62,7 +59,7 @@ public:
   const std::string &get_name() const override
   { return GAME_NAME; }
 
-  openxum::core::common::Moves get_possible_move_list() const override;
+  openxum::core::common::Moves<Decision> get_possible_move_list() const override;
 
   std::string id() const override;
 
@@ -70,7 +67,7 @@ public:
 
   bool is_stoppable() const override;
 
-  void move(const openxum::core::common::Move *move) override;
+  void move(const openxum::core::common::Move<Decision>& move) override;
 
   void parse(const std::string &) override
   {}

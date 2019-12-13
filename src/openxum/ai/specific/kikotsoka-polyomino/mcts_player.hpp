@@ -24,21 +24,22 @@
 #define OPENXUM_AI_SPECIFIC_KIKOTSOKA_POLYOMINO_MCTS_PLAYER_HPP
 
 #include <openxum/ai/common/mcts_player.hpp>
+#include <openxum/core/games/kikotsoka-polyomino/decision.hpp>
 
 namespace openxum {
 namespace ai {
 namespace specific {
 namespace kikotsoka_polyomino {
 
-class MCTSPlayer : public openxum::ai::common::MCTSPlayer
+class MCTSPlayer : public openxum::ai::common::MCTSPlayer<core::games::kikotsoka_polyomino::Decision>
 {
 public:
   MCTSPlayer(int c,
              int o,
-             openxum::core::common::Engine *e,
+             openxum::core::common::Engine<core::games::kikotsoka_polyomino::Decision> *e,
              unsigned int simulation_number,
              bool stoppable)
-      : openxum::ai::common::MCTSPlayer(c, o, e, simulation_number, stoppable)
+      : openxum::ai::common::MCTSPlayer<core::games::kikotsoka_polyomino::Decision>(c, o, e, simulation_number, stoppable)
   {}
 };
 

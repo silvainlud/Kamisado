@@ -29,6 +29,7 @@ namespace openxum {
 namespace core {
 namespace common {
 
+template<class Decision>
 class Engine
 {
 public:
@@ -38,16 +39,16 @@ public:
 
   virtual ~Engine() = default;
 
-  virtual void apply_moves(const Moves &moves)
-  {
-    for (auto m: moves) {
-      move(m);
-    }
-  }
+//  virtual void apply_moves(const Moves &moves)
+//  {
+//    for (auto m: moves) {
+//      move(m);
+//    }
+//  }
 
   virtual int best_is() const = 0;
 
-  virtual Move *build_move() const = 0;
+//  virtual Move<Decision> *build_move() const = 0;
 
   virtual Engine *clone() const = 0;
 
@@ -63,7 +64,7 @@ public:
 
   virtual const std::string &get_name() const = 0;
 
-  virtual Moves get_possible_move_list() const = 0;
+  virtual Moves<Decision> get_possible_move_list() const = 0;
 
   virtual std::string id() const = 0;
 
@@ -71,7 +72,7 @@ public:
 
   virtual bool is_stoppable() const = 0;
 
-  virtual void move(const Move *move) = 0;
+  virtual void move(const Move<Decision> &move) = 0;
 
   unsigned int move_number() const
   { return _move_number; }

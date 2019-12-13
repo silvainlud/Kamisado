@@ -1,5 +1,5 @@
 /**
- * @file openxum/core/games/kikotsoka-polyomino/move_type.hpp
+ * @file openxum/core/games/kikotsoka/decision_type.hpp
  * See the AUTHORS or Authors.txt file
  */
 
@@ -20,20 +20,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef OPENXUM_CORE_GAMES_KIKOTSOKA_POLYOMINO_MOVE_TYPE_HPP
-#define OPENXUM_CORE_GAMES_KIKOTSOKA_POLYOMINO_MOVE_TYPE_HPP
+#ifndef OPENXUM_CORE_GAMES_KIKOTSOKA_DECISION_TYPE_HPP
+#define OPENXUM_CORE_GAMES_KIKOTSOKA_DECISION_TYPE_HPP
+
+#include <openxum/core/common/move.hpp>
+#include <openxum/core/games/kamisado/coordinates.hpp>
 
 namespace openxum {
 namespace core {
 namespace games {
-namespace kikotsoka_polyomino {
+namespace kikotsoka {
 
-class MoveType
+class DecisionType
 {
 public:
   enum Values
   {
-    PUT_POLYOMINO = 0, CHOICE_PATTERN = 1, PASS = 2
+    PUT_SHIDO = 0, PUT_PIECE = 1, CHOICE_PIECE = 2, CHOICE_PATTERN = 3, PASS = 4
   };
 };
 

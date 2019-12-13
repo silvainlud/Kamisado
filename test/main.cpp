@@ -41,19 +41,19 @@ void play(int a, int b, int c)
   openxum::core::games::kikotsoka::Engine *engine = new openxum::core::games::kikotsoka::Engine(
       openxum::core::games::kikotsoka::SMALL,
       openxum::core::games::kikotsoka::Color::BLACK);
-  openxum::core::common::Player *player_one = new openxum::ai::specific::kikotsoka::MCTSPlayer(
+  openxum::core::common::Player<openxum::core::games::kikotsoka::Decision> *player_one = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
-      engine, 2000, false);
+      engine, 10, false);
 //    openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //            openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
 //            engine);
-  openxum::core::common::Player *player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
+  openxum::core::common::Player<openxum::core::games::kikotsoka::Decision> *player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-      engine, 2000, false);
+      engine, 10, false);
 //  openxum::core::common::Player *player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //      openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
 //      engine);
-  openxum::core::common::Player *current_player = player_one;
+  openxum::core::common::Player<openxum::core::games::kikotsoka::Decision> *current_player = player_one;
   unsigned int possible_move_number = 0;
   unsigned int turn_number = 0;
 
@@ -72,12 +72,14 @@ void play(int a, int b, int c)
   patterns[openxum::core::games::kikotsoka::Color::WHITE] = std::vector<std::string>();
 
   while (not engine->is_finished()) {
-    openxum::core::common::Move *move = current_player->get_move();
+    openxum::core::common::Move<openxum::core::games::kikotsoka::Decision> move = current_player->get_move();
     int color = engine->current_color();
 
     possible_move_number += engine->get_possible_move_list().size();
     sizes[engine->current_color()].push_back(engine->get_possible_move_list().size());
-    moves.push_back(move->encode());
+    moves.push_back(move.encode());
+
+    std::cout << move.to_string() << std::endl;
 
     engine->move(move);
 
@@ -108,7 +110,6 @@ void play(int a, int b, int c)
       }
       ++turn_number;
     }
-    delete move;
   }
 
   {
@@ -193,9 +194,9 @@ int main(int, const char **)
   ThreadPool pool(max);
   std::vector<std::future<void> > results;
 
-  for (unsigned int a = 12; a < 21; ++a) {
-    for (unsigned int b = 33; b < 45; ++b) {
-      for (unsigned int c = 2; c < 6; ++c) {
+  for (unsigned int a = 12; a < 13; ++a) {
+    for (unsigned int b = 42; b < 43; ++b) {
+      for (unsigned int c = 5; c < 6; ++c) {
         for (int i = 0; i < 1; ++i) {
           results.emplace_back(pool.enqueue([=] { play(a, b, c); }));
         }

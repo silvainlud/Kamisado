@@ -24,17 +24,18 @@
 #define OPENXUM_AI_SPECIFIC_KAMISADO_MCTS_PLAYER_HPP
 
 #include <openxum/ai/common/mcts_player.hpp>
+#include <openxum/core/games/kamisado/decision.hpp>
 
 namespace openxum {
 namespace ai {
 namespace specific {
 namespace kamisado {
 
-class MCTSPlayer : public openxum::ai::common::MCTSPlayer
+class MCTSPlayer : public openxum::ai::common::MCTSPlayer<core::games::kamisado::Decision>
 {
 public:
-  MCTSPlayer(int c, int o, openxum::core::common::Engine *e)
-      : openxum::ai::common::MCTSPlayer(c, o, e, 10000)
+  MCTSPlayer(int c, int o, openxum::core::common::Engine<core::games::kamisado::Decision> *e)
+      : openxum::ai::common::MCTSPlayer<core::games::kamisado::Decision>(c, o, e, 10000)
   {}
 };
 

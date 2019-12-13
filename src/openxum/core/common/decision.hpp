@@ -1,5 +1,5 @@
 /**
- * @file openxum/core/games/kikotsoka/move_type.hpp
+ * @file openxum/core/common/decision.hpp
  * See the AUTHORS or Authors.txt file
  */
 
@@ -20,27 +20,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef OPENXUM_CORE_GAMES_KIKOTSOKA_MOVE_TYPE_HPP
-#define OPENXUM_CORE_GAMES_KIKOTSOKA_MOVE_TYPE_HPP
+#ifndef OPENXUM_CORE_COMMON_DECISION_HPP
+#define OPENXUM_CORE_COMMON_DECISION_HPP
 
-#include <openxum/core/common/move.hpp>
-#include <openxum/core/games/kamisado/coordinates.hpp>
+#include <nlohmann/json.hpp>
+#include <vector>
 
 namespace openxum {
 namespace core {
-namespace games {
-namespace kikotsoka {
+namespace common {
 
-class MoveType
+class Decision
 {
 public:
-  enum Values
-  {
-    PUT_SHIDO = 0, PUT_PIECE = 1, CHOICE_PIECE = 2, CHOICE_PATTERN = 3, PASS = 4
-  };
+  Decision() = default;
+
+  virtual ~Decision() = default;
+
+  virtual void decode(const std::string &) = 0;
+
+  virtual std::string encode() const = 0;
+
+  virtual void from_object(const nlohmann::json &) = 0;
+
+  virtual nlohmann::json to_object() const = 0;
+
+  virtual std::string to_string() const = 0;
 };
 
-}
 }
 }
 }

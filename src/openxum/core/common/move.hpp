@@ -23,56 +23,134 @@
 #ifndef OPENXUM_CORE_COMMON_MOVE_HPP
 #define OPENXUM_CORE_COMMON_MOVE_HPP
 
-#include <nlohmann/json.hpp>
+#include <openxum/core/common/decision.hpp>
 #include <vector>
 
 namespace openxum {
 namespace core {
 namespace common {
 
-class Move
+template<class Decision>
+class Move : public std::vector<Decision>
 {
+  typedef typename std::vector<Decision> type;
+
 public:
   Move() = default;
 
+  Move(const Decision &decision)
+  { type::push_back(decision); }
+
+  Move(std::initializer_list<Decision> list) : std::vector<Decision>(list)
+  {}
+
   virtual ~Move() = default;
 
-  virtual Move *clone() const = 0;
+  Move *clone() const
+  { return new Move(*this); }
 
-  virtual void decode(const std::string &) = 0;
+  void decode(const std::string &str)
+  {
+    if (str[0] == '<') {
+      std::string::size_type start = 2;
+      size_t pos = str.find_first_of(' ', start);
 
-  virtual std::string encode() const = 0;
+      while (pos != std::string::npos) {
+        if (pos != start) {
+          Decision decision;
 
-  virtual void from_object(const nlohmann::json &) = 0;
+          decision.decode(str.substr(start, pos - start));
+          type::push_back(decision);
+        }
+        start = pos + 1;
+        pos = str.find_first_of(' ', start);
+      }
+    } else {
+      Decision decision;
 
-  virtual nlohmann::json to_object() const = 0;
+      decision.decode(str);
+      type::push_back(decision);
+    }
+  }
 
-  virtual std::string to_string() const = 0;
+  std::string encode() const
+  {
+    std::string str;
+
+    if (type::size() > 1) {
+      std::for_each(type::begin(), type::end(),
+                    [&str](const Decision &e) {
+                      if (str.empty()) {
+                        str = e.encode();
+                      } else {
+                        str += ";" + e.encode();
+                      }
+                    });
+      return "[" + str + "]";
+    } else {
+      return type::front().encode();
+    }
+  }
+
+  void from_object(const nlohmann::json &json)
+  {
+    if (json.is_array()) {
+      std::for_each(json.begin(), json.end(),
+                    [this](const nlohmann::json &e) {
+                      Decision decision;
+
+                      decision.from_object(e);
+                      type::push_back(decision);
+                    });
+    } else {
+      Decision decision;
+
+      decision.from_object(json);
+      type::push_back(decision);
+    }
+  }
+
+  nlohmann::json to_object() const
+  {
+    if (type::size() > 1) {
+      nlohmann::json json = nlohmann::json::array();
+
+      std::for_each(type::begin(), type::end(),
+                    [&json](const Decision &e) { json.push_back(e.to_object()); });
+      return json;
+    } else {
+      return type::front().to_object();
+    }
+  }
+
+  std::string to_string() const
+  {
+    std::string str;
+
+    if (type::size() > 1) {
+      std::for_each(type::begin(), type::end(), [&str](const Decision &e) {
+        if (str.empty()) {
+          str = e.to_string();
+        } else {
+          str += " ; " + e.to_string();
+        }
+      });
+      return "(" + str + ")";
+    } else {
+      return type::back().to_string();
+    }
+  }
 };
 
-class Moves : public std::vector<Move *>
+template<class Decision>
+class Moves : public std::vector<Move<Decision>>
 {
 public:
   Moves() = default;
 
-  virtual ~Moves()
-  {
-    for (auto move: *this) {
-      delete move;
-    }
-  }
-
-  Moves &operator=(const Moves &m)
-  {
-    for (auto move: *this) {
-      delete move;
-    }
-    for (auto move: m) {
-      push_back(move->clone());
-    }
-    return *this;
-  }
+  ~Moves() = default;
 };
+
 }
 }
 }

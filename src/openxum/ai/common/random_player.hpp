@@ -31,20 +31,53 @@ namespace openxum {
 namespace ai {
 namespace common {
 
-class RandomPlayer : public openxum::core::common::Player
+template <class Decision>
+class RandomPlayer : public openxum::core::common::Player<Decision>
 {
 public:
-  RandomPlayer(int c, int o, openxum::core::common::Engine *e)
-      : openxum::core::common::Player(c, o, e), _rng(_random_device())
+  RandomPlayer(int c, int o, openxum::core::common::Engine<Decision> *e)
+      : openxum::core::common::Player<Decision>(c, o, e), _rng(_random_device())
   {}
 
-  openxum::core::common::Move *get_move() override;
+  openxum::core::common::Move<Decision> get_move() override
+  {
+    const openxum::core::common::Moves<Decision> &list = this->engine().get_possible_move_list();
+    openxum::core::common::Move<Decision> move;
+
+    if (not list.empty()) {
+      std::uniform_int_distribution<std::mt19937::result_type> distribution(0, list.size() - 1);
+
+      move = list[distribution(_rng)];
+      compute_next_goal_distance(move);
+    }
+    return move;
+  }
 
   double get_next_goal_distance() override
   { return _next_goal_distance; }
 
 private:
-  unsigned int compute_next_goal_distance(const openxum::core::common::Move *move);
+  void compute_next_goal_distance(const openxum::core::common::Move<Decision> &move)
+  {
+    openxum::core::common::Engine<Decision> *e = this->engine().clone();
+
+    e->move(move);
+
+    unsigned int initial_goal = e->current_goal(this->color());
+
+    _next_goal_distance = 0;
+    while (not e->is_finished() and e->current_goal(this->color()) == initial_goal) {
+      const openxum::core::common::Moves<Decision> &list = e->get_possible_move_list();
+
+      if (not list.empty()) {
+        std::uniform_int_distribution<std::mt19937::result_type> distribution(0, list.size() - 1);
+
+        e->move(list[distribution(_rng)]);
+        ++_next_goal_distance;
+      }
+    }
+    delete e;
+  }
 
   std::random_device _random_device;
   std::mt19937 _rng;

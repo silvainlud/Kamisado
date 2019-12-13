@@ -1,5 +1,5 @@
 /**
- * @file openxum/core/games/kikotsoka-polyomino/move.hpp
+ * @file openxum/core/games/kikotsoka-polyomino/decision.hpp
  * See the AUTHORS or Authors.txt file
  */
 
@@ -20,32 +20,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef OPENXUM_CORE_GAMES_KIKOTSOKA_POLYOMINO_MOVE_HPP
-#define OPENXUM_CORE_GAMES_KIKOTSOKA_POLYOMINO_MOVE_HPP
+#ifndef OPENXUM_CORE_GAMES_KIKOTSOKA_POLYOMINO_DECISION_HPP
+#define OPENXUM_CORE_GAMES_KIKOTSOKA_POLYOMINO_DECISION_HPP
 
-#include <openxum/core/common/move.hpp>
+#include <openxum/core/common/decision.hpp>
 #include <openxum/core/games/kikotsoka-polyomino/color.hpp>
 #include <openxum/core/games/kikotsoka-polyomino/coordinates.hpp>
-#include <openxum/core/games/kikotsoka-polyomino/move_type.hpp>
+#include <openxum/core/games/kikotsoka-polyomino/decision_type.hpp>
 
 namespace openxum {
 namespace core {
 namespace games {
 namespace kikotsoka_polyomino {
 
-class Move : public openxum::core::common::Move
+class Decision : public openxum::core::common::Decision
 {
 public:
-  Move() = default;
+  Decision() = default;
 
-  Move(const MoveType::Values &type,
+  Decision(const DecisionType::Values &type,
        const Color &color,
        const Coordinates &to,
        int polyomino_index,
        int rotation,
        int index);
-
-  openxum::core::common::Move *clone() const override;
 
   const Color &color() const
   { return _color; }
@@ -72,11 +70,11 @@ public:
 
   std::string to_string() const override;
 
-  MoveType::Values type() const
+  DecisionType::Values type() const
   { return _type; }
 
 private:
-  MoveType::Values _type;
+  DecisionType::Values _type;
   Color _color;
   Coordinates _to;
   int _polyomino_index;

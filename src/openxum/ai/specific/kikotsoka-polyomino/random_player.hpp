@@ -24,17 +24,18 @@
 #define OPENXUM_AI_SPECIFIC_KIKOTSOKA_POLYOMINO_RANDOM_PLAYER_HPP
 
 #include <openxum/ai/common/random_player.hpp>
+#include <openxum/core/games/kikotsoka-polyomino/decision.hpp>
 
 namespace openxum {
 namespace ai {
 namespace specific {
 namespace kikotsoka_polyomino {
 
-class RandomPlayer : public openxum::ai::common::RandomPlayer
+class RandomPlayer : public openxum::ai::common::RandomPlayer<core::games::kikotsoka_polyomino::Decision>
 {
 public:
-  RandomPlayer(int c, int o, openxum::core::common::Engine *e)
-      : openxum::ai::common::RandomPlayer(c, o, e)
+  RandomPlayer(int c, int o, openxum::core::common::Engine<core::games::kikotsoka_polyomino::Decision> *e)
+      : openxum::ai::common::RandomPlayer<core::games::kikotsoka_polyomino::Decision>(c, o, e)
   {}
 };
 
