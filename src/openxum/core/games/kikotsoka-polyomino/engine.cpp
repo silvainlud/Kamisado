@@ -224,24 +224,11 @@ double Engine::gain(int color) const
 {
   double g;
 
-  if (winner_is() == Color::BLACK) {
-    if (_black_level == _white_level) {
-      g = (_black_captured_piece_number - _white_captured_piece_number) / 2.;
-    } else {
-      g = 2 * (_black_level - _white_level);
-    }
-  } else if (winner_is() == Color::WHITE) {
-    if (_black_level == _white_level) {
-      g = (_white_captured_piece_number - _black_captured_piece_number) / 2.;
-    } else {
-      g = 2 * (_white_level - _black_level);
-    }
+  if (_black_level == _white_level) {
+    g = (_black_captured_piece_number - _white_captured_piece_number) / 2.;
   } else {
-    if (_black_level == _white_level) {
-      g = (_black_captured_piece_number - _white_captured_piece_number) / 2.;
-    } else {
-      g = 2 * (_black_level - _white_level);
-    }
+    g = 2 * (_black_level - _white_level)
+        + (_black_captured_piece_number - _white_captured_piece_number) / 2.;
   }
   return color == Color::BLACK ? g : -g;
 }

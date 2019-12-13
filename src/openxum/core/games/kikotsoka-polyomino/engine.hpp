@@ -89,6 +89,8 @@ public:
 
   int _black_level;
   int _white_level;
+  int _black_captured_piece_number;
+  int _white_captured_piece_number;
 
 private:
   typedef std::vector<bool> PatternLine;
@@ -136,12 +138,10 @@ private:
   State::Values **_board;
   std::vector<Polyomino *> _black_polyominos;
   std::vector<Polyomino *> _white_polyominos;
-  int _black_polyomino_number;
-  int _white_polyomino_number;
   Coordinates _last_coordinates;
   int _pass;
-  int _black_captured_piece_number;
-  int _white_captured_piece_number;
+  int _black_polyomino_number;
+  int _white_polyomino_number;
   int _previous_black_level;
   int _previous_white_level;
   bool _black_failed;
