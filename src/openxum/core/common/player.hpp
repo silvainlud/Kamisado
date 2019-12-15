@@ -53,6 +53,8 @@ public:
 
   virtual double get_next_goal_distance() = 0;
 
+  virtual unsigned int get_next_goal_distance_evaluation() = 0;
+
   void move(const Move<Decision> *move)
   { _engine->move(move); }
 

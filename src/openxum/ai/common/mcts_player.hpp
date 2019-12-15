@@ -64,12 +64,16 @@ public:
     _best = get_final_choice();
     move = _best->get_move();
     compute_next_goal_distance(move);
+    _next_goal_distance_evaluation = _best->get_visit_number();
     clear();
     return move;
   }
 
   double get_next_goal_distance() override
   { return _next_goal_distance; }
+
+  unsigned int get_next_goal_distance_evaluation() override
+  { return _next_goal_distance_evaluation; }
 
 private:
   void add_children(Node<Decision> *current)
@@ -248,6 +252,7 @@ private:
   std::map<std::string, Node<Decision> *> _nodes;
   Node<Decision> *_best;
   double _next_goal_distance;
+  unsigned int _next_goal_distance_evaluation;
 };
 
 }

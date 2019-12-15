@@ -43,13 +43,13 @@ void play(int a, int b, int c)
       openxum::core::games::kikotsoka::Color::BLACK);
   openxum::core::common::Player<openxum::core::games::kikotsoka::Decision> *player_one = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
-      engine, 10, false);
+      engine, 2000, false);
 //    openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //            openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
 //            engine);
   openxum::core::common::Player<openxum::core::games::kikotsoka::Decision> *player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-      engine, 10, false);
+      engine, 2000, false);
 //  openxum::core::common::Player *player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //      openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
 //      engine);
@@ -63,6 +63,7 @@ void play(int a, int b, int c)
   std::map<int, std::vector<int>> levels;
   std::map<int, std::vector<std::string>> patterns;
   std::map<int, std::vector<double>> distances;
+  std::map<int, std::vector<unsigned int>> distance_evaluations;
 
   sizes[openxum::core::games::kikotsoka::Color::BLACK] = std::vector<int>();
   sizes[openxum::core::games::kikotsoka::Color::WHITE] = std::vector<int>();
@@ -105,8 +106,10 @@ void play(int a, int b, int c)
       levels[openxum::core::games::kikotsoka::Color::WHITE].push_back(engine->_white_level);
       if (color == openxum::core::games::kikotsoka::Color::BLACK) {
         distances[color].push_back(player_one->get_next_goal_distance());
+        distance_evaluations[color].push_back(player_one->get_next_goal_distance_evaluation());
       } else {
         distances[color].push_back(player_two->get_next_goal_distance());
+        distance_evaluations[color].push_back(player_two->get_next_goal_distance_evaluation());
       }
       ++turn_number;
     }
@@ -142,6 +145,16 @@ void play(int a, int b, int c)
     output_file << std::endl;
     output_file << "D[WHITE];";
     for (int e: distances[openxum::core::games::kikotsoka::Color::WHITE]) {
+      output_file << e << ";";
+    }
+    output_file << std::endl;
+    output_file << "E[BLACK];";
+    for (int e: distance_evaluations[openxum::core::games::kikotsoka::Color::BLACK]) {
+      output_file << e << ";";
+    }
+    output_file << std::endl;
+    output_file << "E[WHITE];";
+    for (int e: distance_evaluations[openxum::core::games::kikotsoka::Color::WHITE]) {
       output_file << e << ";";
     }
     output_file << std::endl;
@@ -194,10 +207,10 @@ int main(int, const char **)
   ThreadPool pool(max);
   std::vector<std::future<void> > results;
 
-  for (unsigned int a = 12; a < 13; ++a) {
-    for (unsigned int b = 42; b < 43; ++b) {
-      for (unsigned int c = 5; c < 6; ++c) {
-        for (int i = 0; i < 1; ++i) {
+  for (unsigned int a = 12; a < 21; ++a) {
+    for (unsigned int b = 33; b < 43; ++b) {
+      for (unsigned int c = 2; c < 6; ++c) {
+        for (int i = 0; i < 200; ++i) {
           results.emplace_back(pool.enqueue([=] { play(a, b, c); }));
         }
       }

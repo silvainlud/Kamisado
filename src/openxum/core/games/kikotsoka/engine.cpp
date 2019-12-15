@@ -196,7 +196,7 @@ void Engine::get_possible_put_piece(common::Moves<Decision> &moves, bool decisio
                                                  one_piece_patterns)) {
             if (decision) {
               moves.push_back(common::Move<Decision>(
-                  {Decision(DecisionType::CHOICE_PIECE, _color, Coordinates(), 0),
+                  {Decision(DecisionType::CHOICE_PIECE, _color, Coordinates(), 1),
                    Decision(DecisionType::PUT_PIECE, _color, Coordinates(c, l), -1)}));
             } else {
               moves.push_back(common::Move<Decision>(

@@ -56,6 +56,9 @@ public:
   double get_next_goal_distance() override
   { return _next_goal_distance; }
 
+  unsigned int get_next_goal_distance_evaluation() override
+  { return 1; }
+
 private:
   void compute_next_goal_distance(const openxum::core::common::Move<Decision> &move)
   {
