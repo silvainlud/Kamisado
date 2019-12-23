@@ -100,6 +100,8 @@ public:
   int _white_level;
   int _black_captured_piece_number;
   int _white_captured_piece_number;
+  int _black_captured_shido_number;
+  int _white_captured_shido_number;
   Coordinates _pattern_origin;
 
 private:

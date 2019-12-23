@@ -84,6 +84,8 @@ Engine::Engine(int type, int color)
   _pass = 0;
   _black_captured_piece_number = 0;
   _white_captured_piece_number = 0;
+  _black_captured_shido_number = 0;
+  _white_captured_shido_number = 0;
   _black_level = 0;
   _white_level = 0;
   _previous_black_level = 0;
@@ -104,18 +106,26 @@ Engine::~Engine()
 // public methods
 int Engine::best_is() const
 {
-  if (_black_level == 6 or _black_level > _white_level or _white_failed) {
+//  if (_black_level == 6 or _black_level > _white_level or _white_failed) {
+//    return Color::BLACK;
+//  } else if (_white_level == 6 or _black_level < _white_level or _black_failed) {
+//    return Color::WHITE;
+//  } else {
+//    if (_black_captured_piece_number > _white_captured_piece_number) {
+//      return Color::BLACK;
+//    } else if (_black_captured_piece_number < _white_captured_piece_number) {
+//      return Color::WHITE;
+//    } else {
+//      return Color::NONE;
+//    }
+//  }
+
+  if (gain(Color::BLACK) > gain(Color::WHITE)) {
     return Color::BLACK;
-  } else if (_white_level == 6 or _black_level < _white_level or _black_failed) {
+  } else if (gain(Color::BLACK) < gain(Color::WHITE)) {
     return Color::WHITE;
   } else {
-    if (_black_captured_piece_number > _white_captured_piece_number) {
-      return Color::BLACK;
-    } else if (_black_captured_piece_number < _white_captured_piece_number) {
-      return Color::WHITE;
-    } else {
-      return Color::NONE;
-    }
+    return Color::NONE;
   }
 }
 
@@ -138,6 +148,8 @@ Engine *Engine::clone() const
   e->_pass = _pass;
   e->_black_captured_piece_number = _black_captured_piece_number;
   e->_white_captured_piece_number = _white_captured_piece_number;
+  e->_black_captured_shido_number = _black_captured_shido_number;
+  e->_white_captured_shido_number = _white_captured_shido_number;
   e->_black_level = _black_level;
   e->_white_level = _white_level;
   e->_previous_black_level = _previous_black_level;
@@ -229,15 +241,25 @@ void Engine::get_possible_put_shido(common::Moves<Decision> &moves, bool decisio
 
 double Engine::gain(int color) const
 {
-  double g;
+//  double g;
+//
+//  if (_black_level == _white_level) {
+//    g = (_black_captured_piece_number - _white_captured_piece_number) / 2.;
+//  } else {
+//    g = 2 * (_black_level - _white_level)
+//        + (_black_captured_piece_number - _white_captured_piece_number) / 2.;
+//  }
+//  return color == Color::BLACK ? g : -g;
 
-  if (_black_level == _white_level) {
-    g = (_black_captured_piece_number - _white_captured_piece_number) / 2.;
+  if (color == Color::BLACK) {
+    int level_gain = _black_level - _white_level;
+
+    return _black_captured_piece_number + 2 * _black_captured_shido_number + level_gain > 0 ? level_gain : 0;
   } else {
-    g = 2 * (_black_level - _white_level)
-        + (_black_captured_piece_number - _white_captured_piece_number) / 2.;
+    int level_gain = _white_level - _black_level;
+
+    return _white_captured_piece_number + 2 * _white_captured_shido_number + level_gain > 0 ? level_gain : 0;
   }
-  return color == Color::BLACK ? g : -g;
 }
 
 std::string Engine::id() const
@@ -254,6 +276,8 @@ std::string Engine::id() const
   str += std::to_string(_pass);
   str += std::to_string(_black_captured_piece_number);
   str += std::to_string(_white_captured_piece_number);
+  str += std::to_string(_black_captured_shido_number);
+  str += std::to_string(_white_captured_shido_number);
   str += std::to_string(_black_level);
   str += std::to_string(_white_level);
   str += std::to_string(_phase);
@@ -263,7 +287,8 @@ std::string Engine::id() const
 bool Engine::is_finished() const
 {
   return _black_level == 5 or _white_level == 5 or _pass == 2 or _black_failed or _white_failed or
-      (_black_piece_number == 0 and _white_piece_number == 0);
+      (_black_piece_number == 0 and _white_piece_number == 0 and _black_shido_number == 0
+          and _white_shido_number == 0);
 }
 
 bool Engine::is_stoppable() const
@@ -394,6 +419,8 @@ std::string Engine::to_string() const
   str += std::to_string(_black_level) + " " + std::to_string(_white_level) + " " +
       std::to_string(_black_captured_piece_number) + " " +
       std::to_string(_white_captured_piece_number) + " " +
+      std::to_string(_black_captured_shido_number) + " " +
+      std::to_string(_white_captured_shido_number) + " " +
       std::to_string(_black_piece_number) + " " + std::to_string(_white_piece_number) + " " +
       std::to_string(_black_shido_number) + " " + std::to_string(_white_shido_number) + " " +
       std::to_string(_black_failed) + " " + std::to_string(_white_failed) + " "
@@ -405,19 +432,27 @@ std::string Engine::to_string() const
 int Engine::winner_is() const
 {
   if (is_finished()) {
-    if (_black_level == 5 or _black_level > _white_level or _white_failed) {
-      return Color::BLACK;
-    } else if (_white_level == 5 or _black_level < _white_level or _black_failed) {
-      return Color::WHITE;
-    } else {
-      if (_black_captured_piece_number > _white_captured_piece_number) {
+//    if (_black_level == 5 or _black_level > _white_level or _white_failed) {
+//      return Color::BLACK;
+//    } else if (_white_level == 5 or _black_level < _white_level or _black_failed) {
+//      return Color::WHITE;
+//    } else {
+//      if (_black_captured_piece_number > _white_captured_piece_number) {
+//        return Color::BLACK;
+//      } else if (_black_captured_piece_number < _white_captured_piece_number) {
+//        return Color::WHITE;
+//      } else {
+//        return Color::NONE;
+//      }
+//    }
+
+      if (gain(Color::BLACK) > gain(Color::WHITE)) {
         return Color::BLACK;
-      } else if (_black_captured_piece_number < _white_captured_piece_number) {
+      } else if (gain(Color::BLACK) < gain(Color::WHITE)) {
         return Color::WHITE;
       } else {
         return Color::NONE;
       }
-    }
   } else {
     return Color::NONE;
   }
@@ -463,18 +498,27 @@ void Engine::capture(const Coordinates &origin)
 {
   int l = origin.line();
   int c = origin.column();
-  int n = 0;
+  int n_piece = 0;
+  int n_shido = 0;
 
   while (l < origin.line() + 3) {
     if ((_board[l][c] == State::BLACK or _board[l][c] == State::BLACK_SHIDO)
         and _color == Color::WHITE) {
       _board[l][c] = State::VACANT;
-      ++n;
+      if (_board[l][c] == State::BLACK) {
+        ++n_piece;
+      } else {
+        ++n_shido;
+      }
     }
     if ((_board[l][c] == State::WHITE or _board[l][c] == State::WHITE_SHIDO)
         and _color == Color::BLACK) {
       _board[l][c] = State::VACANT;
-      ++n;
+      if (_board[l][c] == State::WHITE) {
+        ++n_piece;
+      } else {
+        ++n_shido;
+      }
     }
     ++c;
     if (c == origin.column() + 3) {
@@ -483,11 +527,13 @@ void Engine::capture(const Coordinates &origin)
     }
   }
   if (_color == Color::BLACK) {
-    _black_captured_piece_number += n;
-    _black_piece_number += n;
+    _black_captured_piece_number += n_piece;
+    _black_captured_shido_number += n_shido;
+    _black_piece_number += n_piece;
   } else {
-    _white_captured_piece_number += n;
-    _white_piece_number += n;
+    _white_captured_piece_number += n_piece;
+    _white_captured_shido_number += n_shido;
+    _white_piece_number += n_piece;
   }
 }
 
