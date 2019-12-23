@@ -44,14 +44,14 @@ void play(int a, int b, int c)
   openxum::core::common::Player<openxum::core::games::kikotsoka::Decision>
       *player_one = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
-      engine, 10000, false);
+      engine, 500, false);
 //    openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //            openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
 //            engine);
   openxum::core::common::Player<openxum::core::games::kikotsoka::Decision>
       *player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-      engine, 10000, false);
+      engine, 500, false);
 //  openxum::core::common::Player *player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //      openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
 //      engine);
@@ -216,7 +216,7 @@ int main(int, const char **)
   for (unsigned int a = 12; a < 13; ++a) {
     for (unsigned int b = 32; b < 33; ++b) {
       for (unsigned int c = 3; c < 4; ++c) {
-        for (int i = 0; i < 96; ++i) {
+        for (int i = 0; i < 1000; ++i) {
           results.emplace_back(pool.enqueue([=] { play(a, b, c); }));
         }
       }

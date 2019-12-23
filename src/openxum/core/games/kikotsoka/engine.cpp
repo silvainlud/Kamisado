@@ -254,11 +254,11 @@ double Engine::gain(int color) const
   if (color == Color::BLACK) {
     int level_gain = _black_level - _white_level;
 
-    return _black_captured_piece_number + 2 * _black_captured_shido_number + level_gain > 0 ? level_gain : 0;
+    return _black_captured_piece_number + 5 * _black_captured_shido_number + (level_gain > 0 ? level_gain : 0);
   } else {
     int level_gain = _white_level - _black_level;
 
-    return _white_captured_piece_number + 2 * _white_captured_shido_number + level_gain > 0 ? level_gain : 0;
+    return _white_captured_piece_number + 5 * _white_captured_shido_number + (level_gain > 0 ? level_gain : 0);
   }
 }
 
