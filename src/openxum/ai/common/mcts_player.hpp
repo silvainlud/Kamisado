@@ -136,7 +136,7 @@ private:
       winner = clone->best_is();
     } else {
       while (not clone->is_finished()) {
-        if (engine->current_goal(this->color()) == clone->current_goal(this->color())) {
+        if (_root->engine()->current_goal(this->color()) == clone->current_goal(this->color())) {
           ++distance;
         }
         play_a_turn_randomly(clone);

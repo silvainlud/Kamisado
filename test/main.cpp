@@ -43,13 +43,13 @@ void play(int a, int b, int c)
       openxum::core::games::kikotsoka::Color::BLACK);
   openxum::core::common::Player<openxum::core::games::kikotsoka::Decision> *player_one = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
-      engine, 2000, false);
+      engine, 10000, false);
 //    openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //            openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
 //            engine);
   openxum::core::common::Player<openxum::core::games::kikotsoka::Decision> *player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-      engine, 2000, false);
+      engine, 10000, false);
 //  openxum::core::common::Player *player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //      openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
 //      engine);
@@ -207,10 +207,10 @@ int main(int, const char **)
   ThreadPool pool(max);
   std::vector<std::future<void> > results;
 
-  for (unsigned int a = 12; a < 21; ++a) {
-    for (unsigned int b = 33; b < 43; ++b) {
-      for (unsigned int c = 2; c < 6; ++c) {
-        for (int i = 0; i < 200; ++i) {
+  for (unsigned int a = 12; a < 13; ++a) {
+    for (unsigned int b = 32; b < 33; ++b) {
+      for (unsigned int c = 3; c < 4; ++c) {
+        for (int i = 0; i < 96; ++i) {
           results.emplace_back(pool.enqueue([=] { play(a, b, c); }));
         }
       }
