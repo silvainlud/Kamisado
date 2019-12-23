@@ -41,19 +41,22 @@ void play(int a, int b, int c)
   openxum::core::games::kikotsoka::Engine *engine = new openxum::core::games::kikotsoka::Engine(
       openxum::core::games::kikotsoka::SMALL,
       openxum::core::games::kikotsoka::Color::BLACK);
-  openxum::core::common::Player<openxum::core::games::kikotsoka::Decision> *player_one = new openxum::ai::specific::kikotsoka::MCTSPlayer(
+  openxum::core::common::Player<openxum::core::games::kikotsoka::Decision>
+      *player_one = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
       engine, 10000, false);
 //    openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //            openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
 //            engine);
-  openxum::core::common::Player<openxum::core::games::kikotsoka::Decision> *player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
+  openxum::core::common::Player<openxum::core::games::kikotsoka::Decision>
+      *player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
       engine, 10000, false);
 //  openxum::core::common::Player *player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //      openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
 //      engine);
-  openxum::core::common::Player<openxum::core::games::kikotsoka::Decision> *current_player = player_one;
+  openxum::core::common::Player<openxum::core::games::kikotsoka::Decision>
+      *current_player = player_one;
   unsigned int possible_move_number = 0;
   unsigned int turn_number = 0;
 
@@ -73,7 +76,8 @@ void play(int a, int b, int c)
   patterns[openxum::core::games::kikotsoka::Color::WHITE] = std::vector<std::string>();
 
   while (not engine->is_finished()) {
-    openxum::core::common::Move<openxum::core::games::kikotsoka::Decision> move = current_player->get_move();
+    openxum::core::common::Move<openxum::core::games::kikotsoka::Decision>
+        move = current_player->get_move();
     int color = engine->current_color();
 
     possible_move_number += engine->get_possible_move_list().size();
@@ -190,6 +194,8 @@ void play(int a, int b, int c)
                 << engine->_black_level << ";" << engine->_white_level << ";"
                 << engine->_black_captured_piece_number << ";"
                 << engine->_white_captured_piece_number << ";"
+                << engine->_black_captured_shido_number << ";"
+                << engine->_white_captured_shido_number << ";"
                 << (engine->winner_is() == openxum::core::games::kikotsoka::Color::BLACK ? "b"
                                                                                          : "w")
                 << std::endl;
