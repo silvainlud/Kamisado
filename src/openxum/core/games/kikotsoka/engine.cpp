@@ -766,7 +766,7 @@ void Engine::next_phase()
   if (_color == Color::BLACK) {
     if (_black_shido_number == 0) {
       _phase = Phase::PUT_PIECE;
-    } else if (_black_shido_number == 5) {
+    } else if (_black_shido_number == CONFIGURATIONS[_type].shido_number) {
       _phase = Phase::PUT_SHIDO;
     } else {
       _phase = Phase::CHOICE_PIECE;
@@ -774,7 +774,7 @@ void Engine::next_phase()
   } else {
     if (_white_shido_number == 0) {
       _phase = Phase::PUT_PIECE;
-    } else if (_white_shido_number == 5) {
+    } else if (_white_shido_number == CONFIGURATIONS[_type].shido_number) {
       _phase = Phase::PUT_SHIDO;
     } else {
       _phase = Phase::CHOICE_PIECE;
