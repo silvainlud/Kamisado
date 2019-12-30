@@ -206,7 +206,9 @@ openxum::core::common::Moves<Decision> Engine::get_possible_move_list() const
   return moves;
 }
 
-void Engine::get_possible_put_piece(common::Moves<Decision> &moves, const Color& color, bool decision) const
+void Engine::get_possible_put_piece(common::Moves<Decision> &moves,
+                                    const Color &color,
+                                    bool decision) const
 {
   if ((color == Color::BLACK and _black_piece_number > 0) or
       (color == Color::WHITE and _white_piece_number > 0)) {
@@ -239,16 +241,19 @@ void Engine::get_possible_put_piece(common::Moves<Decision> &moves, const Color&
 
 void Engine::get_possible_put_shido(common::Moves<Decision> &moves, bool decision) const
 {
-  for (int l = 0; l < _size; ++l) {
-    for (int c = 0; c < _size; ++c) {
-      if (is_valid(Coordinates(c, l))) {
-        if (decision) {
-          moves.push_back(common::Move<Decision>(
-              {Decision(DecisionType::CHOICE_PIECE, _color, Coordinates(), 0),
-               Decision(DecisionType::PUT_SHIDO, _color, Coordinates(c, l), -1)}));
-        } else {
-          moves.push_back(common::Move<Decision>(
-              Decision(DecisionType::PUT_SHIDO, _color, Coordinates(c, l), -1)));
+  if ((_color == Color::BLACK and _black_shido_number > 0) or
+      (_color == Color::WHITE and _white_shido_number > 0)) {
+    for (int l = 0; l < _size; ++l) {
+      for (int c = 0; c < _size; ++c) {
+        if (is_valid(Coordinates(c, l))) {
+          if (decision) {
+            moves.push_back(common::Move<Decision>(
+                {Decision(DecisionType::CHOICE_PIECE, _color, Coordinates(), 0),
+                 Decision(DecisionType::PUT_SHIDO, _color, Coordinates(c, l), -1)}));
+          } else {
+            moves.push_back(common::Move<Decision>(
+                Decision(DecisionType::PUT_SHIDO, _color, Coordinates(c, l), -1)));
+          }
         }
       }
     }
@@ -842,7 +847,7 @@ std::vector<std::vector<Engine::Possible_pattern_results>> Engine::is_possible_p
   return result;
 }
 
-bool Engine::is_possible_to_put_piece(const Color& color) const
+bool Engine::is_possible_to_put_piece(const Color &color) const
 {
   openxum::core::common::Moves<Decision> moves;
 
@@ -865,7 +870,11 @@ void Engine::next_phase()
     if (_black_shido_number == CONFIGURATIONS[_type].shido_number) {
       _phase = Phase::PUT_INITIAL_SHIDO;
     } else if (_black_possible_shido) {
-      _phase = Phase::CHOICE_PIECE;
+      if (_black_shido_number > 0) {
+        _phase = Phase::CHOICE_PIECE;
+      } else {
+        _phase = Phase::PUT_PIECE;
+      }
     } else {
       _phase = Phase::PUT_PIECE;
     }
@@ -873,7 +882,11 @@ void Engine::next_phase()
     if (_white_shido_number == CONFIGURATIONS[_type].shido_number) {
       _phase = Phase::PUT_INITIAL_SHIDO;
     } else if (_white_possible_shido) {
-      _phase = Phase::CHOICE_PIECE;
+      if (_white_shido_number > 0) {
+        _phase = Phase::CHOICE_PIECE;
+      } else {
+        _phase = Phase::PUT_PIECE;
+      }
     } else {
       _phase = Phase::PUT_PIECE;
     }
