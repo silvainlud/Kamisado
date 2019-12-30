@@ -33,7 +33,7 @@ class Phase
 public:
   enum Values
   {
-    PUT_SHIDO = 0, PUT_PIECE = 1, CHOICE_PIECE = 2, CHOICE_PATTERN = 3
+    PUT_SHIDO = 0, PUT_PIECE = 1, CHOICE_PIECE = 2, CHOICE_PATTERN = 3, PUT_INITIAL_SHIDO = 4
   };
 };
 

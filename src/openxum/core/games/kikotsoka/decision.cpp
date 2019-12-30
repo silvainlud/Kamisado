@@ -27,7 +27,10 @@ namespace core {
 namespace games {
 namespace kikotsoka {
 
-Decision::Decision(const DecisionType::Values &type, const Color &color, const Coordinates &to, int index)
+Decision::Decision(const DecisionType::Values &type,
+                   const Color &color,
+                   const Coordinates &to,
+                   int index)
     : _type(type), _color(color), _to(to), _index(index)
 {}
 
@@ -47,7 +50,8 @@ void Decision::decode(const std::string &str)
     _to = Coordinates();
     _index = str[1] - '0';
   } else {
-    _type = str[1] == '+' ? DecisionType::PUT_PIECE : DecisionType::PUT_SHIDO;
+    _type = str[1] == '+' ? DecisionType::PUT_PIECE : str[1] == '*' ? DecisionType::PUT_SHIDO
+                                                                    : DecisionType::PUT_INITIAL_SHIDO;
     if (str.size() == 4) {
       _to = Coordinates(str[2] - 'A', str[3] - '1');
     } else {
@@ -69,6 +73,8 @@ std::string Decision::encode() const
     return std::string(_color == Color::BLACK ? "B" : "W") + "+" + _to.to_string();
   } else if (_type == DecisionType::PUT_SHIDO) {
     return std::string(_color == Color::BLACK ? "B" : "W") + "*" + _to.to_string();
+  } else if (_type == DecisionType::PUT_INITIAL_SHIDO) {
+    return std::string(_color == Color::BLACK ? "B" : "W") + "#" + _to.to_string();
   }
   return "";
 }
@@ -112,6 +118,9 @@ std::string Decision::to_string() const
         _to.to_string();
   } else if (_type == DecisionType::PUT_SHIDO) {
     return "PUT " + std::string(_color == Color::BLACK ? "black" : "white") + " SHIDO at " +
+        _to.to_string();
+  } else if (_type == DecisionType::PUT_INITIAL_SHIDO) {
+    return "PUT INITIAL " + std::string(_color == Color::BLACK ? "black" : "white") + " SHIDO at " +
         _to.to_string();
   }
   return "";

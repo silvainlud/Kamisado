@@ -149,12 +149,14 @@ private:
   get_one_piece_pattern(const std::vector<std::vector<Possible_pattern_results>> &list) const;
 
   void get_possible_put_piece(common::Moves<kikotsoka::Decision> &moves,
-                              bool decision = false) const;
+                              const Color &color, bool decision = false) const;
 
   void get_possible_put_shido(common::Moves<kikotsoka::Decision> &moves,
                               bool decision = false) const;
 
   bool is_connect(const Coordinates &coordinates) const;
+
+  bool is_possible_to_put_piece(const Color &color) const;
 
   Possible_pattern_results is_possible_pattern(const Pattern &pattern) const;
 
@@ -184,6 +186,8 @@ private:
   int _white_piece_number;
   int _black_shido_number;
   int _white_shido_number;
+  bool _black_possible_shido;
+  bool _white_possible_shido;
   Coordinates _last_coordinates;
   int _pass;
   int _previous_black_level;
