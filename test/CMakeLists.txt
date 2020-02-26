@@ -11,3 +11,7 @@ TARGET_LINK_LIBRARIES(openxum-ws-cpp-test openxum-core-games-kikotsoka openxum-a
 ADD_EXECUTABLE(openxum-ws-cpp-test-kikotsoka-polyomino main_kikotsoka_polyomino.cpp)
 
 TARGET_LINK_LIBRARIES(openxum-ws-cpp-test-kikotsoka-polyomino openxum-core-games-kikotsoka-polyomino openxum-ai-common)
+
+ADD_EXECUTABLE(openxum-ws-cpp-test-kamisado main_kamisado.cpp)
+
+TARGET_LINK_LIBRARIES(openxum-ws-cpp-test-kamisado openxum-core-games-kamisado openxum-ai-common)

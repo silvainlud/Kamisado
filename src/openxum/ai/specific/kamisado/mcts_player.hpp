@@ -35,7 +35,7 @@ class MCTSPlayer : public openxum::ai::common::MCTSPlayer<core::games::kamisado:
 {
 public:
   MCTSPlayer(int c, int o, openxum::core::common::Engine<core::games::kamisado::Decision> *e)
-      : openxum::ai::common::MCTSPlayer<core::games::kamisado::Decision>(c, o, e, 10000)
+      : openxum::ai::common::MCTSPlayer<core::games::kamisado::Decision>(c, o, e, 100)
   {}
 };
 
