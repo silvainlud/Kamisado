@@ -199,17 +199,20 @@ void play(int a, int b, int c, int d, int e)
     }
     output_file << std::endl;
 
-    output_file << "T;" << a << ";" << b << ";" << c << ";"
-                << engine->move_number() << ";" << possible_move_number << ";"
+    output_file << "T;" << a << ";" << b << ";" << c << ";" << d << ";"
+                << engine->move_number() << ";"
+                << possible_move_number << ";"
                 << turn_number << ";"
-                << engine->_black_level << ";" << engine->_white_level << ";"
+                << engine->_black_level << ";"
+                << engine->_white_level << ";"
                 << engine->_black_captured_piece_number << ";"
                 << engine->_white_captured_piece_number << ";"
                 << engine->_black_captured_shido_number << ";"
                 << engine->_white_captured_shido_number << ";"
+                << engine->_black_pattern_number << ";"
+                << engine->_white_pattern_number << ";"
                 << (engine->winner_is() == openxum::core::games::kikotsoka::Color::BLACK ? "b"
                                                                                          : "w")
-                << engine->_black_pattern_number << ";" << engine->_white_pattern_number << ";"
                 << std::endl;
     output_file.flush();
   }
@@ -229,10 +232,10 @@ int main(int, const char **)
 
   for (int a = 13; a < 14; ++a) {
     for (int b = 32; b < 33; ++b) {
-      for (int c = 3; c < 6; ++c) {
-        for (int d = 1; d < 2; ++d) {
+      for (int c = 5; c < 6; ++c) {
+        for (int d = 1; d < 4; ++d) {
           for (int e = 2000; e < 2001; ++e) {
-            for (int i = 0; i < 100; ++i) {
+            for (int i = 0; i < 10; ++i) {
               results.emplace_back(pool.enqueue([=] { play(a, b, c, d, e); }));
             }
           }
