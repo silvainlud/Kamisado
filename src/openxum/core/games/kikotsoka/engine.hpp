@@ -42,7 +42,7 @@ class Engine : public openxum::core::common::Engine<kikotsoka::Decision>
 public:
   Engine() = default;
 
-  Engine(int type, int color);
+  Engine(int type, int color, int variant);
 
   ~Engine() override;
 
@@ -186,8 +186,6 @@ private:
   int _white_piece_number;
   int _black_shido_number;
   int _white_shido_number;
-  bool _black_possible_shido;
-  bool _white_possible_shido;
   Coordinates _last_coordinates;
   int _pass;
   int _previous_black_level;
@@ -195,6 +193,11 @@ private:
   bool _black_failed;
   bool _white_failed;
   int _size;
+  int _variant;
+
+  // rule variant 2
+  bool _black_possible_shido;
+  bool _white_possible_shido;
 
   static Patterns PATTERNS;
   static std::string GAME_NAME;

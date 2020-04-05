@@ -66,8 +66,8 @@ std::string Engine::GAME_NAME = "kikotsoka";
 typedef State::Values *PtrState;
 
 // constructors
-Engine::Engine(int type, int color)
-    : _color(Color(color)), _type(type)
+Engine::Engine(int type, int color, int variant)
+    : _color(Color(color)), _type(type), _variant(variant)
 {
   _size = CONFIGURATIONS[_type].size;
   _board = new PtrState[_size];
@@ -86,15 +86,22 @@ Engine::Engine(int type, int color)
   _white_captured_piece_number = 0;
   _black_captured_shido_number = 0;
   _white_captured_shido_number = 0;
-  _black_possible_shido = true;
-  _white_possible_shido = true;
   _black_level = 0;
   _white_level = 0;
   _previous_black_level = 0;
   _previous_white_level = 0;
   _black_failed = false;
   _white_failed = false;
-  _phase = Phase::PUT_INITIAL_SHIDO;
+
+  if (_variant == 1) {
+    _black_possible_shido = true;
+    _white_possible_shido = true;
+    _phase = Phase::PUT_SHIDO;
+  } else if (_variant == 2) {
+    _phase = Phase::PUT_INITIAL_SHIDO;
+  } else if (_variant == 3) {
+    // TODO
+  }
 }
 
 Engine::~Engine()
@@ -108,20 +115,6 @@ Engine::~Engine()
 // public methods
 int Engine::best_is() const
 {
-//  if (_black_level == 6 or _black_level > _white_level or _white_failed) {
-//    return Color::BLACK;
-//  } else if (_white_level == 6 or _black_level < _white_level or _black_failed) {
-//    return Color::WHITE;
-//  } else {
-//    if (_black_captured_piece_number > _white_captured_piece_number) {
-//      return Color::BLACK;
-//    } else if (_black_captured_piece_number < _white_captured_piece_number) {
-//      return Color::WHITE;
-//    } else {
-//      return Color::NONE;
-//    }
-//  }
-
   if (gain(Color::BLACK) > gain(Color::WHITE)) {
     return Color::BLACK;
   } else if (gain(Color::BLACK) < gain(Color::WHITE)) {
@@ -133,7 +126,7 @@ int Engine::best_is() const
 
 Engine *Engine::clone() const
 {
-  auto e = new Engine(_type, _color);
+  auto e = new Engine(_type, _color, _variant);
 
   e->_move_number = _move_number;
   e->_size = _size;
@@ -159,6 +152,11 @@ Engine *Engine::clone() const
   e->_black_failed = _black_failed;
   e->_white_failed = _white_failed;
   e->_phase = _phase;
+
+  // rule variant 2
+  e->_black_possible_shido = _black_possible_shido;
+  e->_white_possible_shido = _white_possible_shido;
+
   return e;
 }
 
@@ -166,21 +164,7 @@ openxum::core::common::Moves<Decision> Engine::get_possible_move_list() const
 {
   openxum::core::common::Moves<Decision> moves;
 
-  if (_phase == Phase::PUT_INITIAL_SHIDO) {
-    int p = std::floor(_size / 2);
-
-    if (_color == Color::BLACK) {
-      moves.push_back(common::Move<Decision>(
-          Decision(DecisionType::PUT_INITIAL_SHIDO, _color, Coordinates(p, p - 2), -1)));
-      moves.push_back(common::Move<Decision>(
-          Decision(DecisionType::PUT_INITIAL_SHIDO, _color, Coordinates(p, p + 2), -1)));
-    } else {
-      moves.push_back(common::Move<Decision>(
-          Decision(DecisionType::PUT_INITIAL_SHIDO, _color, Coordinates(p - 2, p), -1)));
-      moves.push_back(common::Move<Decision>(
-          Decision(DecisionType::PUT_INITIAL_SHIDO, _color, Coordinates(p + 2, p), -1)));
-    }
-  } else if (_phase == Phase::PUT_SHIDO) {
+  if (_phase == Phase::PUT_SHIDO) {
     get_possible_put_shido(moves);
     if (moves.empty()) {
       moves.push_back(common::Move<Decision>(
@@ -201,6 +185,25 @@ openxum::core::common::Moves<Decision> Engine::get_possible_move_list() const
     for (std::vector<Coordinates>::size_type i = 0; i < result.size(); ++i) {
       moves.push_back(common::Move<Decision>(
           Decision(DecisionType::CHOICE_PATTERN, _color, Coordinates(), (int) i)));
+    }
+  }
+
+  // rule variant 2
+  if (_variant == 2) {
+    if (_phase == Phase::PUT_INITIAL_SHIDO) {
+      int p = std::floor(_size / 2);
+
+      if (_color == Color::BLACK) {
+        moves.push_back(common::Move<Decision>(
+            Decision(DecisionType::PUT_INITIAL_SHIDO, _color, Coordinates(p, p - 2), -1)));
+        moves.push_back(common::Move<Decision>(
+            Decision(DecisionType::PUT_INITIAL_SHIDO, _color, Coordinates(p, p + 2), -1)));
+      } else {
+        moves.push_back(common::Move<Decision>(
+            Decision(DecisionType::PUT_INITIAL_SHIDO, _color, Coordinates(p - 2, p), -1)));
+        moves.push_back(common::Move<Decision>(
+            Decision(DecisionType::PUT_INITIAL_SHIDO, _color, Coordinates(p + 2, p), -1)));
+      }
     }
   }
   return moves;
@@ -262,16 +265,6 @@ void Engine::get_possible_put_shido(common::Moves<Decision> &moves, bool decisio
 
 double Engine::gain(int color) const
 {
-//  double g;
-//
-//  if (_black_level == _white_level) {
-//    g = (_black_captured_piece_number - _white_captured_piece_number) / 2.;
-//  } else {
-//    g = 2 * (_black_level - _white_level)
-//        + (_black_captured_piece_number - _white_captured_piece_number) / 2.;
-//  }
-//  return color == Color::BLACK ? g : -g;
-
   if (color == Color::BLACK) {
     int level_gain = _black_level - _white_level;
 
@@ -304,6 +297,11 @@ std::string Engine::id() const
   str += std::to_string(_black_level);
   str += std::to_string(_white_level);
   str += std::to_string(_phase);
+
+  // rule variant 2
+  str += std::to_string(_black_possible_shido);
+  str += std::to_string(_white_possible_shido);
+
   return str;
 }
 
@@ -327,19 +325,7 @@ void Engine::move(const openxum::core::common::Move<Decision> &move)
     ++_move_number;
     _previous_black_level = _black_level;
     _previous_white_level = _white_level;
-    if (m.type() == DecisionType::PUT_INITIAL_SHIDO) {
-      _board[m.to().line()][m.to().column()] =
-          m.color() == Color::BLACK ? State::BLACK_SHIDO : State::WHITE_SHIDO;
-      if (_color == Color::BLACK) {
-        _black_possible_shido = false;
-        --_black_shido_number;
-      } else {
-        _white_possible_shido = false;
-        --_white_shido_number;
-      }
-      change_color();
-      next_phase();
-    } else if (m.type() == DecisionType::PUT_SHIDO) {
+    if (m.type() == DecisionType::PUT_SHIDO) {
       _board[m.to().line()][m.to().column()] =
           m.color() == Color::BLACK ? State::BLACK_SHIDO : State::WHITE_SHIDO;
       if (_color == Color::BLACK) {
@@ -356,12 +342,18 @@ void Engine::move(const openxum::core::common::Move<Decision> &move)
           capture(result[0]);
           block(result[0]);
           if (_color == Color::BLACK) {
+
+            // rule variant 2
             _black_possible_shido = true;
             _white_possible_shido = is_possible_to_put_piece(Color::WHITE);
+
             ++_black_level;
           } else {
+
+            // rule variant 2
             _white_possible_shido = true;
             _black_possible_shido = is_possible_to_put_piece(Color::BLACK);
+
             ++_white_level;
           }
           change_color();
@@ -391,12 +383,18 @@ void Engine::move(const openxum::core::common::Move<Decision> &move)
           capture(result[0]);
           block(result[0]);
           if (_color == Color::BLACK) {
+
+            // rule variant 2
             _black_possible_shido = true;
             _white_possible_shido = is_possible_to_put_piece(Color::WHITE);
+
             ++_black_level;
           } else {
+
+            // rule variant 2
             _white_possible_shido = true;
             _black_possible_shido = is_possible_to_put_piece(Color::BLACK);
+
             ++_white_level;
           }
           change_color();
@@ -422,13 +420,19 @@ void Engine::move(const openxum::core::common::Move<Decision> &move)
       block(result[m.index()]);
       if (_color == Color::BLACK) {
         _previous_black_level = _black_level;
+
+        // rule variant 2
         _black_possible_shido = true;
         _white_possible_shido = is_possible_to_put_piece(Color::WHITE);
+
         ++_black_level;
       } else {
         _previous_white_level = _white_level;
+
+        // rule variant 2
         _white_possible_shido = true;
         _black_possible_shido = is_possible_to_put_piece(Color::BLACK);
+
         ++_white_level;
       }
       change_color();
@@ -439,6 +443,22 @@ void Engine::move(const openxum::core::common::Move<Decision> &move)
       change_color();
       next_phase();
     }
+
+    // rule variant 2
+    if (m.type() == DecisionType::PUT_INITIAL_SHIDO) {
+      _board[m.to().line()][m.to().column()] =
+          m.color() == Color::BLACK ? State::BLACK_SHIDO : State::WHITE_SHIDO;
+      if (_color == Color::BLACK) {
+        _black_possible_shido = false;
+        --_black_shido_number;
+      } else {
+        _white_possible_shido = false;
+        --_white_shido_number;
+      }
+      change_color();
+      next_phase();
+    }
+
   });
 }
 
@@ -475,26 +495,15 @@ std::string Engine::to_string() const
       std::to_string(_black_failed) + " " + std::to_string(_white_failed) + " "
       + std::to_string(_pass);
 
+  // rule variant 2
+  str += " " + std::to_string(_black_possible_shido) + " " + std::to_string(_white_possible_shido);
+
   return str;
 }
 
 int Engine::winner_is() const
 {
   if (is_finished()) {
-//    if (_black_level == 5 or _black_level > _white_level or _white_failed) {
-//      return Color::BLACK;
-//    } else if (_white_level == 5 or _black_level < _white_level or _black_failed) {
-//      return Color::WHITE;
-//    } else {
-//      if (_black_captured_piece_number > _white_captured_piece_number) {
-//        return Color::BLACK;
-//      } else if (_black_captured_piece_number < _white_captured_piece_number) {
-//        return Color::WHITE;
-//      } else {
-//        return Color::NONE;
-//      }
-//    }
-
     if (gain(Color::BLACK) > gain(Color::WHITE)) {
       return Color::BLACK;
     } else if (gain(Color::BLACK) < gain(Color::WHITE)) {
@@ -717,8 +726,7 @@ Engine::get_one_piece_pattern(const std::vector<std::vector<Possible_pattern_res
     new_list.emplace_back(Possible_pattern_results());
     for (LevelPattern::size_type i = 0; i < PATTERNS[level].size(); ++i) {
       for (Possible_pattern_results::size_type index = 0;
-           index < list[level][i].size();
-           ++index) {
+           index < list[level][i].size(); ++index) {
         if (list[level][i][index].list.size() == 1) {
           new_list[level].push_back(list[level][i][index]);
         }
@@ -847,6 +855,7 @@ std::vector<std::vector<Engine::Possible_pattern_results>> Engine::is_possible_p
   return result;
 }
 
+// rule variant 2
 bool Engine::is_possible_to_put_piece(const Color &color) const
 {
   openxum::core::common::Moves<Decision> moves;
@@ -866,29 +875,49 @@ bool Engine::is_valid2(const Coordinates &coordinates) const
 
 void Engine::next_phase()
 {
-  if (_color == Color::BLACK) {
-    if (_black_shido_number == CONFIGURATIONS[_type].shido_number) {
-      _phase = Phase::PUT_INITIAL_SHIDO;
-    } else if (_black_possible_shido) {
-      if (_black_shido_number > 0) {
-        _phase = Phase::CHOICE_PIECE;
-      } else {
+  if (_variant == 1) {
+    if (_color == Color::BLACK) {
+      if (_black_shido_number == 0) {
         _phase = Phase::PUT_PIECE;
+      } else if (_black_shido_number == CONFIGURATIONS[_type].shido_number) {
+        _phase = Phase::PUT_SHIDO;
+      } else {
+        _phase = Phase::CHOICE_PIECE;
       }
     } else {
-      _phase = Phase::PUT_PIECE;
+      if (_white_shido_number == 0) {
+        _phase = Phase::PUT_PIECE;
+      } else if (_white_shido_number == CONFIGURATIONS[_type].shido_number) {
+        _phase = Phase::PUT_SHIDO;
+      } else {
+        _phase = Phase::CHOICE_PIECE;
+      }
     }
-  } else {
-    if (_white_shido_number == CONFIGURATIONS[_type].shido_number) {
-      _phase = Phase::PUT_INITIAL_SHIDO;
-    } else if (_white_possible_shido) {
-      if (_white_shido_number > 0) {
-        _phase = Phase::CHOICE_PIECE;
+  } else if (_variant == 2) {
+    if (_color == Color::BLACK) {
+      if (_black_shido_number == CONFIGURATIONS[_type].shido_number) {
+        _phase = Phase::PUT_INITIAL_SHIDO;
+      } else if (_black_possible_shido) {
+        if (_black_shido_number > 0) {
+          _phase = Phase::CHOICE_PIECE;
+        } else {
+          _phase = Phase::PUT_PIECE;
+        }
       } else {
         _phase = Phase::PUT_PIECE;
       }
     } else {
-      _phase = Phase::PUT_PIECE;
+      if (_white_shido_number == CONFIGURATIONS[_type].shido_number) {
+        _phase = Phase::PUT_INITIAL_SHIDO;
+      } else if (_white_possible_shido) {
+        if (_white_shido_number > 0) {
+          _phase = Phase::CHOICE_PIECE;
+        } else {
+          _phase = Phase::PUT_PIECE;
+        }
+      } else {
+        _phase = Phase::PUT_PIECE;
+      }
     }
   }
 }

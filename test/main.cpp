@@ -29,10 +29,10 @@
 #include <openxum/ai/specific/kikotsoka/mcts_player.hpp>
 #include <openxum/ai/specific/kikotsoka/random_player.hpp>
 
-std::ofstream output_file("result.csv");
+std::ofstream output_file;
 std::mutex mutex;
 
-void play(int a, int b, int c)
+void play(int a, int b, int c, int d, int e)
 {
   openxum::core::games::kikotsoka::Engine::CONFIGURATIONS[0].size = a;
   openxum::core::games::kikotsoka::Engine::CONFIGURATIONS[0].piece_number = b;
@@ -40,18 +40,18 @@ void play(int a, int b, int c)
 
   openxum::core::games::kikotsoka::Engine *engine = new openxum::core::games::kikotsoka::Engine(
       openxum::core::games::kikotsoka::SMALL,
-      openxum::core::games::kikotsoka::Color::BLACK);
+      openxum::core::games::kikotsoka::Color::BLACK, d);
   openxum::core::common::Player<openxum::core::games::kikotsoka::Decision>
       *player_one = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
-      engine, 2000, false);
+      engine, e, false);
 //    openxum::core::common::Player* player_one = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //            openxum::core::games::kikotsoka::Color::BLACK, openxum::core::games::kikotsoka::Color::WHITE,
 //            engine);
   openxum::core::common::Player<openxum::core::games::kikotsoka::Decision>
       *player_two = new openxum::ai::specific::kikotsoka::MCTSPlayer(
       openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
-      engine, 2000, false);
+      engine, e, false);
 //  openxum::core::common::Player *player_two = new openxum::ai::specific::kikotsoka::RandomPlayer(
 //      openxum::core::games::kikotsoka::Color::WHITE, openxum::core::games::kikotsoka::Color::BLACK,
 //      engine);
@@ -213,11 +213,17 @@ int main(int, const char **)
   ThreadPool pool(max);
   std::vector<std::future<void> > results;
 
-  for (unsigned int a = 13; a < 14; ++a) {
-    for (unsigned int b = 32; b < 33; ++b) {
-      for (unsigned int c = 3; c < 6; ++c) {
-        for (int i = 0; i < 100; ++i) {
-          results.emplace_back(pool.enqueue([=] { play(a, b, c); }));
+  output_file.open("result.csv", std::ofstream::out | std::ofstream::trunc);
+
+  for (int a = 13; a < 14; ++a) {
+    for (int b = 32; b < 33; ++b) {
+      for (int c = 3; c < 6; ++c) {
+        for (int d = 1; d < 2; ++d) {
+          for (int e = 2000; e < 2001; ++e) {
+            for (int i = 0; i < 100; ++i) {
+              results.emplace_back(pool.enqueue([=] { play(a, b, c, d, e); }));
+            }
+          }
         }
       }
     }
