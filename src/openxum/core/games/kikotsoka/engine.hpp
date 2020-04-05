@@ -57,7 +57,13 @@ public:
   { return _color; }
 
   unsigned int current_goal(int color) const override
-  { return color == Color::BLACK ? _black_level : _white_level; }
+  {
+    if (_variant == 1 or _variant == 2) {
+      return color == Color::BLACK ? _black_level : _white_level;
+    } else if (_variant == 3){
+      return color == Color::BLACK ? _black_pattern_number : _white_pattern_number;
+    }
+  }
 
   double gain(int color, bool finish) const override;
 
