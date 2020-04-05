@@ -90,8 +90,8 @@ void test_random()
           ? openxum::core::games::kikotsoka_polyomino::Color::WHITE
           : openxum::core::games::kikotsoka_polyomino::Color::BLACK;
 
-      gains[engine->current_color()].push_back(engine->gain(engine->current_color()));
-      gains[opponent_color].push_back(engine->gain(opponent_color));
+      gains[engine->current_color()].push_back(engine->gain(engine->current_color(), false));
+      gains[opponent_color].push_back(engine->gain(opponent_color, false));
       ++turn_number;
     }
   }

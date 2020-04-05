@@ -54,7 +54,7 @@ public:
   int current_color() const override
   { return _color; }
 
-  double gain(int color) const override;
+  double gain(int color, bool finish) const override;
 
   const std::string &get_name() const override
   { return GAME_NAME; }

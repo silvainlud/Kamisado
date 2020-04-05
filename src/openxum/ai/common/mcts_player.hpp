@@ -233,9 +233,9 @@ private:
     while (current != nullptr) {
       current->visit();
       if (winner == this->color()) {
-        current->inc_wins(engine.gain(this->color()));
+        current->inc_wins(engine.gain(this->color(), true));
       } else {
-        current->inc_losses(engine.gain(winner));
+        current->inc_losses(engine.gain(winner, true));
       }
       current = current->get_father();
     }

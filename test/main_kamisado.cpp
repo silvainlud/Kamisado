@@ -84,8 +84,8 @@ void play()
                            ? openxum::core::games::kamisado::Color::WHITE
                            : openxum::core::games::kamisado::Color::BLACK;
 
-      gains[engine->current_color()].push_back(engine->gain(engine->current_color()));
-      gains[opponent_color].push_back(engine->gain(opponent_color));
+      gains[engine->current_color()].push_back(engine->gain(engine->current_color(), false));
+      gains[opponent_color].push_back(engine->gain(opponent_color, false));
       if (color == openxum::core::games::kamisado::Color::BLACK) {
         distances[color].push_back(player_one->get_next_goal_distance());
         distance_evaluations[color].push_back(player_one->get_next_goal_distance_evaluation());

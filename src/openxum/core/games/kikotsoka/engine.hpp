@@ -59,7 +59,7 @@ public:
   unsigned int current_goal(int color) const override
   { return color == Color::BLACK ? _black_level : _white_level; }
 
-  double gain(int color) const override;
+  double gain(int color, bool finish) const override;
 
   unsigned int get_goal_number() const override
   { return 5; }
@@ -96,13 +96,22 @@ public:
 
   static Configuration CONFIGURATIONS[3];
 
+  // rule variant 1 and 2
   int _black_level;
   int _white_level;
+
+  // rule variant 1, 2 and 3
   int _black_captured_piece_number;
   int _white_captured_piece_number;
   int _black_captured_shido_number;
   int _white_captured_shido_number;
   Coordinates _pattern_origin;
+
+  // rule variant 3
+  int _black_pattern_number;
+  int _white_pattern_number;
+  std::vector < int > _black_patterns;
+  std::vector < int > _white_patterns;
 
 private:
   typedef std::vector<bool> PatternLine;
@@ -137,6 +146,7 @@ private:
 
   std::vector<Coordinates> check_patterns() const;
 
+  // rule variants 1 and 2
   int count_possible_cases(const std::vector<std::vector<Possible_pattern_results>> &list) const;
 
   int distance(const Coordinates &coordinates) const
@@ -145,6 +155,7 @@ private:
         std::abs(_last_coordinates.column() - coordinates.column());
   }
 
+  // rule variants 1 and 2
   std::vector<Possible_pattern_results>
   get_one_piece_pattern(const std::vector<std::vector<Possible_pattern_results>> &list) const;
 
@@ -175,6 +186,7 @@ private:
 
   void next_phase();
 
+  // rule variants 1 and 2
   bool possible_forbidden_pattern(const Coordinates &coordinates,
                                   const std::vector<Possible_pattern_results> &list) const;
 
@@ -198,6 +210,10 @@ private:
   // rule variant 2
   bool _black_possible_shido;
   bool _white_possible_shido;
+
+  // rule variant 3
+  int _previous_black_pattern_number;
+  int _previous_white_pattern_number;
 
   static Patterns PATTERNS;
   static std::string GAME_NAME;

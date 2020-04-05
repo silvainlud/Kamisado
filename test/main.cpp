@@ -104,8 +104,8 @@ void play(int a, int b, int c, int d, int e)
                            ? openxum::core::games::kikotsoka::Color::WHITE
                            : openxum::core::games::kikotsoka::Color::BLACK;
 
-      gains[engine->current_color()].push_back(engine->gain(engine->current_color()));
-      gains[opponent_color].push_back(engine->gain(opponent_color));
+      gains[engine->current_color()].push_back(engine->gain(engine->current_color(), false));
+      gains[opponent_color].push_back(engine->gain(opponent_color, false));
       levels[openxum::core::games::kikotsoka::Color::BLACK].push_back(engine->_black_level);
       levels[openxum::core::games::kikotsoka::Color::WHITE].push_back(engine->_white_level);
       if (color == openxum::core::games::kikotsoka::Color::BLACK) {
@@ -188,6 +188,17 @@ void play(int a, int b, int c, int d, int e)
     }
     output_file << std::endl;
 
+    output_file << "ZB;";
+    for (const int &p: engine->_black_patterns) {
+      output_file << p << ";";
+    }
+    output_file << std::endl;
+    output_file << "ZW;";
+    for (const int &p: engine->_white_patterns) {
+      output_file << p << ";";
+    }
+    output_file << std::endl;
+
     output_file << "T;" << a << ";" << b << ";" << c << ";"
                 << engine->move_number() << ";" << possible_move_number << ";"
                 << turn_number << ";"
@@ -198,6 +209,7 @@ void play(int a, int b, int c, int d, int e)
                 << engine->_white_captured_shido_number << ";"
                 << (engine->winner_is() == openxum::core::games::kikotsoka::Color::BLACK ? "b"
                                                                                          : "w")
+                << engine->_black_pattern_number << ";" << engine->_white_pattern_number << ";"
                 << std::endl;
     output_file.flush();
   }

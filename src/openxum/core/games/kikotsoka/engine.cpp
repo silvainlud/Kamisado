@@ -86,10 +86,13 @@ Engine::Engine(int type, int color, int variant)
   _white_captured_piece_number = 0;
   _black_captured_shido_number = 0;
   _white_captured_shido_number = 0;
+
+  // rule variants 1 and 2
   _black_level = 0;
   _white_level = 0;
   _previous_black_level = 0;
   _previous_white_level = 0;
+
   _black_failed = false;
   _white_failed = false;
 
@@ -100,7 +103,9 @@ Engine::Engine(int type, int color, int variant)
   } else if (_variant == 2) {
     _phase = Phase::PUT_INITIAL_SHIDO;
   } else if (_variant == 3) {
-    // TODO
+    _previous_black_pattern_number = 0;
+    _previous_white_pattern_number = 0;
+    _phase = Phase::PUT_SHIDO;
   }
 }
 
@@ -115,9 +120,9 @@ Engine::~Engine()
 // public methods
 int Engine::best_is() const
 {
-  if (gain(Color::BLACK) > gain(Color::WHITE)) {
+  if (gain(Color::BLACK, false) > gain(Color::WHITE, false)) {
     return Color::BLACK;
-  } else if (gain(Color::BLACK) < gain(Color::WHITE)) {
+  } else if (gain(Color::BLACK, false) < gain(Color::WHITE, false)) {
     return Color::WHITE;
   } else {
     return Color::NONE;
@@ -156,6 +161,14 @@ Engine *Engine::clone() const
   // rule variant 2
   e->_black_possible_shido = _black_possible_shido;
   e->_white_possible_shido = _white_possible_shido;
+
+  // rule variant 3
+  e->_black_pattern_number = _black_pattern_number;
+  e->_white_piece_number = _white_piece_number;
+  e->_previous_black_pattern_number = _previous_black_pattern_number;
+  e->_previous_white_pattern_number = _previous_white_pattern_number;
+  e->_black_patterns = _black_patterns;
+  e->_white_patterns = _white_patterns;
 
   return e;
 }
@@ -215,25 +228,42 @@ void Engine::get_possible_put_piece(common::Moves<Decision> &moves,
 {
   if ((color == Color::BLACK and _black_piece_number > 0) or
       (color == Color::WHITE and _white_piece_number > 0)) {
-    std::vector<std::vector<Possible_pattern_results>> possible_patterns = is_possible_patterns();
-    int possible_cases_number = count_possible_cases(possible_patterns);
+    if (_variant == 1 or _variant == 2) {
+      std::vector<std::vector<Possible_pattern_results>> possible_patterns = is_possible_patterns();
+      int possible_cases_number = count_possible_cases(possible_patterns);
 
-    if (possible_cases_number > 0) {
-      std::vector<Engine::Possible_pattern_results> one_piece_patterns = get_one_piece_pattern(
-          possible_patterns);
+      if (possible_cases_number > 0) {
+        std::vector<Engine::Possible_pattern_results> one_piece_patterns = get_one_piece_pattern(
+            possible_patterns);
 
+        for (int l = 0; l < _size; ++l) {
+          for (int c = 0; c < _size; ++c) {
+            if (is_valid(Coordinates(c, l)) and is_connect(Coordinates(c, l))
+                and not possible_forbidden_pattern(Coordinates(c, l),
+                                                   one_piece_patterns)) {
+              if (decision) {
+                moves.push_back(common::Move<Decision>(
+                    {Decision(DecisionType::CHOICE_PIECE, color, Coordinates(), 1),
+                     Decision(DecisionType::PUT_PIECE, color, Coordinates(c, l), -1)}));
+              } else {
+                moves.push_back(common::Move<Decision>(
+                    Decision(DecisionType::PUT_PIECE, color, Coordinates(c, l), -1)));
+              }
+            }
+          }
+        }
+      }
+    } else if (_variant == 3) {
       for (int l = 0; l < _size; ++l) {
         for (int c = 0; c < _size; ++c) {
-          if (is_valid(Coordinates(c, l)) and is_connect(Coordinates(c, l))
-              and not possible_forbidden_pattern(Coordinates(c, l),
-                                                 one_piece_patterns)) {
+          if (is_valid(Coordinates(c, l)) and is_connect(Coordinates(c, l))) {
             if (decision) {
               moves.push_back(common::Move<Decision>(
-                  {Decision(DecisionType::CHOICE_PIECE, color, Coordinates(), 1),
-                   Decision(DecisionType::PUT_PIECE, color, Coordinates(c, l), -1)}));
+                  {Decision(DecisionType::CHOICE_PIECE, _color, Coordinates(), 1),
+                   Decision(DecisionType::PUT_PIECE, _color, Coordinates(c, l), -1)}));
             } else {
               moves.push_back(common::Move<Decision>(
-                  Decision(DecisionType::PUT_PIECE, color, Coordinates(c, l), -1)));
+                  Decision(DecisionType::PUT_PIECE, _color, Coordinates(c, l), -1)));
             }
           }
         }
@@ -263,18 +293,46 @@ void Engine::get_possible_put_shido(common::Moves<Decision> &moves, bool decisio
   }
 }
 
-double Engine::gain(int color) const
+double Engine::gain(int color, bool finish) const
 {
-  if (color == Color::BLACK) {
-    int level_gain = _black_level - _white_level;
+  if (_variant == 1 or _variant == 2) {
+    if (color == Color::BLACK) {
+      int level_gain = _black_level - _white_level;
 
-    return _black_captured_piece_number + 5 * _black_captured_shido_number
-        + (level_gain > 0 ? level_gain : 0);
-  } else {
-    int level_gain = _white_level - _black_level;
+      return _black_captured_piece_number + 5 * _black_captured_shido_number
+          + (level_gain > 0 ? level_gain : 0);
+    } else {
+      int level_gain = _white_level - _black_level;
 
-    return _white_captured_piece_number + 5 * _white_captured_shido_number
-        + (level_gain > 0 ? level_gain : 0);
+      return _white_captured_piece_number + 5 * _white_captured_shido_number
+          + (level_gain > 0 ? level_gain : 0);
+    }
+  } else if (_variant == 3) {
+    if (finish) {
+      if (color == Color::BLACK) {
+        int level_gain = std::accumulate(_black_patterns.begin(), _black_patterns.end(), 0) -
+            std::accumulate(_white_patterns.begin(), _white_patterns.end(), 0);
+
+        return (_black_captured_piece_number + 2 * _black_captured_shido_number) -
+            (_white_captured_piece_number + 2 * _white_captured_shido_number) + level_gain;
+      } else {
+        int level_gain = std::accumulate(_white_patterns.begin(), _white_patterns.end(), 0) -
+            std::accumulate(_black_patterns.begin(), _black_patterns.end(), 0);
+
+        return (_white_captured_piece_number + 2 * _white_captured_shido_number) -
+            (_black_captured_piece_number + 2 * _black_captured_shido_number) + level_gain;
+      }
+    } else {
+      if (color == Color::BLACK) {
+        int level_gain = std::accumulate(_black_patterns.begin(), _black_patterns.end(), 0);
+
+        return _black_captured_piece_number + 2 * _black_captured_shido_number + level_gain;
+      } else {
+        int level_gain = std::accumulate(_white_patterns.begin(), _white_patterns.end(), 0);
+
+        return _white_captured_piece_number + 2 * _white_captured_shido_number + level_gain;
+      }
+    }
   }
 }
 
@@ -302,20 +360,33 @@ std::string Engine::id() const
   str += std::to_string(_black_possible_shido);
   str += std::to_string(_white_possible_shido);
 
+  // rule variant 3
+  // TODO
+
   return str;
 }
 
 bool Engine::is_finished() const
 {
-  return _black_level == 5 or _white_level == 5 or _pass == 2 or _black_failed or _white_failed or
-      (_black_piece_number == 0 and _white_piece_number == 0 and _black_shido_number == 0
-          and _white_shido_number == 0);
+  if (_variant == 1 or _variant == 2) {
+    return _black_level == 5 or _white_level == 5 or _pass == 2 or _black_failed or _white_failed or
+        (_black_piece_number == 0 and _white_piece_number == 0 and _black_shido_number == 0
+            and _white_shido_number == 0);
+  } else if (_variant == 3) {
+    return _pass == 2 or (_black_piece_number == 0 and _white_piece_number == 0
+        and _black_shido_number == 0 and _white_shido_number == 0);
+  }
 }
 
 bool Engine::is_stoppable() const
 {
-  return is_finished() or _previous_black_level != _black_level
-      or _previous_white_level != _white_level;
+  if (_variant == 1 or _variant == 2) {
+    return is_finished() or _previous_black_level != _black_level
+        or _previous_white_level != _white_level;
+  } else if (_variant == 3) {
+    return is_finished() or _previous_black_pattern_number != _black_pattern_number
+        or _previous_white_pattern_number != _white_pattern_number;
+  }
 }
 
 void Engine::move(const openxum::core::common::Move<Decision> &move)
@@ -323,16 +394,27 @@ void Engine::move(const openxum::core::common::Move<Decision> &move)
   std::for_each(move.begin(), move.end(), [this](const Decision &m) {
     _pattern_origin = Coordinates();
     ++_move_number;
-    _previous_black_level = _black_level;
-    _previous_white_level = _white_level;
+    if (_variant == 1 or _variant == 2) {
+      _previous_black_level = _black_level;
+      _previous_white_level = _white_level;
+    } else if (_variant == 3) {
+      _previous_black_pattern_number = _black_pattern_number;
+      _previous_white_pattern_number = _white_pattern_number;
+    }
     if (m.type() == DecisionType::PUT_SHIDO) {
       _board[m.to().line()][m.to().column()] =
           m.color() == Color::BLACK ? State::BLACK_SHIDO : State::WHITE_SHIDO;
       if (_color == Color::BLACK) {
+
+        // rule variant 2
         _black_possible_shido = false;
+
         --_black_shido_number;
       } else {
+
+        // rule variant 2
         _white_possible_shido = false;
+
         --_white_shido_number;
       }
       std::vector<Coordinates> result = check_patterns();
@@ -341,20 +423,22 @@ void Engine::move(const openxum::core::common::Move<Decision> &move)
         if (result.size() == 1) {
           capture(result[0]);
           block(result[0]);
-          if (_color == Color::BLACK) {
+          if (_variant == 1 or _variant == 2) {
+            if (_color == Color::BLACK) {
 
-            // rule variant 2
-            _black_possible_shido = true;
-            _white_possible_shido = is_possible_to_put_piece(Color::WHITE);
+              // rule variant 2
+              _black_possible_shido = true;
+              _white_possible_shido = is_possible_to_put_piece(Color::WHITE);
 
-            ++_black_level;
-          } else {
+              ++_black_level;
+            } else {
 
-            // rule variant 2
-            _white_possible_shido = true;
-            _black_possible_shido = is_possible_to_put_piece(Color::BLACK);
+              // rule variant 2
+              _white_possible_shido = true;
+              _black_possible_shido = is_possible_to_put_piece(Color::BLACK);
 
-            ++_white_level;
+              ++_white_level;
+            }
           }
           change_color();
           next_phase();
@@ -382,20 +466,22 @@ void Engine::move(const openxum::core::common::Move<Decision> &move)
         if (result.size() == 1) {
           capture(result[0]);
           block(result[0]);
-          if (_color == Color::BLACK) {
+          if (_variant == 1 or _variant == 2) {
+            if (_color == Color::BLACK) {
 
-            // rule variant 2
-            _black_possible_shido = true;
-            _white_possible_shido = is_possible_to_put_piece(Color::WHITE);
+              // rule variant 2
+              _black_possible_shido = true;
+              _white_possible_shido = is_possible_to_put_piece(Color::WHITE);
 
-            ++_black_level;
-          } else {
+              ++_black_level;
+            } else {
 
-            // rule variant 2
-            _white_possible_shido = true;
-            _black_possible_shido = is_possible_to_put_piece(Color::BLACK);
+              // rule variant 2
+              _white_possible_shido = true;
+              _black_possible_shido = is_possible_to_put_piece(Color::BLACK);
 
-            ++_white_level;
+              ++_white_level;
+            }
           }
           change_color();
           next_phase();
@@ -418,22 +504,24 @@ void Engine::move(const openxum::core::common::Move<Decision> &move)
 
       capture(result[m.index()]);
       block(result[m.index()]);
-      if (_color == Color::BLACK) {
-        _previous_black_level = _black_level;
+      if (_variant == 1 or _variant == 2) {
+        if (_color == Color::BLACK) {
+          _previous_black_level = _black_level;
 
-        // rule variant 2
-        _black_possible_shido = true;
-        _white_possible_shido = is_possible_to_put_piece(Color::WHITE);
+          // rule variant 2
+          _black_possible_shido = true;
+          _white_possible_shido = is_possible_to_put_piece(Color::WHITE);
 
-        ++_black_level;
-      } else {
-        _previous_white_level = _white_level;
+          ++_black_level;
+        } else {
+          _previous_white_level = _white_level;
 
-        // rule variant 2
-        _white_possible_shido = true;
-        _black_possible_shido = is_possible_to_put_piece(Color::BLACK);
+          // rule variant 2
+          _white_possible_shido = true;
+          _black_possible_shido = is_possible_to_put_piece(Color::BLACK);
 
-        ++_white_level;
+          ++_white_level;
+        }
       }
       change_color();
       next_phase();
@@ -498,15 +586,18 @@ std::string Engine::to_string() const
   // rule variant 2
   str += " " + std::to_string(_black_possible_shido) + " " + std::to_string(_white_possible_shido);
 
+  // rule variant 3
+  // TODO
+
   return str;
 }
 
 int Engine::winner_is() const
 {
   if (is_finished()) {
-    if (gain(Color::BLACK) > gain(Color::WHITE)) {
+    if (gain(Color::BLACK, true) > gain(Color::WHITE, true)) {
       return Color::BLACK;
-    } else if (gain(Color::BLACK) < gain(Color::WHITE)) {
+    } else if (gain(Color::BLACK, true) < gain(Color::WHITE, true)) {
       return Color::WHITE;
     } else {
       return Color::NONE;
@@ -559,6 +650,9 @@ void Engine::capture(const Coordinates &origin)
   int n_piece = 0;
   int n_shido = 0;
 
+  // rule variant 3
+  int n_level = 0;
+
   while (l < origin.line() + 3) {
     if ((_board[l][c] == State::BLACK or _board[l][c] == State::BLACK_SHIDO)
         and _color == Color::WHITE) {
@@ -569,6 +663,12 @@ void Engine::capture(const Coordinates &origin)
         ++n_shido;
       }
     }
+    if (_variant == 3) {
+      if ((_board[l][c] == State::WHITE or _board[l][c] == State::WHITE_SHIDO)
+          and _color == Color::WHITE) {
+        ++n_level;
+      }
+    }
     if ((_board[l][c] == State::WHITE or _board[l][c] == State::WHITE_SHIDO)
         and _color == Color::BLACK) {
       _board[l][c] = State::VACANT;
@@ -576,6 +676,12 @@ void Engine::capture(const Coordinates &origin)
         ++n_piece;
       } else {
         ++n_shido;
+      }
+    }
+    if (_variant == 3) {
+      if ((_board[l][c] == State::BLACK or _board[l][c] == State::BLACK_SHIDO)
+          and _color == Color::BLACK) {
+        ++n_level;
       }
     }
     ++c;
@@ -588,10 +694,18 @@ void Engine::capture(const Coordinates &origin)
     _black_captured_piece_number += n_piece;
     _black_captured_shido_number += n_shido;
     _black_piece_number += n_piece;
+    if (_variant == 3) {
+      _black_patterns.push_back(n_level - 2);
+      ++_black_pattern_number;
+    }
   } else {
     _white_captured_piece_number += n_piece;
     _white_captured_shido_number += n_shido;
     _white_piece_number += n_piece;
+    if (_variant == 3) {
+      _white_patterns.push_back(n_level - 2);
+      ++_white_pattern_number;
+    }
   }
 }
 
@@ -664,45 +778,72 @@ bool Engine::check_pattern_in_block(const Coordinates &origin, const Pattern &pa
 
 std::vector<Coordinates> Engine::check_patterns() const
 {
-  int level = 0;
-  bool found = false;
-  std::vector<Coordinates> origins;
+  if (_variant == 1 or _variant == 2) {
+    int level = 0;
+    bool found = false;
+    std::vector<Coordinates> origins;
 
-  while (!found and level < 5) {
-    const LevelPattern &pattern = PATTERNS[level];
+    while (!found and level < 5) {
+      const LevelPattern &pattern = PATTERNS[level];
 
-    for (const Pattern &p: pattern) {
-      const std::vector<Coordinates> &new_origins = check_pattern(p);
+      for (const Pattern &p: pattern) {
+        const std::vector<Coordinates> &new_origins = check_pattern(p);
 
-      if (not new_origins.empty()) {
-        origins.insert(
-            origins.end(),
-            std::make_move_iterator(new_origins.begin()),
-            std::make_move_iterator(new_origins.end())
-        );
-        found = true;
+        if (not new_origins.empty()) {
+          origins.insert(
+              origins.end(),
+              std::make_move_iterator(new_origins.begin()),
+              std::make_move_iterator(new_origins.end())
+          );
+          found = true;
+        }
+      }
+      if (!found) {
+        ++level;
       }
     }
-    if (!found) {
-      ++level;
-    }
-  }
-  if (found) {
-    int current_level = _color == Color::BLACK ? _black_level : _white_level;
+    if (found) {
+      int current_level = _color == Color::BLACK ? _black_level : _white_level;
 
-    if (level == current_level) {
-      return origins;
-    } else {
-      // TODO
+      if (level == current_level) {
+        return origins;
+      } else {
+        // TODO
 //                            if (_color == Color::BLACK) {
 //                                _black_failed = true;
 //                            } else {
 //                                _white_failed = true;
 //                            }
+        return std::vector<Coordinates>();
+      }
+    } else {
       return std::vector<Coordinates>();
     }
-  } else {
-    return std::vector<Coordinates>();
+  } else if (_variant == 3) {
+    bool found = false;
+    std::vector<Coordinates> origins;
+
+    for (int level = 0; level < 5; ++level) {
+      const LevelPattern &pattern = PATTERNS[level];
+
+      for (const Pattern &p: pattern) {
+        const std::vector<Coordinates> &new_origins = check_pattern(p);
+
+        if (not new_origins.empty()) {
+          origins.insert(
+              origins.end(),
+              std::make_move_iterator(new_origins.begin()),
+              std::make_move_iterator(new_origins.end())
+          );
+          found = true;
+        }
+      }
+    }
+    if (found) {
+      return origins;
+    } else {
+      return std::vector<Coordinates>();
+    }
   }
 }
 
@@ -875,7 +1016,7 @@ bool Engine::is_valid2(const Coordinates &coordinates) const
 
 void Engine::next_phase()
 {
-  if (_variant == 1) {
+  if (_variant == 1 or _variant == 3) {
     if (_color == Color::BLACK) {
       if (_black_shido_number == 0) {
         _phase = Phase::PUT_PIECE;

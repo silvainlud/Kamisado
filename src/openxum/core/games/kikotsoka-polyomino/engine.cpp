@@ -220,7 +220,7 @@ Engine *Engine::clone() const
   return e;
 }
 
-double Engine::gain(int color) const
+double Engine::gain(int color, bool /* finish */) const
 {
   double g;
 

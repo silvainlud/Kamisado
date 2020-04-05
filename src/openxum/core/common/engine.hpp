@@ -57,7 +57,7 @@ public:
   virtual unsigned int current_goal(int /* color */) const
   { return is_finished() ? 1 : 0; }
 
-  virtual double gain(int color) const = 0;
+  virtual double gain(int color, bool finish) const = 0;
 
   virtual unsigned int get_goal_number() const
   { return 1; }

@@ -57,7 +57,7 @@ public:
 
   Coordinates find_playable_tower(int) const;
 
-  double gain(int /* color */) const override
+  double gain(int /* color */, bool /* finish */) const override
   { return 1; }
 
   const std::string &get_name() const override
