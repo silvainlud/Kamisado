@@ -235,7 +235,7 @@ int main(int, const char **)
       for (int c = 5; c < 6; ++c) {
         for (int d = 1; d < 4; ++d) {
           for (int e = 2000; e < 2001; ++e) {
-            for (int i = 0; i < 10; ++i) {
+            for (int i = 0; i < 100; ++i) {
               results.emplace_back(pool.enqueue([=] { play(a, b, c, d, e); }));
             }
           }

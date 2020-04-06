@@ -93,6 +93,10 @@ Engine::Engine(int type, int color, int variant)
   _previous_black_level = 0;
   _previous_white_level = 0;
 
+  // rule variant 3
+  _black_pattern_number = 0;
+  _white_pattern_number = 0;
+
   _black_failed = false;
   _white_failed = false;
 
