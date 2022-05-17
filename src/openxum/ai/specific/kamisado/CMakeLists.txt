@@ -3,7 +3,7 @@ INCLUDE_DIRECTORIES(
 
 LINK_DIRECTORIES()
 
-SET(OPENXUM_WS_CPP_AI_SPECIFIC_KAMISADO_HPP random_player.hpp mcts_player.hpp)
+SET(OPENXUM_WS_CPP_AI_SPECIFIC_KAMISADO_HPP random_player.hpp mcts_player.hpp lambda_mcts.hpp)
 
 INSTALL(FILES ${OPENXUM_WS_CPP_AI_SPECIFIC_KAMISADO_HPP} DESTINATION
         ${OPENXUM_WS_CPP_INCLUDE_DIRS}/openxum/ai/specific/kamisado/)
