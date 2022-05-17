@@ -63,7 +63,6 @@ public:
       simulate_one_game_from_root();
     }
     _best = get_final_choice();
-    std::cout << " - "<< _best->compute_score()<<std::endl;
     move = _best->get_move();
     compute_next_goal_distance(move);
     _next_goal_distance_evaluation = _best->get_visit_number();

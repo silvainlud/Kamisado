@@ -212,70 +212,89 @@ int main(int, const char **) {
 
     std::vector<int> stats;
 
-    const unsigned int partyNumber = 10;
+    const unsigned int partyNumber = 100;
+    const unsigned int multiplicator = 1;
+
+    std::cout << "levelWhite" << "," << "levelBlack" << "," << "meanWhite" << "," << "meanBlack" << "," << "whiteWin"
+              << "," << "blackWin"
+              << std::endl;
+    for (int levelWhite = 1; levelWhite <= 9; ++levelWhite) {
+        for (int levelBlack = 1; levelBlack <= 9; ++levelBlack) {
+
+            std::vector<double> scoresWhite;
+            std::vector<double> scoresBlack;
+            int whiteWin = 0, blackWin = 0;
+
+            for (int i = 0; i < partyNumber; ++i) {
+
+                auto *engine = new openxum::core::games::kamisado::Engine(
+                        openxum::core::games::kamisado::SIMPLE,
+                        openxum::core::games::kamisado::Color::BLACK);
+
+                auto
+                        *player_one = new openxum::ai::specific::kamisado::MCTSPlayer(
+                        openxum::core::games::kamisado::Color::BLACK, openxum::core::games::kamisado::Color::WHITE,
+                        engine, levelBlack * multiplicator);
+
+                auto
+                        *player_two = new openxum::ai::specific::kamisado::MCTSPlayer(
+                        openxum::core::games::kamisado::Color::WHITE, openxum::core::games::kamisado::Color::BLACK,
+                        engine, levelWhite * multiplicator);
+
+                auto *current_player = player_one;
+
+                while (not engine->is_finished()) {
+                    openxum::core::common::Move<openxum::core::games::kamisado::Decision>
+                            move = current_player->get_move();
 
 
-    for (int i = 0; i < partyNumber; ++i) {
+                    engine->move(move);
 
-        auto *engine = new openxum::core::games::kamisado::Engine(
-                openxum::core::games::kamisado::SIMPLE,
-                openxum::core::games::kamisado::Color::BLACK);
 
-        auto
-                *player_one = new openxum::ai::specific::kamisado::MCTSPlayer(
-                openxum::core::games::kamisado::Color::BLACK, openxum::core::games::kamisado::Color::WHITE,
-                engine, 2);
+                    if (engine->current_color() == player_one->color()) {
 
-        auto
-                *player_two = new openxum::ai::specific::kamisado::MCTSPlayer(
-                openxum::core::games::kamisado::Color::WHITE, openxum::core::games::kamisado::Color::BLACK,
-                engine, 100);
+                        if (!engine->is_finished())
+                            scoresWhite.push_back(findScore(current_player, levelBlack * multiplicator));
+                        current_player = player_one;
 
-        auto *current_player = player_one;
 
-        while (not engine->is_finished()) {
-            openxum::core::common::Move<openxum::core::games::kamisado::Decision>
-                    move = current_player->get_move();
-
-//            int color = engine->current_color();
-
-            engine->move(move);
-//        std::cout << color << " " << move.to_string() << std::endl;
-
-            if (engine->current_color() == player_one->color()) {
-                current_player = player_one;
-                std::cout << " ONE "<<std::endl;
-                if (!engine->is_finished())
-                    std::cout << findScore(current_player, 100) << std::endl;
-
-            } else {
-
-                current_player = player_two;
-                std::cout << " TWO "<<std::endl;
-                if (!engine->is_finished())
-                    std::cout << findScore(current_player, 100) << std::endl;
-            }
-        }
+                    } else {
+                        if (!engine->is_finished())
+                            scoresBlack.push_back(findScore(current_player, levelBlack * multiplicator));
+                        current_player = player_two;
+                    }
+                }
 
 //    std::cout << engine->to_string() << std::endl;
 
 
-        stats.push_back(engine->winner_is());
-        std::cout << (engine->winner_is() == openxum::core::games::kamisado::Color::BLACK ? "b" : "w") << std::endl;
-        delete player_one;
-        delete player_two;
-        delete engine;
+
+                stats.push_back(engine->winner_is());
+//                std::cout << (engine->winner_is() == openxum::core::games::kamisado::Color::BLACK ? "b" : "w")
+//                          << std::endl;
+                switch (engine->winner_is()) {
+                    case openxum::core::games::kamisado::Color::BLACK:
+                        blackWin++;
+                        break;
+                    case openxum::core::games::kamisado::Color::WHITE:
+                        whiteWin++;
+                        break;
+                }
+                delete player_one;
+                delete player_two;
+                delete engine;
+            }
+
+
+            double meanWhite = std::accumulate(scoresWhite.begin(), scoresWhite.end(), 0.0) / scoresWhite.size();
+            double meanBlack = std::accumulate(scoresBlack.begin(), scoresBlack.end(), 0.0) / scoresBlack.size();
+            std::cout << levelWhite << "," << levelBlack << "," << meanWhite << "," << meanBlack << "," << whiteWin
+                      << "," << blackWin
+                      << std::endl;
+        }
+
 
     }
-
-    int black = std::count_if(stats.begin(), stats.end(),
-                              [](const int &i) { return i == openxum::core::games::kamisado::Color::BLACK; });
-    int white = std::count_if(stats.begin(), stats.end(),
-                              [](const int &i) { return i == openxum::core::games::kamisado::Color::WHITE; });
-
-    std::cout << white << " " << black << std::endl;
-    std::cout << (double) white * (double) 100 / (double) partyNumber << " "
-              << (double) black * (double) 100 / (double) partyNumber << std::endl;
 
 
     return EXIT_SUCCESS;
