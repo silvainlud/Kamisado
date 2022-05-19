@@ -26,12 +26,15 @@
 #include <openxum/core/games/kamisado/engine.hpp>
 #include <openxum/core/games/kamisado/game_type.hpp>
 #include <openxum/ai/specific/kamisado/mcts_player.hpp>
+#include <torch/script.h>
 
 #define DEBUG 0
+#define USE_LAMBDA 0
+#define USE_AI 1
 
 using json = nlohmann::json;
 
-int beta = 2;
+int beta = 5;
 double lambda = 0.05;
 int epsilon = 5;
 int counter = 0;
@@ -53,7 +56,7 @@ int main(int, const char **) {
 
     const unsigned int partyNumber = 1000;
     const unsigned int multiplicator = 1;
-
+#if USE_LAMBDA == 1 or USE_AI == 1
     std::cout << "id" << "," << "levelWhite" << "," << "levelBlack" << ","
               << "whiteWin"
               << "," << "blackWin"
@@ -63,15 +66,29 @@ int main(int, const char **) {
               << "," << "countTotal"
               << "," << "epsilon"
               << std::endl;
+#else
 
-    const int levelWhite = 9;
-    const int levelBlack = 1;
+    std::cout << "id" << "," << "levelWhite" << "," << "levelBlack" << "," << "diff" << "," << "change" << ","
+              << "score" << std::endl;
+#endif
+
+#if USE_AI == 1
+    torch::jit::script::Module module;
+    module = torch::jit::load("../../../model_white.pt");
+    module.eval();
+    module.train(false);
+#endif
+
+//    for (uint w = 1; w < 10; w++) {
+    const uint levelWhite = 5;
+//        for (uint j = 1; j < 10; j++) {
+    const uint levelBlack = 9;
 
     epsilon = levelBlack;
     std::vector<double> scoresWhite;
     std::vector<double> scoresBlack;
     int whiteWin = 0, blackWin = 0;
-    std::vector<double> history_levels = std::vector<double>{(double) epsilon};
+    std::vector<double> history_levels = std::vector<double>{(double) levelBlack};
 
 
     for (unsigned int i = 0; i < partyNumber; ++i) {
@@ -110,7 +127,7 @@ int main(int, const char **) {
             if (engine->current_color() == player_one->color()) {
 
                 if (!engine->is_finished())
-                    scoresWhite.push_back(findScore(current_player, history_levels.back() * multiplicator));
+                    scoresWhite.push_back(findScore(current_player, levelWhite * multiplicator));
                 current_player = player_one;
 
 
@@ -120,16 +137,24 @@ int main(int, const char **) {
 
                     //Modification de niveau tous les bêta coups
 
-                    double score = findScore(current_player, history_levels.back() * multiplicator);
+                    double score = findScore(current_player, levelBlack * multiplicator);
+                    double tmp = score;
                     if (scoresWhite.empty()) {
                         score = 0;
                     } else {
                         score = score - scoresWhite.back();
                     }
+
+#if USE_LAMBDA == 0 and USE_AI == 0
+                    int change = (levelBlack > levelWhite) ? 0 : ((levelBlack == levelWhite) ? 1 : 2 );
+                    std::cout << i << "," << levelWhite << "," << levelBlack << "," << score << "," << change << "," << tmp << std::endl;
+#endif
+
 #if DEBUG == 1
                     std::cout << "DIFF: " << score << std::endl;
 #endif
 
+#if USE_LAMBDA == 1
                     if (score > lambda) { // Diminution du niveau
                         requestModify.push_back(-1);
                     } else if (score < -lambda) { // Augmentation du niveau
@@ -170,13 +195,82 @@ int main(int, const char **) {
 #if DEBUG == 1
                             std::cout << "nothing" << std::endl;
 #endif
+                            countNothing++;
                         }
                     } else {
                         counter++;
                     }
+#endif
+
+#if USE_AI == 1
 
 
-                    scoresBlack.push_back(findScore(current_player, history_levels.back()));
+                    std::vector<torch::jit::IValue> inputs;
+                    std::vector<double> datas;
+
+
+                    datas.push_back(score);
+                    datas.push_back(tmp);
+
+                    torch::Tensor tensor = torch::ones(datas.size());
+
+                    for (uint u = 0; u < datas.size(); ++u) {
+                        tensor[u] = datas[u];
+                    }
+
+                    inputs.push_back(tensor);
+
+                    auto outputs = module.forward(inputs).toTensor();
+                    auto preds = torch::max(outputs.slice(0, 0, 9), 0);
+                    int ia_level = std::get<1>(preds).data().item().toInt() + 1;
+#if DEBUG == 1
+                    std::cout << ia_level << " " << levelWhite << " " << levelBlack << std::endl;
+#endif
+                    requestModify.push_back(ia_level);
+
+
+                    if (counter >= beta) {
+                        counter = 1;
+                        int new_ia_level = std::round(
+                                (double) std::accumulate(requestModify.begin(), requestModify.end(), 0.0) /
+                                (double) requestModify.size());
+                        requestModify.clear();
+
+
+                        if (history_levels.back() < new_ia_level) {//LEVEL Up
+#if DEBUG == 1
+                            std::cout << "up" << std::endl;
+#endif
+#if USE_AI == 1
+                            countUp += new_ia_level - history_levels.back();
+#elif USE_LAMBDA == 1
+                            countUp += 1;
+#endif
+                        } else if (history_levels.back() > new_ia_level) { //LEVEL down
+#if DEBUG == 1
+                            std::cout << "down" << std::endl;
+#endif
+#if USE_AI == 1
+                            countDown += history_levels.back() - new_ia_level;
+#elif USE_LAMBDA == 1
+                            countDown+= 1;
+#endif
+                        } else { // NOTHING
+#if DEBUG == 1
+                            std::cout << "nothing" << std::endl;
+#endif
+                            countNothing++;
+                        }
+
+                        player_two->set_simulation_number(new_ia_level);
+                        history_levels.push_back(new_ia_level);
+
+                    } else
+                        counter++;
+
+#endif
+
+                    scoresBlack.push_back(findScore(current_player, levelBlack));
                 }
                 current_player = player_two;
             }
@@ -194,9 +288,10 @@ int main(int, const char **) {
                 break;
         }
 
-
+#if USE_LAMBDA == 1 or USE_AI == 1
         double newEpsilon =
                 std::accumulate(history_levels.begin(), history_levels.end(), 0.0) / history_levels.size();
+
         std::cout << i << "," << levelWhite << "," << epsilon << "," << whiteWin
                   << "," << blackWin
                   << "," << countUp
@@ -205,18 +300,20 @@ int main(int, const char **) {
                   << "," << countTotal
                   << "," << newEpsilon
                   << std::endl;
-
+#endif
         if (history_levels.size() > maxLevelInHistory)
-            history_levels = std::vector<double>(history_levels.end() - maxLevelInHistory, history_levels.end());
-
+            history_levels = std::vector<double>(history_levels.end() - maxLevelInHistory,
+                                                 history_levels.end());
+#if USE_LAMBDA == 1 or USE_AI == 1
         epsilon = std::round(newEpsilon);
-
+#endif
         delete player_one;
         delete player_two;
         delete engine;
 
     }
-
+//        }
+//    }
 
     return EXIT_SUCCESS;
 }

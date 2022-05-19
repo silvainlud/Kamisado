@@ -164,6 +164,9 @@ namespace openxum {
                 }
 
                 void init_search() {
+                    if(_root != nullptr) {
+                        delete _root;
+                    }
                     _root = new Node<Decision>(this->engine().clone(), nullptr,
                                                openxum::core::common::Move<Decision>());
                 }
