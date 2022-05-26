@@ -13,14 +13,24 @@ for levelWhite in range(1, 10):
     df = df.groupby(["levelBlack"]).sum()
 
     df.plot(y=["whiteWin"], use_index=True, ax=ax, color="tab:red")
+    plt.xlabel("Niveau des blancs")
 
     ax.set_ylim(0, 100)
-    ax.legend("Nombre de victoire pour les blancs", loc=0)
+    plt.ylabel("Nombre de victoire pour les blancs")
     ax.grid()
+    h1, l1 = ax.get_legend_handles_labels()
+    ax1 = ax
 
     ax = ax.twinx()
     df.plot(y=["diff"], use_index=True, ax=ax, color="tab:green")
-    ax.legend("Différence de score", loc=0)
+    ax.get_legend().remove()
+    plt.ylabel("Différence de score")
 
-    plt.title("lvl " + str(levelWhite))
+    h2, l2 = ax.get_legend_handles_labels()
+
+    ax1.legend(h1 + h2, ["Nombre de victoire pour les blancs", "Différence de score"], loc=2)
+
+    plt.title(
+        "Nombre de parties gagnées par les blancs en fonction du\nniveau des blancs, avec les noirs au niveau " + str(
+            levelWhite))
     plt.savefig("lvl " + str(levelWhite) + ".png")
