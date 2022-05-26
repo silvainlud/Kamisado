@@ -28,17 +28,24 @@
 #include <openxum/ai/specific/kamisado/mcts_player.hpp>
 #include <torch/script.h>
 
+///Permet d'afficher les sortie standards dans le but de débuger le program (0=FALSE, 1=TRUE)
 #define DEBUG 0
+///Utilisation de l'algorithme "Lambda" (0=FALSE, 1=TRUE)
 #define USE_LAMBDA 0
+///Utilisation de l'algorithme avec intelligence artificielle (0=FALSE, 1=TRUE)
 #define USE_AI 1
 
 using json = nlohmann::json;
 
+///Nombre de coup avant changement de niveaux
 int beta = 5;
+///Interval à respecter [-lambda;lambda]
 double lambda = 0.05;
+///Niveau de départ de l'IA adaptative
 int epsilon = 5;
 int counter = 0;
 
+///Nombre de niveaux maximum dans l'historique
 const int maxLevelInHistory = 5;
 
 
