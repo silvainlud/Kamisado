@@ -39,7 +39,7 @@ double lambda = 0.05;
 int epsilon = 5;
 int counter = 0;
 
-const int maxLevelInHistory = 50;
+const int maxLevelInHistory = 5;
 
 
 double findScore(openxum::ai::specific::kamisado::MCTSPlayer *player, unsigned int level) {
@@ -54,7 +54,7 @@ int main(int, const char **) {
 
     std::vector<int> stats;
 
-    const unsigned int partyNumber = 1000;
+    const unsigned int partyNumber = 50;
     const unsigned int multiplicator = 1;
 #if USE_LAMBDA == 1 or USE_AI == 1
     std::cout << "id" << "," << "levelWhite" << "," << "levelBlack" << ","
