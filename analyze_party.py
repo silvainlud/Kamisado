@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-dataframe = pd.read_csv("result_7vs5.csv")
+dataframe = pd.read_csv("result.csv")
 dataframe["countChange"] = dataframe["countUp"] + dataframe["countDown"]
 
 fig, ax = plt.subplots()
@@ -20,4 +20,4 @@ plt.savefig("res_lambda_7vs5.png")
 fig, ax = plt.subplots()
 mylabels = ["Nombre de victoires des blancs", "Nombre de victoires des noires"]
 plt.pie([489, 511], labels=mylabels)
-plt.savefig("res_lambda_7vs5_pie.png")
+plt.savefig("res.png")
