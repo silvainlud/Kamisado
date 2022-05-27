@@ -19,5 +19,5 @@ plt.savefig("res_lambda_7vs5.png")
 
 fig, ax = plt.subplots()
 mylabels = ["Nombre de victoires des blancs", "Nombre de victoires des noires"]
-plt.pie([489, 511], labels=mylabels)
+plt.pie([dataframe["whiteWin"].sum(), dataframe["blackWin"].sum()], labels=mylabels)
 plt.savefig("res_lambda_7vs5_pie.png")
