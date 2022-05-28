@@ -5,6 +5,7 @@
 <h2 align="center">IA Adaptative - M1 WedSci</h2>
 <p align="center">HEBAN Simon & SILVAIN Ludwig</p>
 <p align="center"><a href="https://gitlab.com/openxum/openxum-ws-cplusplus">Dépôt original de Eric Ramat</a></p>
+<p align="center"><a href="https://github.com/Miithrandiir/kamisado-ML">Dépôt pour la partie apprentissage</a></p>
 
 ## Compilation
 
