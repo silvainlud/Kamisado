@@ -21,15 +21,16 @@
  */
 
 #include <iostream>
+#include <nlohmann/json.hpp>
 
 #include <openxum/core/games/kamisado/engine.hpp>
 #include <openxum/core/games/kamisado/game_type.hpp>
 #include <openxum/ai/specific/kamisado/mcts_player.hpp>
 
-
 ///Permet d'afficher les sortie standards dans le but de débuger le program (0=FALSE, 1=TRUE)
 #define DEBUG 0
 
+using json = nlohmann::json;
 
 ///Nombre de coup avant changement de niveaux
 int beta = 5;
@@ -38,6 +39,7 @@ double lambda = 0.05;
 ///Niveau de départ de l'IA adaptative
 int epsilon = 5;
 int counter = 0;
+
 
 double findScore(openxum::ai::specific::kamisado::MCTSPlayer *player, unsigned int level) {
     player->init_search();
@@ -49,21 +51,28 @@ double findScore(openxum::ai::specific::kamisado::MCTSPlayer *player, unsigned i
 
 int main(int argc, const char **argv) {
 
-    std::vector<int> stats;
 
-    if (argc < 3) {
-        std::cerr << argv[0] << " <whiteLevel> <startLevel> <partyNumber>" << std::endl;
-        return -1;
+    if (argc < 4) {
+        std::cerr << argv[0] << " <startLevel> <targetLevel> <nombre de partie>" << std::endl;
+        return EXIT_FAILURE;
     }
+
+    std::vector<int> stats;
 
     const unsigned int partyNumber = std::stoi(argv[3]);
 
+    std::cout << "id" << "," << "levelWhite" << "," << "levelBlack" << ","
+              << "whiteWin"
+              << "," << "blackWin"
+              << "," << "countUp"
+              << "," << "countDown"
+              << "," << "countNothing"
+              << "," << "countTotal"
+              << "," << "epsilon"
+              << std::endl;
 
-    std::cout << "id" << "," << "levelWhite" << "," << "levelBlack" << "," << "diff" << "," << "change" << ","
-              << "score" << std::endl;
-
-    const uint levelWhite = std::stoi(argv[1]);
-    const uint levelBlack = std::stoi(argv[2]);
+    const uint levelWhite = std::stoi(argv[2]);
+    const uint levelBlack = std::stoi(argv[1]);
 
     epsilon = levelBlack;
     std::vector<double> scoresWhite;
@@ -74,6 +83,9 @@ int main(int argc, const char **argv) {
 
     for (unsigned int i = 0; i < partyNumber; ++i) {
 
+        int countUp = 0;
+        int countDown = 0;
+        int countNothing = 0;
         int countTotal = 0;
 
         auto *engine = new openxum::core::games::kamisado::Engine(
@@ -123,15 +135,55 @@ int main(int argc, const char **argv) {
                         score = score - scoresWhite.back();
                     }
 
-
-                    int change = (levelBlack > levelWhite) ? 0 : ((levelBlack == levelWhite) ? 1 : 2);
-                    std::cout << i << "," << levelWhite << "," << levelBlack << "," << score << "," << change << ","
-                              << tmp << std::endl;
-
-
 #if DEBUG == 1
                     std::cout << "DIFF: " << score << std::endl;
 #endif
+
+                    if (score > lambda) { // Diminution du niveau
+                        requestModify.push_back(-1);
+                    } else if (score < -lambda) { // Augmentation du niveau
+                        requestModify.push_back(1);
+                    } else { // Ne fait rien
+                        requestModify.push_back(0);
+                    }
+
+                    if (counter >= beta) {
+                        counter = 1;
+
+                        uint requestUp = std::count_if(requestModify.begin(), requestModify.end(),
+                                                       [](const int &lvl) { return lvl == 1; });
+                        uint requestDown = std::count_if(requestModify.begin(), requestModify.end(),
+                                                         [](const int &lvl) { return lvl == -1; });
+                        uint requestNothing = std::count_if(requestModify.begin(), requestModify.end(),
+                                                            [](const int &lvl) { return lvl == 0; });
+
+                        requestModify.clear();
+
+                        if (requestUp > requestNothing && requestUp > requestDown) {//LEVEL Up
+#if DEBUG == 1
+                            std::cout << "up" << std::endl;
+#endif
+                            player_two->set_simulation_number((current_player->get_simulation_number() == 9) ? 9 : (
+                                    current_player->get_simulation_number() + 1));
+                            history_levels.push_back(player_two->get_simulation_number());
+                            countUp++;
+                        } else if (requestDown > requestNothing && requestDown > requestUp) { //LEVEL down
+#if DEBUG == 1
+                            std::cout << "down" << std::endl;
+#endif
+                            player_two->set_simulation_number((current_player->get_simulation_number() == 1) ? 1 : (
+                                    current_player->get_simulation_number() - 1));
+                            history_levels.push_back(player_two->get_simulation_number());
+                            countDown++;
+                        } else { // NOTHING
+#if DEBUG == 1
+                            std::cout << "nothing" << std::endl;
+#endif
+                            countNothing++;
+                        }
+                    } else {
+                        counter++;
+                    }
 
                     scoresBlack.push_back(findScore(current_player, levelBlack));
                 }
@@ -151,7 +203,20 @@ int main(int argc, const char **argv) {
                 break;
         }
 
+        double newEpsilon =
+                std::accumulate(history_levels.begin(), history_levels.end(), 0.0) / history_levels.size();
 
+        std::cout << i << "," << levelWhite << "," << epsilon << "," << whiteWin
+                  << "," << blackWin
+                  << "," << countUp
+                  << "," << countDown
+                  << "," << countNothing
+                  << "," << countTotal
+                  << "," << newEpsilon
+                  << std::endl;
+
+
+        epsilon = std::round(newEpsilon);
         delete player_one;
         delete player_two;
         delete engine;
